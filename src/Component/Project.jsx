@@ -32,6 +32,12 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import dayjs from 'dayjs';
 import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
 const Project = () => {
   const [projectName, setProjectName] = useState([]);
   const [projects, setProjects] = useState(null);
@@ -56,7 +62,28 @@ const Project = () => {
   const [openProjectAdd, setOpenProjectAdd] = useState(false);
   const [openProjectError, setOpenProjectError] = useState(false);
   const [fileUpload, setFileUpload] = useState(false);
+  const [openPopup, setOpenPopup] = React.useState(false);
+  const [index, setIndex] = useState(null);
 
+  const handleClickOpen = (index,project) => {
+    setIndex(index)
+    setOpenPopup(true);
+    const projectData = {
+      id: project._id,
+      projectName: project.projectName,
+      status: project.status,
+      sourceLanguage: project.sourceLanguage,
+      sourceUpload: project.sourceUpload,
+      targetLanguage: project.targetLanguage,
+      createdAt: project.createdAt,
+      tasks:project.tasks
+    };
+    setProjectData(projectData)
+  };
+
+  const handleClickClose = () => {
+    setOpenPopup(false);
+  };
   const handleClick = () => {
     setOpen(true);
   };
@@ -249,7 +276,7 @@ const AssignTasksApi = async () =>{
       const response = await axios.post(
         "http://localhost:8000/api/createProject",
         {
-          projectName : `${clientName}${getRandomFourDigitString()}${formatDate(new Date())}`,
+          projectName : `${clientName}_${getRandomFourDigitString()}${formatDate(new Date())}`,
           email: email,
           sourceLanguage,
           targetLanguage,
@@ -268,15 +295,20 @@ const AssignTasksApi = async () =>{
   const handleAssignChange = (event) => {
     setAssign(event.target.value);
   };
-  const handleDelete = async (index) => {
+  useEffect(()=>{
+    console.log(projectData);
+  },[projectData])
+  const handleDelete = async () => {
     try {
       let response = await axios.delete(
-        `http://localhost:8000/api/projects/${projects[index]._id}`
+        `http://localhost:8000/api/projects/${projectData?.id}`
       );
       const updatedProjects = projects?.filter((_, i) => i !== index);
       setProjects(updatedProjects);
       if(response.status === 200){
         handleClickDelete()
+        setOpenPopup(false);
+        fetchProjects()
       }
     } catch (error) {
       console.error("Error deleting project:", error);
@@ -470,16 +502,16 @@ const AssignTasksApi = async () =>{
      
     </div> : null}
     {errorMessage && <span style={{ color: 'red', display:"flex", justifyContent:"right",marginRight:"30px" }}>{errorMessage}</span>}
-    <span style={{display:"flex",justifyContent:"center",position:"fixed",top:"35rem",right:"15rem"}}>
+    <span style={{display:"flex",justifyContent:"center",position:"fixed",top:"35rem",right:"13rem"}}>
         <Button onClick={handleCreateProject} 
          variant="contained"
         sx={{ 
     fontSize: "16px", 
     borderRadius: "8px", 
-    boxShadow: "0 3px 5px 2px rgba(66, 165, 245, .3)", // Adds shadow for depth
-    transition: "transform 0.3s ease", // Adds a smooth transition for hover effect
+    boxShadow: "0 3px 5px 2px rgba(66, 165, 245, .3)", 
+    transition: "transform 0.3s ease", 
     '&:hover': { 
-      transform: "scale(1.05)" // Slightly increases the size on hover
+      transform: "scale(1.05)" 
     }
   }}>Save</Button>
         </span>
@@ -488,7 +520,7 @@ const AssignTasksApi = async () =>{
         anchor='right'
         open={isDrawerOpenTasks}
         onClose={toggleDrawerAssignTasks(false)}
-        PaperProps={{ style: { width: "40%" }}}
+        PaperProps={{ style: { width: "44%" }}}
       >
         <div style={{  overflowX: "auto" }}>
         <AppBar position='static'>
@@ -503,7 +535,6 @@ const AssignTasksApi = async () =>{
         </AppBar>
         <div style={{ display: 'flex', flexDirection: 'column', overflowY: 'scroll' }}>
         {projectData?.tasks && projectData.tasks.map((task, index) => (
-  // <Card key={index} sx={{ maxWidth: 600, minWidth: 600, marginBottom: 2 }}>
        <Card 
        key={index}
   sx={{ 
@@ -532,7 +563,7 @@ const AssignTasksApi = async () =>{
           <TextField
             name='sourceLanguage'
             variant='standard'
-            value={projects?.map((project) => (project.sourceLanguage))}
+            value={projectData?.sourceLanguage}
             sx={{ width: "307px" }}
           />
         </span>
@@ -885,7 +916,7 @@ const AssignTasksApi = async () =>{
                     >
                       <MdOutlinePeople className="icon" onClick={() => handleIconClick(project)} />
                       
-                        <MdDelete onClick={() => handleDelete(index)}
+                        <MdDelete onClick={(index)=>handleClickOpen(index,project)}
                         style={{ fontSize: "1.5rem",marginLeft:"15px",color:"#0485B4"  }}
                         className="icon"/>
                     </Box>
@@ -896,7 +927,7 @@ const AssignTasksApi = async () =>{
           </Table>
         </TableContainer>
       </div>
-      <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+      <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
   <Alert
     onClose={handleClose}
     severity="success"
@@ -906,7 +937,7 @@ const AssignTasksApi = async () =>{
     Project Assigned
   </Alert>
 </Snackbar>
-<Snackbar open={openError} autoHideDuration={3000} onClose={handleCloseError}>
+<Snackbar open={openError} autoHideDuration={2000} onClose={handleCloseError}>
   <Alert
     onClose={handleCloseError}
     severity="error"
@@ -916,7 +947,7 @@ const AssignTasksApi = async () =>{
     Project Assigned Failed
   </Alert>
 </Snackbar>
-<Snackbar open={openProjectError} autoHideDuration={3000} onClose={handleCloseProjectError}>
+<Snackbar open={openProjectError} autoHideDuration={2000} onClose={handleCloseProjectError}>
   <Alert
     onClose={handleCloseProjectError}
     severity="error"
@@ -926,7 +957,7 @@ const AssignTasksApi = async () =>{
     Something went wrong!
   </Alert>
 </Snackbar>
-<Snackbar open={openDelete} autoHideDuration={3000} onClose={handleCloseDelete}>
+<Snackbar open={openDelete} autoHideDuration={2000} onClose={handleCloseDelete}>
   <Alert
     onClose={handleCloseDelete}
     severity="success"
@@ -936,7 +967,7 @@ const AssignTasksApi = async () =>{
     Project deleted successfully 
   </Alert>
 </Snackbar>
-<Snackbar open={openProjectAdd} autoHideDuration={3000} onClose={handleAddProjectClose}>
+<Snackbar open={openProjectAdd} autoHideDuration={2000} onClose={handleAddProjectClose}>
   <Alert
     onClose={handleAddProjectClose}
     severity="success"
@@ -946,7 +977,7 @@ const AssignTasksApi = async () =>{
     Project Created successfully 
   </Alert>
 </Snackbar>
-<Snackbar open={fileUpload} autoHideDuration={3000} onClose={handleFileUplaod}>
+<Snackbar open={fileUpload} autoHideDuration={2000} onClose={handleFileUplaod}>
   <Alert
     onClose={handleFileUplaod}
     severity="success"
@@ -956,6 +987,27 @@ const AssignTasksApi = async () =>{
     File Upload successfully 
   </Alert>
 </Snackbar>
+<Dialog
+        open={openPopup}
+        onClose={handleClickClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Use Google's location service?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure want to delete!
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClickClose}>No</Button>
+          <Button onClick={handleDelete} autoFocus>
+            Yes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };
