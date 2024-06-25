@@ -371,10 +371,15 @@ const AssignTasksApi = async () =>{
   };
   const toggleDrawerAssignTasks = (isOpen) => () => {
     setIsDrawerOpenTasks(isOpen);
-    if(isOpen == false){
+    // if(isOpen == false){
+    //   setValue(false)
+    // }
+  };
+  useEffect(()=>{
+    if(isDrawerOpenTasks == false){
       setValue(false)
     }
-  };
+  },[isDrawerOpenTasks])
   const [errorMessage, setErrorMessage] = useState('');
   const handleLanguageChange = (e) => {
     const selectedLanguage = e.target.value;
@@ -496,6 +501,11 @@ const AssignTasksApi = async () =>{
     </select>
           </span>
         </div>
+        <div  style={{
+              display: "flex",
+              justifyContent: "end",
+              height:"25vh"
+            }}>
         {targetLanguage[0] ? <div style={{display:"flex", justifyContent:"right", marginRight:"4rem",marginTop:"10px"}}>
         <ul>
         <h3>Target Languages</h3>
@@ -504,7 +514,7 @@ const AssignTasksApi = async () =>{
           ))}
         </ul>
      
-    </div> : null}
+    </div> : null}</div>
     {errorMessage && <span style={{ color: 'red', display:"flex", justifyContent:"right",marginRight:"30px" }}>{errorMessage}</span>}
     <span style={{display:"flex",justifyContent:"center",position:"fixed",top:"35rem",right:"13rem"}}>
         <Button onClick={handleCreateProject} 
