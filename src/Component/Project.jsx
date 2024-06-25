@@ -37,7 +37,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-
+import AddIcon from '@mui/icons-material/Add';
 const Project = () => {
   const [projectName, setProjectName] = useState([]);
   const [projects, setProjects] = useState(null);
@@ -64,6 +64,7 @@ const Project = () => {
   const [fileUpload, setFileUpload] = useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
   const [index, setIndex] = useState(null);
+  const [value, setValue] = useState(false);
 
   const handleClickOpen = (index,project) => {
     setIndex(index)
@@ -370,6 +371,9 @@ const AssignTasksApi = async () =>{
   };
   const toggleDrawerAssignTasks = (isOpen) => () => {
     setIsDrawerOpenTasks(isOpen);
+    if(isOpen == false){
+      setValue(false)
+    }
   };
   const [errorMessage, setErrorMessage] = useState('');
   const handleLanguageChange = (e) => {
@@ -533,127 +537,29 @@ const AssignTasksApi = async () =>{
             </MUIButton>
           </Toolbar>
         </AppBar>
+      <Button  sx={{
+        color: 'white',  
+        margin:"15px",
+        backgroundColor: '#4691f2',  
+        borderRadius: '8px',  
+        padding: '10px 20px',  
+        textTransform: 'none', 
+        display: 'flex',  
+        alignItems: 'center',  
+        gap: '10px',  
+        boxShadow: '0 3px 5px 2px rgba(0, 0, 0, 0.2)',  
+        transition: 'transform 0.3s ease, background-color 0.3s ease',  
+        '&:hover': {
+          backgroundColor: '#1976D2',  
+          transform: 'scale(1.05)', 
+        },
+        '&:active': {
+          transform: 'scale(0.95)',  
+        },
+      }}  onClick={() => setValue(true)}
+      className="icon">Assign Tasks<AddIcon /></Button>
         <div style={{ display: 'flex', flexDirection: 'column', overflowY: 'scroll' }}>
-        {projectData?.tasks && projectData.tasks.map((task, index) => (
-       <Card 
-       key={index}
-  sx={{ 
-    maxWidth: 600, 
-    minWidth: 600, 
-    margin: "20px", 
-    border: "2px solid #F3F4F6", 
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", 
-    backgroundColor: "#f3f4f6", 
-    marginBottom: 2
-  }}
->
-    <CardContent>
-      <div
-        style={{
-          margin: "70px 22px 0px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-          Source Language<span style={{ color: "red" }}>*</span>
-        </span>
-        <span>
-          <TextField
-            name='sourceLanguage'
-            variant='standard'
-            value={projectData?.sourceLanguage}
-            sx={{ width: "307px" }}
-          />
-        </span>
-      </div>
-      <div
-        style={{
-          margin: "70px 22px 0px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-          Target Language<span style={{ color: "red" }}>*</span>
-        </span>
-        <span>
-          <select
-            value={task.assignTargetLanguage || null}
-            style={{ width: "255px" }}
-          >
-            <option disabled>
-            {task.assignTargetLanguage}
-            </option>
-          </select>
-        </span>
-      </div>
-      <div
-        style={{
-          margin: "70px 22px 0px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-          Service Type<span style={{ color: "red" }}>*</span>
-        </span>
-        <span>
-          <select
-            value={task.serviceType || serviceType}
-            onChange={(e) => handleServiceTypeChange(e, index)}
-            style={{ width: "255px" }}
-          >
-            <option disabled>
-             {task.serviceType}
-            </option>
-          </select>
-        </span>
-      </div>
-      <div
-        style={{
-          margin: "70px 22px 0px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-          Assign To<span style={{ color: "red" }}>*</span>
-        </span>
-        <span>
-          <TextField
-            name='assignTo'
-            variant='standard'
-            value={task.assignTo || ''}
-            sx={{ width: "307px" }}
-          />
-        </span>
-      </div>
-      <div
-        style={{
-          margin: "70px 22px 0px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-          TAT<span style={{ color: "red" }}>*</span>
-        </span>
-        <div style={{fontWeight:"bold"}}>
-          {task.date}
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-))}
- 
-       {/* <Card sx={{ maxWidth: 600, minWidth:600,margin:"20px" }}> */}
-       <Card 
+       {value == true ? <Card 
   sx={{ 
     maxWidth: 600, 
     minWidth: 600, 
@@ -663,6 +569,8 @@ const AssignTasksApi = async () =>{
     backgroundColor: "#f3f4f6" // Light background color for highlighting
   }}
 >
+<div className="highlight-text">Assign Here</div>
+
         <CardContent>
         <div
           style={{
@@ -829,7 +737,124 @@ const AssignTasksApi = async () =>{
   }}>Assign</Button>
     </div>
   </CardContent>
-        </Card>
+        </Card> : null}
+        {projectData?.tasks && projectData.tasks.map((task, index) => (
+       <Card 
+       key={index}
+  sx={{ 
+    maxWidth: 600, 
+    minWidth: 600, 
+    margin: "20px", 
+    border: "2px solid #F3F4F6", 
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", 
+    backgroundColor: "#f3f4f6", 
+    marginBottom: 2
+  }}
+>
+    <CardContent>
+      <div
+        style={{
+          margin: "70px 22px 0px 20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+          Source Language<span style={{ color: "red" }}>*</span>
+        </span>
+        <span>
+          <TextField
+            name='sourceLanguage'
+            variant='standard'
+            value={projectData?.sourceLanguage}
+            sx={{ width: "307px" }}
+          />
+        </span>
+      </div>
+      <div
+        style={{
+          margin: "70px 22px 0px 20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+          Target Language<span style={{ color: "red" }}>*</span>
+        </span>
+        <span>
+          <select
+            value={task.assignTargetLanguage || null}
+            style={{ width: "255px" }}
+          >
+            <option disabled>
+            {task.assignTargetLanguage}
+            </option>
+          </select>
+        </span>
+      </div>
+      <div
+        style={{
+          margin: "70px 22px 0px 20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+          Service Type<span style={{ color: "red" }}>*</span>
+        </span>
+        <span>
+          <select
+            value={task.serviceType || serviceType}
+            onChange={(e) => handleServiceTypeChange(e, index)}
+            style={{ width: "255px" }}
+          >
+            <option disabled>
+             {task.serviceType}
+            </option>
+          </select>
+        </span>
+      </div>
+      <div
+        style={{
+          margin: "70px 22px 0px 20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+          Assign To<span style={{ color: "red" }}>*</span>
+        </span>
+        <span>
+          <TextField
+            name='assignTo'
+            variant='standard'
+            value={task.assignTo || ''}
+            sx={{ width: "307px" }}
+          />
+        </span>
+      </div>
+      <div
+        style={{
+          margin: "70px 22px 0px 20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+          TAT<span style={{ color: "red" }}>*</span>
+        </span>
+        <div style={{fontWeight:"bold"}}>
+          {task.date}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+))}
     </div>
     </div>
       </Drawer>
@@ -993,9 +1018,7 @@ const AssignTasksApi = async () =>{
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">
-          {"Use Google's location service?"}
-        </DialogTitle>
+        
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
             Are you sure want to delete!

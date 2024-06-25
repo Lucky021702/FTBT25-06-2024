@@ -110,3 +110,22 @@ select option {
 select option:hover {
   background-color: #f1f1f1;
 }
+
+.highlight-text {
+  color: #3F51B5; /* Text color */
+  padding: 10px 20px; /* Padding around the text */
+  font-size: 24px; /* Increase font size for better visibility */
+  font-weight: bold; /* Bold font */
+  text-align: center; /* Center-align text */
+  font-family: 'Arial', sans-serif; /* Change font family */
+  background: linear-gradient(45deg, #3F51B5, #1E88E5); /* Gradient text color */
+  -webkit-background-clip: text; /* Clip background to text */
+  color: transparent; /* Make text transparent to show gradient */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Add text shadow */
+  transition: transform 0.3s ease, text-shadow 0.3s ease; /* Smooth transitions */
+}
+
+.highlight-text:hover {
+  transform: scale(1.05); /* Slightly increase size on hover */
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5); /* Enhance text shadow on hover */
+}
