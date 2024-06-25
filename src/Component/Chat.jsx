@@ -91,8 +91,8 @@ const Chat = ({ selectedUser }) => {
     try {
       const response = await axios.get(
         `http://localhost:8000/api/chat/${
-          selectedUser.email
-        }/${localStorage.getItem("email")}/messages`
+          selectedUser.name
+        }/${localStorage.getItem("name")}/messages`
       );
       setMessages(response.data.reverse());
     } catch (error) {
@@ -102,13 +102,13 @@ const Chat = ({ selectedUser }) => {
   useEffect(() => {
     fetchMessages();
     if (selectedUser) {
-      socket.emit("joinRoom", localStorage.getItem("email"));
+      socket.emit("joinRoom", localStorage.getItem("name"));
       socket.on("receiveMessage", (newMessage) => {
         if (
-          (newMessage.toSender === selectedUser.email &&
-            newMessage.toReceiver === localStorage.getItem("email")) ||
-          (newMessage.toReceiver === selectedUser.email &&
-            newMessage.toSender === localStorage.getItem("email"))
+          (newMessage.toSender === selectedUser.name &&
+            newMessage.toReceiver === localStorage.getItem("name")) ||
+          (newMessage.toReceiver === selectedUser.name &&
+            newMessage.toSender === localStorage.getItem("name"))
         ) {
           setMessages((prevMessages) => [newMessage, ...prevMessages]);
         }
@@ -122,9 +122,9 @@ const Chat = ({ selectedUser }) => {
     e.preventDefault();
     if (!selectedUser || !message) return;
     const newMessage = {
-      toSender: selectedUser.email,
+      toSender: selectedUser.name,
       message,
-      toReceiver: localStorage.getItem("email"),
+      toReceiver: localStorage.getItem("name"),
     };
     socket.emit("sendMessage", newMessage);
     setMessage("");
@@ -145,7 +145,7 @@ const Chat = ({ selectedUser }) => {
           <div
             key={index}
             className={`${classes.messageBubbleContainer} ${
-              msg.toSender === selectedUser.email
+              msg.toSender === selectedUser.name
                 ? ""
                 : classes.receiverMessageBubble
             }`}
@@ -203,9 +203,9 @@ const TwoColumnChat = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get("http://localhost:8000/api/users");
-        const loggedInemail = localStorage.getItem("email");
+        const loggedInname = localStorage.getItem("name");
         const filteredUsers = response.data.filter(
-          (user) => user.email !== loggedInemail
+          (user) => user.name !== loggedInname
         );
         setUsers(filteredUsers);
       } catch (error) {
@@ -231,7 +231,7 @@ const TwoColumnChat = () => {
             }`}
           >
             <p>
-              {user.email} ({user.department})
+              {user.name} ({user.department})
             </p>
           </div>
         ))}

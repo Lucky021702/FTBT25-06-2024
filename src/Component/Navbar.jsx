@@ -74,7 +74,7 @@ const Navbar = () => {
   const handleCloseChat = () => {
     setIsChatOpen(false);
   };
-  const email = localStorage.getItem("email");
+  const name = localStorage.getItem("name");
 
   // UseEffect to set isLoggedIn, isFT, and isBT based on token and department
   useEffect(() => {
@@ -345,7 +345,7 @@ const Navbar = () => {
   maxWidth="lg"
 >
   <div style={{display:"flex",justifyContent:"space-between"}}>
-  <DialogTitle>Login_User: <b>{email}</b></DialogTitle>
+  <DialogTitle>Login_User: <b>{name}</b></DialogTitle>
   <DialogActions>
     <Button onClick={handleCloseChat} style={{fontSize:"2rem"}}>
     <IoMdCloseCircle/>

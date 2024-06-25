@@ -41,7 +41,7 @@ const Login = () => {
       const decodedToken = jwt_decode(token);
       const department = decodedToken.department;
       localStorage.setItem("department", department);
-      
+
       switch (department) {
         case "FT":
           navigate("/FT");
@@ -94,6 +94,8 @@ const Login = () => {
         // Use department from decoded token
         const department = decodedToken.department;
         localStorage.setItem("department", department);
+        const name = decodedToken.name;
+        localStorage.setItem("name", name);
 
         // Use the emaail from the backend response
         localStorage.setItem("email", response.data.email);
