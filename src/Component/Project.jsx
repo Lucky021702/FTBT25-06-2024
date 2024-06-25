@@ -9,13 +9,10 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Select,
-  MenuItem,
   IconButton,
   Typography,
   Box,
   Snackbar,
-  Slide,
   Drawer,
   CardContent ,
   AppBar,
@@ -23,9 +20,7 @@ import {
   Card,
   IconButton as MUIButton,
 } from "@mui/material";
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import MuiAlert from "@mui/material/Alert";
 import { MdDelete, MdOutlinePeople } from "react-icons/md";
 import { GoPlus } from "react-icons/go";
 import axios from "axios";
@@ -58,6 +53,9 @@ const Project = () => {
   const [open, setOpen] = useState(false);
   const [openError, setOpenError] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [openProjectAdd, setOpenProjectAdd] = useState(false);
+  const [openProjectError, setOpenProjectError] = useState(false);
+  const [fileUpload, setFileUpload] = useState(false);
 
   const handleClick = () => {
     setOpen(true);
@@ -76,6 +74,20 @@ const Project = () => {
 
     setOpen(false);
   };
+  const handleFileUplaod = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setFileUpload(false);
+  };
+  const handleCloseProjectError = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenProjectError(false);
+  };
   const handleCloseError = (event, reason) => {
     if (reason === 'clickaway') {
       return;
@@ -89,6 +101,13 @@ const Project = () => {
     }
 
     setOpenDelete(false);
+  };
+  const handleAddProjectClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenProjectAdd(false);
   };
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -214,12 +233,7 @@ useEffect(()=>{
     };
     return date.toLocaleString('en-GB', options).replace(',', '');
   };
-  // const handleCloseSnackbar = (event, reason) => {
-  //   if (reason === "clickaway") {
-  //     return;
-  //   }
-  //   setOpenSnackbar(false);
-  // };
+ 
 useEffect(()=>{
 console.log("AssignTasks",assignTasks);
 },[assignTasks])
@@ -275,12 +289,14 @@ console.log("AssignTasks",assignTasks);
           targetLanguage,
         }
       );
-      if (response.status == 201) {
+      if (response.status == 200) {
         setIsDrawerOpen(false)
         fetchProjects();
+        setOpenProjectAdd(true);
       }
       console.log("Project created:", response.data);
     } catch (error) {
+      setOpenProjectError(true)
       console.error("Error creating project:", error);
     }
   };
@@ -317,6 +333,9 @@ console.log("AssignTasks",assignTasks);
       updatedProjects[index].sourceUpload = response?.data?.fileName;
       setProjects(updatedProjects);
       setSourceFileLength(updatedProjects)
+      if(response.status == 200){
+        setFileUpload(true)
+      }
     } catch (error) {
       console.error("Error uploading source file:", error);
     }
@@ -880,22 +899,6 @@ console.log("AssignTasks",assignTasks);
           </Table>
         </TableContainer>
       </div>
-      {/* <Snackbar
-        open={openSnackbar}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        TransitionComponent={Slide}
-      >
-        <MuiAlert
-          onClose={handleCloseSnackbar}
-          severity="error"
-          elevation={6}
-          variant="filled"
-        >
-          {errorMessage}
-        </MuiAlert>
-      </Snackbar> */}
       <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
   <Alert
     onClose={handleClose}
@@ -903,7 +906,7 @@ console.log("AssignTasks",assignTasks);
     variant="filled"
     sx={{ width: '100%' }}
   >
-    Project Assigned👍
+    Project Assigned
   </Alert>
 </Snackbar>
 <Snackbar open={openError} autoHideDuration={3000} onClose={handleCloseError}>
@@ -913,7 +916,17 @@ console.log("AssignTasks",assignTasks);
     variant="filled"
     sx={{ width: '100%' }}
   >
-    Project Assigned Failed❌
+    Project Assigned Failed
+  </Alert>
+</Snackbar>
+<Snackbar open={openProjectError} autoHideDuration={3000} onClose={handleCloseProjectError}>
+  <Alert
+    onClose={handleCloseProjectError}
+    severity="error"
+    variant="filled"
+    sx={{ width: '100%' }}
+  >
+    Something went wrong!
   </Alert>
 </Snackbar>
 <Snackbar open={openDelete} autoHideDuration={3000} onClose={handleCloseDelete}>
@@ -924,6 +937,26 @@ console.log("AssignTasks",assignTasks);
     sx={{ width: '100%' }}
   >
     Project deleted successfully 
+  </Alert>
+</Snackbar>
+<Snackbar open={openProjectAdd} autoHideDuration={3000} onClose={handleAddProjectClose}>
+  <Alert
+    onClose={handleAddProjectClose}
+    severity="success"
+    variant="filled"
+    sx={{ width: '100%' }}
+  >
+    Project Created successfully 
+  </Alert>
+</Snackbar>
+<Snackbar open={fileUpload} autoHideDuration={3000} onClose={handleFileUplaod}>
+  <Alert
+    onClose={handleFileUplaod}
+    severity="success"
+    variant="filled"
+    sx={{ width: '100%' }}
+  >
+    File Upload successfully 
   </Alert>
 </Snackbar>
     </>
