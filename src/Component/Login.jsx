@@ -232,9 +232,9 @@ const Login = () => {
       </div>
       <Snackbar
         open={openSnackbar}
-        autoHideDuration={3000}
+        severity="error"
+        autoHideDuration={2000}
         onClose={handleCloseSnackbar}
-       
       >
         <MuiAlert
           elevation={6}
@@ -247,9 +247,9 @@ const Login = () => {
       </Snackbar>
       <Snackbar
         open={openSuccessSnackbar}
-        autoHideDuration={3000}
+        severity="success"
+        autoHideDuration={2000}
         onClose={handleCloseSuccessSnackbar}
-       
       >
         <MuiAlert
           elevation={6}
