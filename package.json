@@ -89,11 +89,7 @@
     ]
   },
   "devDependencies": {
-<<<<<<< HEAD
-    "@babel/plugin-proposal-private-property-in-object": "^7.0.0"
-=======
     "@babel/plugin-proposal-private-property-in-object": "^7.0.0",
     "react-app-rewired": "^2.2.1"
->>>>>>> ff8204ad8e7fd0057c739fde0a58fe4d63c68790
   }
 }

@@ -232,10 +232,9 @@ const Login = () => {
       </div>
       <Snackbar
         open={openSnackbar}
-        autoHideDuration={2000}
+        autoHideDuration={3000}
         onClose={handleCloseSnackbar}
-        TransitionComponent={Slide}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+       
       >
         <MuiAlert
           elevation={6}
@@ -248,10 +247,9 @@ const Login = () => {
       </Snackbar>
       <Snackbar
         open={openSuccessSnackbar}
-        autoHideDuration={2000}
+        autoHideDuration={3000}
         onClose={handleCloseSuccessSnackbar}
-        TransitionComponent={Slide}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+       
       >
         <MuiAlert
           elevation={6}

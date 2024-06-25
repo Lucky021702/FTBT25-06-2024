@@ -409,7 +409,7 @@ console.log("AssignTasks",assignTasks);
         anchor='right'
         open={isDrawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{ style: { width: "40%" } }}
+        PaperProps={{ style: { width: "32%" } }}
       >
         <AppBar position='static'>
           <Toolbar>
@@ -515,7 +515,7 @@ console.log("AssignTasks",assignTasks);
         anchor='right'
         open={isDrawerOpenTasks}
         onClose={toggleDrawerAssignTasks(false)}
-        PaperProps={{ style: { width: "40%" }}}
+        PaperProps={{ style: { width: "32%" }}}
       >
         <div style={{  overflowX: "auto" }}>
         <AppBar position='static'>
@@ -548,7 +548,7 @@ console.log("AssignTasks",assignTasks);
             name='sourceLanguage'
             variant='standard'
             value={projects?.map((project) => (project.sourceLanguage))}
-            sx={{ width: "255px" }}
+            sx={{ width: "300px" }}
           />
         </span>
       </div>
@@ -622,7 +622,7 @@ console.log("AssignTasks",assignTasks);
             variant='standard'
             value={task.assignTo || ''}
             disabled
-            sx={{ width: "255px" }}
+            sx={{ width: "300px" }}
           />
         </span>
       </div>
@@ -637,7 +637,7 @@ console.log("AssignTasks",assignTasks);
         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
           TAT<span style={{ color: "red" }}>*</span>
         </span>
-        <div>
+        <div style={{fontWeight:"bold"}}>
           {task.date }
         </div>
       </div>
@@ -663,7 +663,7 @@ console.log("AssignTasks",assignTasks);
               name='fullName'
               variant='standard'
               value={projectData?.sourceLanguage}
-              sx={{ width: "255px" }}
+              sx={{ width: "300px" }}
             />
           </span>
         </div>
@@ -778,14 +778,16 @@ console.log("AssignTasks",assignTasks);
             label="Select Date"
             value={selectedDate}
             onChange={handleDateChange}
+            sx={{width:"307px"}}
             renderInput={(params) => <TextField {...params} />}
           />
         </LocalizationProvider>
         </div>
-        <div style={{marginTop:"10px"}}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <div style={{marginTop:"10px",fontWeight: "bold"}}>
+        <LocalizationProvider dateAdapter={AdapterDayjs} >
           <TimePicker
             label="Select Time"
+            sx={{width:"307px"}}
             value={selectedTime}
             onChange={handleTimeChange}
             renderInput={(params) => <TextField {...params} />}
