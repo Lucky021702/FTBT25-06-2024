@@ -342,6 +342,7 @@ export const FunctionProvider = ({ children }) => {
     const newComments = [...comments];
     newComments[index] = event.target.value;
     setComments(newComments);
+    console.log(comments);
   };
   const handleDownloadQC = async () => {
     const fileName = prompt("Enter file name (without extension):", "data");
@@ -397,6 +398,7 @@ export const FunctionProvider = ({ children }) => {
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [dataTrue]);
+
   useEffect(() => {
     if (ftData.length > 0) {
       const newData = [...savedData];
