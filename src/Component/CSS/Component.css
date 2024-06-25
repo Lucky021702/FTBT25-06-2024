@@ -20,18 +20,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(8px);
-  z-index: 9999;
+  backdrop-filter: blur(8px); 
+  z-index: 9999; 
 }
 .docx-table-container {
   margin-top: 20px;
 }
- 
 .docx-table {
   border-collapse: collapse;
   width: 100%;
 }
- 
 .docx-table th,
 .docx-table td {
   border: 1px solid #d4d4d4;
@@ -39,22 +37,21 @@
   text-align: left;
   vertical-align: top;
 }
- 
 .icon-container {
   position: relative;
   width: fit-content; /* Adjust width as needed */
 }
- 
+
 .icon {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   cursor: pointer;
   transition: transform 0.3s ease; /* Add smooth transition for transform */
 }
- 
+
 .icon:hover {
-  transform: scale(1.2);
+  transform: scale(1.2); 
 }
- 
+
 .icon-container:hover::before {
   position: absolute;
   top: -1.5rem; /* Adjust top position */
@@ -66,20 +63,18 @@
   font-size: 1rem; /* Font size of the tooltip text */
   white-space: nowrap; /* Prevent tooltip from wrapping */
 }
- 
 .icon-container:hover::after {
   content: '';
   position: absolute;
   top: 50%; /* Center vertically */
   left: 100%; /* Position on the right of the icon */
   transform: translate(-50%, -50%); /* Center horizontally and vertically */
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.5rem; 
+  height: 1.5rem; 
   background-color: rgba(0, 0, 0, 0.8); /* Background color of the circle */
   border-radius: 50%; /* Make it a circle */
   z-index: -1; /* Behind the icon */
 }
- 
 select {
   min-width: 310px;
   padding: 10px;
@@ -94,20 +89,17 @@ select {
   -moz-appearance: none;
   cursor: pointer;
 }
- 
 select:focus {
   border-color: #007bff;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
   outline: none;
 }
- 
 select option {
   padding: 10px;
   background-color: #fff;
   color: #333;
 }
- 
+
 select option:hover {
   background-color: #f1f1f1;
 }
- 
