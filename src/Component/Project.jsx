@@ -138,9 +138,6 @@ const AssignTasksApi = async () =>{
     console.error("Error fetching projects:", error);
   }
 }
-useEffect(()=>{
-  console.log("projectData",projectData);
-},[projectData])
   const handleTimeChange = (time) => {
     setSelectedTime(time);
     formatDateTime(selectedDate, time);
@@ -203,7 +200,6 @@ useEffect(()=>{
       createdAt: project.createdAt,
       tasks:project.tasks
     };
-    console.log("Collected project data:", projectData);
     setProjectData(projectData)
   };
   const fetchLanguage = async () => {
@@ -233,37 +229,7 @@ useEffect(()=>{
     };
     return date.toLocaleString('en-GB', options).replace(',', '');
   };
- 
-useEffect(()=>{
-console.log("AssignTasks",assignTasks);
-},[assignTasks])
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (projectName === "") {
-      setErrorMessage("Please enter a project name");
-      setOpenSnackbar(true);
-      return;
-    }
-    const email = localStorage.getItem("email");
-    if (!email) {
-      setErrorMessage("User email not found in localStorage.");
-      setOpenSnackbar(true);
-      return;
-    }
-    try {
-      const response = await axios.post("http://localhost:8000/api/projects", {
-        projectName: projectName,
-        email: email,
-        sourceUpload: [],
-        tmxUpload: [],
-      });
-      setProjects([...projects, response.data]);
-      setProjectName("");
-      setIsDrawerOpen(false); // Close the drawer after submission
-    } catch (error) {
-      console.error("Error creating project:", error);
-    }
-  };
+
   useEffect(() => {
     fetchProjects();
   }, [sourceFileLength]);
@@ -294,7 +260,6 @@ console.log("AssignTasks",assignTasks);
         fetchProjects();
         setOpenProjectAdd(true);
       }
-      console.log("Project created:", response.data);
     } catch (error) {
       setOpenProjectError(true)
       console.error("Error creating project:", error);
@@ -360,7 +325,6 @@ console.log("AssignTasks",assignTasks);
         `http://localhost:8000/api/projects/${serviceType}`,
       );
       setAssignTasks(response.data.map((item)=>item.name))
-      console.log("response--->",response);
     } catch (error) {
       console.error("Error fetching user", error);
     }
@@ -375,41 +339,39 @@ console.log("AssignTasks",assignTasks);
   const toggleDrawerAssignTasks = (isOpen) => () => {
     setIsDrawerOpenTasks(isOpen);
   };
+  const [errorMessage, setErrorMessage] = useState('');
   const handleLanguageChange = (e) => {
     const selectedLanguage = e.target.value;
-    setTargetLanguage((prevLanguages) => [...prevLanguages, selectedLanguage]);
+
+    // Check if the language is already selected
+    if (targetLanguage.includes(selectedLanguage)) {
+      setErrorMessage(`"${selectedLanguage}" is already selected.`);
+    } else {
+      setTargetLanguage((prevLanguages) => [...prevLanguages, selectedLanguage]);
+      setErrorMessage('');
+    }
   };
-  
   return (
     <>
       <div style={{ margin: "2rem" }}>
-        <Box>
-          <form
-            onSubmit={handleSubmit}
-            style={{ display: "flex", justifyContent: "end" }}
-          >
+        <Box sx={{display:"flex",justifyContent:"right",alignItems:"center"}}>
             <TextField
               label="Search Project.."
               variant="outlined"
               onChange={(e) => filterProjects(e.target.value)}
-              sx={{marginRight:"50px"}}
+              sx={{marginRight:"30px"}}
             />
-            <Button
-              type='button'
-              style={{ fontSize: "2.5rem", color: "black" }}
+              <GoPlus
+              style={{ fontSize: "2.5rem", color: "black"}}
               onClick={toggleDrawer(true)}
-              className="icon"
-            >
-              <GoPlus />
-            </Button>
-          </form>
+              className="icon" />
         </Box>
       </div>
       <Drawer
         anchor='right'
         open={isDrawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{ style: { width: "40%" } }}
+        PaperProps={{ style: { width: "32%" } }}
       >
         <AppBar position='static'>
           <Toolbar>
@@ -483,7 +445,7 @@ console.log("AssignTasks",assignTasks);
           </span>
           <span>
           <select
-      value={targetLanguage}
+      value=""
       onChange={handleLanguageChange}
       style={{ width: "200px" }}
     >
@@ -507,8 +469,19 @@ console.log("AssignTasks",assignTasks);
         </ul>
      
     </div> : null}
-    <span style={{display:"flex",justifyContent:"center",position:"fixed",top:"35rem",right:"19rem"}}>
-        <Button onClick={handleCreateProject} >Save</Button>
+    {errorMessage && <span style={{ color: 'red', display:"flex", justifyContent:"right",marginRight:"30px" }}>{errorMessage}</span>}
+    <span style={{display:"flex",justifyContent:"center",position:"fixed",top:"35rem",right:"15rem"}}>
+        <Button onClick={handleCreateProject} 
+         variant="contained"
+        sx={{ 
+    fontSize: "16px", 
+    borderRadius: "8px", 
+    boxShadow: "0 3px 5px 2px rgba(66, 165, 245, .3)", // Adds shadow for depth
+    transition: "transform 0.3s ease", // Adds a smooth transition for hover effect
+    '&:hover': { 
+      transform: "scale(1.05)" // Slightly increases the size on hover
+    }
+  }}>Save</Button>
         </span>
       </Drawer>
       <Drawer
@@ -530,7 +503,19 @@ console.log("AssignTasks",assignTasks);
         </AppBar>
         <div style={{ display: 'flex', flexDirection: 'column', overflowY: 'scroll' }}>
         {projectData?.tasks && projectData.tasks.map((task, index) => (
-  <Card key={index} sx={{ maxWidth: 600, minWidth: 600, marginBottom: 2 }}>
+  // <Card key={index} sx={{ maxWidth: 600, minWidth: 600, marginBottom: 2 }}>
+       <Card 
+       key={index}
+  sx={{ 
+    maxWidth: 600, 
+    minWidth: 600, 
+    margin: "20px", 
+    border: "2px solid #F3F4F6", 
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", 
+    backgroundColor: "#f3f4f6", 
+    marginBottom: 2
+  }}
+>
     <CardContent>
       <div
         style={{
@@ -548,7 +533,7 @@ console.log("AssignTasks",assignTasks);
             name='sourceLanguage'
             variant='standard'
             value={projects?.map((project) => (project.sourceLanguage))}
-            sx={{ width: "255px" }}
+            sx={{ width: "307px" }}
           />
         </span>
       </div>
@@ -568,14 +553,9 @@ console.log("AssignTasks",assignTasks);
             value={task.assignTargetLanguage || null}
             style={{ width: "255px" }}
           >
-            <option value='' disabled>
-              Select Language
+            <option disabled>
+            {task.assignTargetLanguage}
             </option>
-            {language.map((lang) => (
-              <option key={lang._id} value={lang.languageName}>
-                {lang.languageName}
-              </option>
-            ))}
           </select>
         </span>
       </div>
@@ -596,12 +576,9 @@ console.log("AssignTasks",assignTasks);
             onChange={(e) => handleServiceTypeChange(e, index)}
             style={{ width: "255px" }}
           >
-            <option value='' disabled>
-              Service type
+            <option disabled>
+             {task.serviceType}
             </option>
-            <option value='FT'>FT</option>
-            <option value='BT'>BT</option>
-            <option value='QC'>QC</option>
           </select>
         </span>
       </div>
@@ -621,8 +598,7 @@ console.log("AssignTasks",assignTasks);
             name='assignTo'
             variant='standard'
             value={task.assignTo || ''}
-            disabled
-            sx={{ width: "255px" }}
+            sx={{ width: "307px" }}
           />
         </span>
       </div>
@@ -637,15 +613,25 @@ console.log("AssignTasks",assignTasks);
         <span style={{ fontSize: "15px", fontWeight: "bold" }}>
           TAT<span style={{ color: "red" }}>*</span>
         </span>
-        <div>
-          {task.date }
+        <div style={{fontWeight:"bold"}}>
+          {task.date}
         </div>
       </div>
     </CardContent>
   </Card>
 ))}
  
-       <Card sx={{ maxWidth: 600, minWidth:600 }}>
+       {/* <Card sx={{ maxWidth: 600, minWidth:600,margin:"20px" }}> */}
+       <Card 
+  sx={{ 
+    maxWidth: 600, 
+    minWidth: 600, 
+    margin: "20px", 
+    border: "2px solid #F3F4F6",  // Blue border for highlighting
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Adding shadow for depth
+    backgroundColor: "#f3f4f6" // Light background color for highlighting
+  }}
+>
         <CardContent>
         <div
           style={{
@@ -663,7 +649,7 @@ console.log("AssignTasks",assignTasks);
               name='fullName'
               variant='standard'
               value={projectData?.sourceLanguage}
-              sx={{ width: "255px" }}
+              sx={{ width: "307px" }}
             />
           </span>
         </div>
@@ -779,6 +765,7 @@ console.log("AssignTasks",assignTasks);
             value={selectedDate}
             onChange={handleDateChange}
             renderInput={(params) => <TextField {...params} />}
+            sx={{width:"307px"}}
           />
         </LocalizationProvider>
         </div>
@@ -789,13 +776,26 @@ console.log("AssignTasks",assignTasks);
             value={selectedTime}
             onChange={handleTimeChange}
             renderInput={(params) => <TextField {...params} />}
+            sx={{width:"307px"}}
           />
         </LocalizationProvider>
       </div>
     </div>
     </div>
     <div style={{display:"flex",justifyContent:"center",alignItems:"center", marginTop:"20px"}}>
-    <Button onClick={AssignTasksApi}>Assign</Button>
+    <Button onClick={AssignTasksApi} variant="contained" // Makes the button filled
+  color="primary" // Sets the button color
+  sx={{ 
+    margin: "10px", 
+    padding: "10px 20px", 
+    fontSize: "16px", 
+    borderRadius: "8px", 
+    boxShadow: "0 3px 5px 2px rgba(66, 165, 245, .3)", // Adds shadow for depth
+    transition: "transform 0.3s ease", // Adds a smooth transition for hover effect
+    '&:hover': { 
+      transform: "scale(1.05)" // Slightly increases the size on hover
+    }
+  }}>Assign</Button>
     </div>
   </CardContent>
         </Card>
@@ -884,13 +884,10 @@ console.log("AssignTasks",assignTasks);
                       className='icon-container'
                     >
                       <MdOutlinePeople className="icon" onClick={() => handleIconClick(project)} />
-                      <Button
-                        onClick={() => handleDelete(index)}
-                        style={{ fontSize: "2rem" }}
-                        className="icon"
-                      >
-                        <MdDelete />
-                      </Button>
+                      
+                        <MdDelete onClick={() => handleDelete(index)}
+                        style={{ fontSize: "1.5rem",marginLeft:"15px",color:"#0485B4"  }}
+                        className="icon"/>
                     </Box>
                   </TableCell>
                 </TableRow>
