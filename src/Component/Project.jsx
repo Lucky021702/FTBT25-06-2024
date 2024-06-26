@@ -260,10 +260,6 @@ const Project = () => {
     };
     return date.toLocaleString("en-GB", options).replace(",", "");
   };
-
-  useEffect(() => {
-    fetchProjects();
-  }, [sourceFileLength]);
   const handleCreateProject = async () => {
     const email = localStorage.getItem("email");
 
@@ -325,42 +321,30 @@ const Project = () => {
   const handleSourceUploadChange = async (e, index) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
-    const updatedProjects = [...projects]; // Assuming projects is your state variable
+    const updatedProjects = [...projects];
     const formData = new FormData();
-
-    // Iterate through each selected file
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       formData.append("sourceUpload", file);
-
       try {
         const response = await axios.post(
           `http://localhost:8000/api/projects/${updatedProjects[index]._id}/upload-source`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
-
-        // Assuming your API returns the file name or some identifier
-        updatedProjects[index].sourceUpload = response?.data?.fileName; // Update project with uploaded file info
-
-        // Update state with updated projects
+        updatedProjects[index].sourceUpload = response?.data?.fileName;
         setProjects(updatedProjects);
-
-        // Additional logic if needed
-        setSourceFileLength(updatedProjects); // Update file length state
+        setSourceFileLength(updatedProjects);
         if (response.status === 200) {
-          setFileUpload(true); // Set file upload flag
+          setFileUpload(true);
+          fetchProjects();
         }
       } catch (error) {
         console.error("Error uploading source file:", error);
       }
-
-      // Clear formData for the next iteration
       formData.delete("sourceUpload");
     }
   };
-
   const filterProjects = (searchProjectName) => {
     if (!searchProjectName) {
       setProjects(null);
@@ -385,7 +369,6 @@ const Project = () => {
       console.error("Error fetching user", error);
     }
   };
-
   useEffect(() => {
     handleUserName();
   }, [serviceType]);
@@ -574,21 +557,17 @@ const Project = () => {
           </span>
         )}
         <div
-           sx={{
-            color: "white",
-            margin: "15px",
-            backgroundColor: "#4691f2",
-            borderRadius: "8px",
-            padding: "10px 20px",
-            textTransform: "none",
+          style={{
             display: "flex",
-            right:"20rem"
+            justifyContent: "center",
           }}
         >
           <Button
             onClick={handleCreateProject}
             variant="contained"
             sx={{
+              margin: "10px",
+              padding: "10px 20px",
               fontSize: "16px",
               borderRadius: "8px",
               boxShadow: "0 3px 5px 2px rgba(66, 165, 245, .3)",
@@ -831,17 +810,17 @@ const Project = () => {
                   >
                     <Button
                       onClick={AssignTasksApi}
-                      variant="contained" // Makes the button filled
-                      color="primary" // Sets the button color
+                      variant="contained"
+                      color="primary"
                       sx={{
                         margin: "10px",
                         padding: "10px 20px",
                         fontSize: "16px",
                         borderRadius: "8px",
-                        boxShadow: "0 3px 5px 2px rgba(66, 165, 245, .3)", // Adds shadow for depth
-                        transition: "transform 0.3s ease", // Adds a smooth transition for hover effect
+                        boxShadow: "0 3px 5px 2px rgba(66, 165, 245, .3)",
+                        transition: "transform 0.3s ease",
                         "&:hover": {
-                          transform: "scale(1.05)", // Slightly increases the size on hover
+                          transform: "scale(1.05)",
                         },
                       }}
                     >
