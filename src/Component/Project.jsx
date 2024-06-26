@@ -258,9 +258,6 @@ const AssignTasksApi = async () =>{
     return date.toLocaleString('en-GB', options).replace(',', '');
   };
 
-  useEffect(() => {
-    fetchProjects();
-  }, [sourceFileLength]);
   const handleCreateProject = async () => {
     const email = localStorage.getItem("email");
  
@@ -344,7 +341,8 @@ const AssignTasksApi = async () =>{
         // Additional logic if needed
         setSourceFileLength(updatedProjects); // Update file length state
         if (response.status === 200) {
-          setFileUpload(true); // Set file upload flag
+          setFileUpload(true);
+          fetchProjects()
         }
       } catch (error) {
         console.error("Error uploading source file:", error);
@@ -697,19 +695,24 @@ const AssignTasksApi = async () =>{
           </span>
           <span>
           <select
-      value={assign}
-      onChange={handleAssignChange}
-      style={{ width: "255px" }}
-    >
-      {assignTasks.length === 0 && <option value="" disabled>Select Name</option>}
-      {assignTasks && assignTasks.length > 0 ? assignTasks?.map((item, index) => (
+  value={assign}
+  onChange={handleAssignChange}
+  style={{ width: "255px" }}
+>
+  {assignTasks.length === 0 ? (
+    <option value="" disabled>Please select service type</option>
+  ) : (
+    <>
+      <option value="" disabled>Select Name</option>
+      {assignTasks.map((item, index) => (
         <option key={index} value={item}>
           {item}
         </option>
-      )) : (
-        <option disabled>Please select service type</option>
-      )}
-    </select>
+      ))}
+    </>
+  )}
+</select>
+
           </span>
         </div>
         <div
