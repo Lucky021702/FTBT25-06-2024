@@ -317,27 +317,44 @@ const AssignTasksApi = async () =>{
   };
  
   const handleSourceUploadChange = async (e, index) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+  
+    const updatedProjects = [...projects]; // Assuming projects is your state variable
     const formData = new FormData();
-    formData.append("sourceUpload", file);
-    try {
-      const response = await axios.post(
-        `http://localhost:8000/api/projects/${projects[index]._id}/upload-source`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-      const updatedProjects = [...projects];
-      updatedProjects[index].sourceUpload = response?.data?.fileName;
-      setProjects(updatedProjects);
-      setSourceFileLength(updatedProjects)
-      if(response.status == 200){
-        setFileUpload(true)
+  
+    // Iterate through each selected file
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      formData.append("sourceUpload", file);
+  
+      try {
+        const response = await axios.post(
+          `http://localhost:8000/api/projects/${updatedProjects[index]._id}/upload-source`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
+        // Assuming your API returns the file name or some identifier
+        updatedProjects[index].sourceUpload = response?.data?.fileName; // Update project with uploaded file info
+  
+        // Update state with updated projects
+        setProjects(updatedProjects);
+  
+        // Additional logic if needed
+        setSourceFileLength(updatedProjects); // Update file length state
+        if (response.status === 200) {
+          setFileUpload(true); // Set file upload flag
+        }
+      } catch (error) {
+        console.error("Error uploading source file:", error);
       }
-    } catch (error) {
-      console.error("Error uploading source file:", error);
+  
+      // Clear formData for the next iteration
+      formData.delete("sourceUpload");
     }
   };
+  
   const filterProjects = (searchProjectName) => {
     if (!searchProjectName) {
       setProjects(null);
@@ -876,8 +893,8 @@ const AssignTasksApi = async () =>{
                 {[
                   "Project Name",
                   "Status",
-                  "Source Language",
                   "Source File",
+                  "Source Language",
                   "Target Language",
                   "CreatedOn",
                   "Actions",
