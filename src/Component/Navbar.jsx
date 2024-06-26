@@ -15,7 +15,7 @@ import { useFunctionContext } from "./Context/Function";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import ChatIcon from "@mui/icons-material/Chat";
-import logo from '../images/logo.png'
+import logo from '../images/Kw.png'
 import { IoMdCloseCircle } from "react-icons/io";
 import Chat from "./Chat";
 
@@ -314,7 +314,7 @@ const Navbar = () => {
     <AppBar position="sticky">
       <Toolbar>
         <Typography className={classes.title}>
-          {/* <img src={logo} alt="logo" height={"70vh"} style={{marginRight:"20px"}} /> */}
+          <img src={logo} alt="logo" height={"70vh"} style={{marginRight:"20px"}} />
         </Typography>
         {renderFileUpload()}
         {isLoggedIn && location.pathname !== "/login" ? (

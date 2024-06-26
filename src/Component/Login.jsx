@@ -39,7 +39,7 @@ const Login = () => {
     const token = localStorage.getItem("token");
     if (token) {
       const decodedToken = jwt_decode(token);
-      const department = decodedToken.department;
+      const department = decodedToken.name;
       localStorage.setItem("department", department);
 
       switch (department) {
@@ -85,7 +85,6 @@ const Login = () => {
         {
           email: inputValue.email,
           password: inputValue.password,
-          department: inputValue.department,
         }
       );
       if (response.status === 200 && response.data.token) {
@@ -97,7 +96,7 @@ const Login = () => {
         const name = decodedToken.name;
         localStorage.setItem("name", name);
 
-        // Use the emaail from the backend response
+        // Use the email from the backend response
         localStorage.setItem("email", response.data.email);
         setOpenSuccessSnackbar(true);
         setTimeout(() => {
@@ -163,7 +162,8 @@ const Login = () => {
               }}
             >
               <Typography>
-                <img src={Logo} alt="logo" />
+              <img src={Logo} alt="logo" />
+
               </Typography>
               <Typography component="h1" variant="h5">
                 Sign in
@@ -174,16 +174,6 @@ const Login = () => {
                 noValidate
                 sx={{ mt: 1 }}
               >
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="department"
-                  label="Department"
-                  name="department"
-                  value={inputValue.department}
-                  onChange={handleFieldChange}
-                />
                 <TextField
                   margin="normal"
                   required
@@ -265,5 +255,4 @@ const Login = () => {
     </div>
   );
 };
-
 export default Login;

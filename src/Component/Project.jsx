@@ -17,12 +17,6 @@ import {
   CardContent,
   AppBar,
   Toolbar,
-  DialogTitle,
-  DialogContentText,
-  DialogContent,
-  DialogActions,
-  Dialog,
-  Alert,
   Card,
   IconButton as MUIButton,
 } from "@mui/material";
@@ -37,9 +31,15 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import dayjs from "dayjs";
+import Alert from "@mui/material/Alert";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 import AddIcon from "@mui/icons-material/Add";
-
 const Project = () => {
+  const [projectName, setProjectName] = useState([]);
   const [projects, setProjects] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [language, setLanguage] = useState([]);
@@ -323,27 +323,44 @@ const Project = () => {
   };
 
   const handleSourceUploadChange = async (e, index) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const updatedProjects = [...projects]; // Assuming projects is your state variable
     const formData = new FormData();
-    formData.append("sourceUpload", file);
-    try {
-      const response = await axios.post(
-        `http://localhost:8000/api/projects/${projects[index]._id}/upload-source`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
-      const updatedProjects = [...projects];
-      updatedProjects[index].sourceUpload = response?.data?.fileName;
-      setProjects(updatedProjects);
-      setSourceFileLength(updatedProjects);
-      if (response.status == 200) {
-        setFileUpload(true);
+
+    // Iterate through each selected file
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      formData.append("sourceUpload", file);
+
+      try {
+        const response = await axios.post(
+          `http://localhost:8000/api/projects/${updatedProjects[index]._id}/upload-source`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        // Assuming your API returns the file name or some identifier
+        updatedProjects[index].sourceUpload = response?.data?.fileName; // Update project with uploaded file info
+
+        // Update state with updated projects
+        setProjects(updatedProjects);
+
+        // Additional logic if needed
+        setSourceFileLength(updatedProjects); // Update file length state
+        if (response.status === 200) {
+          setFileUpload(true); // Set file upload flag
+        }
+      } catch (error) {
+        console.error("Error uploading source file:", error);
       }
-    } catch (error) {
-      console.error("Error uploading source file:", error);
+
+      // Clear formData for the next iteration
+      formData.delete("sourceUpload");
     }
   };
+
   const filterProjects = (searchProjectName) => {
     if (!searchProjectName) {
       setProjects(null);
@@ -377,10 +394,15 @@ const Project = () => {
   };
   const toggleDrawerAssignTasks = (isOpen) => () => {
     setIsDrawerOpenTasks(isOpen);
-    if (isOpen == false) {
+    // if(isOpen == false){
+    //   setValue(false)
+    // }
+  };
+  useEffect(() => {
+    if (isDrawerOpenTasks == false) {
       setValue(false);
     }
-  };
+  }, [isDrawerOpenTasks]);
   const [errorMessage, setErrorMessage] = useState("");
   const handleLanguageChange = (e) => {
     const selectedLanguage = e.target.value;
@@ -398,7 +420,7 @@ const Project = () => {
   };
   return (
     <>
-      <div className="main_div" style={{ margin: "2rem" }}>
+      <div style={{ margin: "2rem" }}>
         <Box
           sx={{
             display: "flex",
@@ -423,7 +445,7 @@ const Project = () => {
         anchor="right"
         open={isDrawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{ style: { width: "32%" } }}
+        PaperProps={{ style: { width: "35%" } }}
       >
         <AppBar position="static">
           <Toolbar>
@@ -551,10 +573,16 @@ const Project = () => {
             {errorMessage}
           </span>
         )}
-        <span
-          style={{
+        <div
+           sx={{
+            color: "white",
+            margin: "15px",
+            backgroundColor: "#4691f2",
+            borderRadius: "8px",
+            padding: "10px 20px",
+            textTransform: "none",
             display: "flex",
-            justifyContent: "center",
+            right:"20rem"
           }}
         >
           <Button
@@ -572,7 +600,7 @@ const Project = () => {
           >
             Save
           </Button>
-        </span>
+        </div>
       </Drawer>
       <Drawer
         anchor="right"
@@ -946,8 +974,8 @@ const Project = () => {
                 {[
                   "Project Name",
                   "Status",
-                  "Source Language",
                   "Source File",
+                  "Source Language",
                   "Target Language",
                   "CreatedOn",
                   "Actions",
