@@ -23,8 +23,9 @@ export const FunctionProvider = ({ children }) => {
   const [englishSource, setEnglishSource] = useState([]);
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
+  
   // useEffect(() => {
   //   console.log("savedData", savedData);
   // }, [savedData]);
@@ -481,6 +482,7 @@ export const FunctionProvider = ({ children }) => {
     handleFileUploadQCSource2,
     handleCommentChange,
     handleDownloadQC,
+   
   };
 
   return (

@@ -192,7 +192,7 @@ function FT() {
                         style={{
                          fontSize:"2.5rem",
                          color:"green",
-                         cursor:"progress",
+                         cursor:"pointer",
                         marginBottom:"2.5rem",
                         marginLeft:"0.5rem"
                         }}
