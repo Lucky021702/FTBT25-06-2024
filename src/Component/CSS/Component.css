@@ -26,12 +26,10 @@
 .docx-table-container {
   margin-top: 20px;
 }
-
 .docx-table {
   border-collapse: collapse;
   width: 100%;
 }
-
 .docx-table th,
 .docx-table td {
   border: 1px solid #d4d4d4;
@@ -39,7 +37,6 @@
   text-align: left;
   vertical-align: top;
 }
-
 .icon-container {
   position: relative;
   width: fit-content; /* Adjust width as needed */
@@ -66,7 +63,6 @@
   font-size: 1rem; /* Font size of the tooltip text */
   white-space: nowrap; /* Prevent tooltip from wrapping */
 }
-
 .icon-container:hover::after {
   content: '';
   position: absolute;
@@ -79,7 +75,6 @@
   border-radius: 50%; /* Make it a circle */
   z-index: -1; /* Behind the icon */
 }
-
 select {
   min-width: 310px;
   padding: 10px;
@@ -94,13 +89,11 @@ select {
   -moz-appearance: none;
   cursor: pointer;
 }
-
 select:focus {
   border-color: #007bff;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
   outline: none;
 }
-
 select option {
   padding: 10px;
   background-color: #fff;
@@ -129,3 +122,46 @@ select option:hover {
   transform: scale(1.05); /* Slightly increase size on hover */
   text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5); /* Enhance text shadow on hover */
 }
+.main{
+  margin: "2rem"
+}
+
+.navbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px;
+  background-color: #333;
+  color: white;
+}
+
+.profile-container {
+  position: relative;
+  cursor: pointer;
+}
+
+.profile-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background-color: white;
+  color: black;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+

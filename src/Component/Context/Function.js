@@ -23,8 +23,9 @@ export const FunctionProvider = ({ children }) => {
   const [englishSource, setEnglishSource] = useState([]);
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
+  
   // useEffect(() => {
   //   console.log("savedData", savedData);
   // }, [savedData]);
@@ -342,6 +343,7 @@ export const FunctionProvider = ({ children }) => {
     const newComments = [...comments];
     newComments[index] = event.target.value;
     setComments(newComments);
+    console.log(comments);
   };
   const handleDownloadQC = async () => {
     const fileName = prompt("Enter file name (without extension):", "data");
@@ -397,6 +399,7 @@ export const FunctionProvider = ({ children }) => {
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [dataTrue]);
+
   useEffect(() => {
     if (ftData.length > 0) {
       const newData = [...savedData];
@@ -479,6 +482,7 @@ export const FunctionProvider = ({ children }) => {
     handleFileUploadQCSource2,
     handleCommentChange,
     handleDownloadQC,
+   
   };
 
   return (

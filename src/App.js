@@ -10,7 +10,7 @@ import { FunctionProvider } from "./Component/Context/Function";
 import Docs from "./Component/Docx";
 import PDF from "./Component/Pdf";
 import Docx_IntoCells from "./Component/Docx_IntoCells";
-import Word_Xliff from "./Component/WordToXLIFFConverter";
+import AssignTaskDialog from "./Component/AssignTaskDialog";
 function App() {
   return (
     <>
@@ -26,7 +26,7 @@ function App() {
           <Route path="/pdf" element={<PDF />} />
           <Route path="/Docx" element={<Docs />} />
           <Route path="/docxIntoCells" element={<Docx_IntoCells />} />
-          <Route path="/word-xliff" element={<Word_Xliff />} />
+          <Route path="/assignTask" element={<AssignTaskDialog />} />
         </Routes>
       </FunctionProvider>
     </>

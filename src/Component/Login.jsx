@@ -41,7 +41,7 @@ const Login = () => {
       const decodedToken = jwt_decode(token);
       const department = decodedToken.name;
       localStorage.setItem("department", department);
-      
+
       switch (department) {
         case "FT":
           navigate("/FT");
@@ -96,7 +96,7 @@ const Login = () => {
         const name = decodedToken.name;
         localStorage.setItem("name", name);
 
-        // Use the emaail from the backend response
+        // Use the email from the backend response
         localStorage.setItem("email", response.data.email);
         setOpenSuccessSnackbar(true);
         setTimeout(() => {
@@ -255,5 +255,4 @@ const Login = () => {
     </div>
   );
 };
-
 export default Login;
