@@ -66,6 +66,24 @@ const Project = () => {
   const [index, setIndex] = useState(null);
   const [value, setValue] = useState(false);
 
+const handleProjectData = (project)=>{
+  const projectData = {
+    id: project._id,
+    projectName: project.projectName,
+    status: project.status,
+    sourceLanguage: project.sourceLanguage,
+    sourceUpload: project.sourceUpload,
+    targetLanguage: project.targetLanguage,
+    createdAt: project.createdAt,
+    tasks:project.tasks
+  };
+  console.log("projectData====>",projectData);
+  setProjectData(projectData)
+}
+// useEffect(()=>{
+//   console.log("projectData====>",projectData);
+// },[projectData])
+
   const handleClickOpen = (index,project) => {
     setIndex(index)
     setOpenPopup(true);
@@ -257,7 +275,7 @@ const AssignTasksApi = async () =>{
     };
     return date.toLocaleString('en-GB', options).replace(',', '');
   };
-
+let name = localStorage.getItem("name")
   const handleCreateProject = async () => {
     const email = localStorage.getItem("email");
  
@@ -278,6 +296,7 @@ const AssignTasksApi = async () =>{
           email: email,
           sourceLanguage,
           targetLanguage,
+          assignedBy: name
         }
       );
       if (response.status == 200) {
@@ -312,46 +331,101 @@ const AssignTasksApi = async () =>{
       console.error("Error deleting project:", error);
     }
   };
- 
   const handleSourceUploadChange = async (e, index) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
   
     const updatedProjects = [...projects]; // Assuming projects is your state variable
-    const formData = new FormData();
+    const project = updatedProjects[index]; // Get the specific project
+    const targetLanguages = project.targetLanguage; // Get the target languages
   
     // Iterate through each selected file
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      formData.append("sourceUpload", file);
   
-      try {
-        const response = await axios.post(
-          `http://localhost:8000/api/projects/${updatedProjects[index]._id}/upload-source`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
+      for (let j = 0; j < targetLanguages.length; j++) {
+        const formData = new FormData();
   
-        // Assuming your API returns the file name or some identifier
-        updatedProjects[index].sourceUpload = response?.data?.fileName; // Update project with uploaded file info
+        // Modify the file name to include the target language
+        const modifiedFileName = `${targetLanguages[j]}_${file.name}`;
+        console.log("targetLanguage[j]",file.name);
+        // Create a new File object with the modified name
+        const modifiedFile = new File([file], modifiedFileName, { type: file.type });
   
-        // Update state with updated projects
-        setProjects(updatedProjects);
+        formData.append("sourceUpload", modifiedFile);
+        formData.append("targetLanguage", targetLanguages[j]); // Append the current target language
   
-        // Additional logic if needed
-        setSourceFileLength(updatedProjects); // Update file length state
-        if (response.status === 200) {
-          setFileUpload(true);
-          fetchProjects()
+        try {
+          const response = await axios.post(
+            `http://localhost:8000/api/projects/${project._id}/upload-source`,
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
+          );
+  
+          // Assuming your API returns the file name or some identifier
+          if (response.status === 200) {
+            if (!project.sourceUpload) {
+              project.sourceUpload = [];
+            }
+            project.sourceUpload.push({ fileName: response?.data?.fileName, language: targetLanguages[j] }); // Update project with uploaded file info
+  
+            // Additional logic if needed
+            setFileUpload(true);
+            fetchProjects();
+          }
+        } catch (error) {
+          console.error("Error uploading source file:", error);
         }
-      } catch (error) {
-        console.error("Error uploading source file:", error);
       }
-  
-      // Clear formData for the next iteration
-      formData.delete("sourceUpload");
     }
+  
+    // Update state with updated projects
+    setProjects(updatedProjects);
+    setSourceFileLength(updatedProjects); // Update file length state if needed
   };
+  
+   
+  // const handleSourceUploadChange = async (e, index) => {
+   
+  //   console.log("projectData====>",projectData);
+  //   const files = e.target.files;
+  //   if (!files || files.length === 0) return;
+  
+  //   const updatedProjects = [...projects]; // Assuming projects is your state variable
+  //   const formData = new FormData();
+  
+  //   // Iterate through each selected file
+  //   for (let i = 0; i < files.length; i++) {
+  //     const file = files[i];
+  //     formData.append("sourceUpload", file);
+  
+  //     try {
+  //       const response = await axios.post(
+  //         `http://localhost:8000/api/projects/${updatedProjects[index]._id}/upload-source`,
+  //         formData,
+  //         { headers: { "Content-Type": "multipart/form-data" } }
+  //       );
+  
+  //       // Assuming your API returns the file name or some identifier
+  //       updatedProjects[index].sourceUpload = response?.data?.fileName; // Update project with uploaded file info
+  
+  //       // Update state with updated projects
+  //       setProjects(updatedProjects);
+  
+  //       // Additional logic if needed
+  //       setSourceFileLength(updatedProjects); // Update file length state
+  //       if (response.status === 200) {
+  //         setFileUpload(true);
+  //         fetchProjects()
+  //       }
+  //     } catch (error) {
+  //       console.error("Error uploading source file:", error);
+  //     }
+  
+  //     // Clear formData for the next iteration
+  //     formData.delete("sourceUpload");
+  //   }
+  // };
   
   const filterProjects = (searchProjectName) => {
     if (!searchProjectName) {
@@ -917,7 +991,7 @@ const AssignTasksApi = async () =>{
             </TableHead>
             <TableBody>
               {projects?.map((project, index) => (
-                <TableRow key={index}>
+                <TableRow key={index} onClick={() => handleProjectData(project)}>
                   <TableCell style={{ fontSize: "1rem" }}>
                     {project.projectName}
                   </TableCell>
@@ -925,14 +999,15 @@ const AssignTasksApi = async () =>{
                     {project.status.charAt(0).toUpperCase() +
                       project.status.slice(1).toLowerCase()}
                   </TableCell>
-                  <TableCell>
+                  <TableCell >
+                    
                     <Box display='flex' alignItems='center'>
                       <input
                         multiple
                         id={`source-file-input-${index}`}
                         type='file'
                         accept='.csv'
-                        onChange={(e) => handleSourceUploadChange(e, index)}
+                        onChange={(e) => handleSourceUploadChange(e, index,project)}
                         style={{ display: "none" }}
                       />
                       <label htmlFor={`source-file-input-${index}`}>
@@ -943,9 +1018,9 @@ const AssignTasksApi = async () =>{
                       <Typography variant='body1'>
                         {project.sourceUpload
                           ? `${
-                              project.sourceUpload.length <= 1
-                                ? `${project.sourceUpload.length} File`
-                                : `${project.sourceUpload.length} Files`
+                              project.sourceUpload.length / project.targetLanguage.length <= 1
+                                ? `${project.sourceUpload.length / project.targetLanguage.length} File`
+                                : `${project.sourceUpload.length / project.targetLanguage.length} Files`
                             }`
                           : "No file chosen"}
                       </Typography>
