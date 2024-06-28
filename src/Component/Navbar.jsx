@@ -88,16 +88,17 @@ const Navbar = () => {
   const handleClickOpen = () => {
     setDialogOpen(true);
   };
-
   const handleClose = () => {
     setDialogOpen(false);
   };
 
   const UserName = localStorage.getItem("name");
+  const department = localStorage.getItem("department");
   const handleProjectdata = async () => {
     try {
       const response = await axios.post("http://localhost:8000/api/Find", {
         name: UserName,
+        serviceType:department
       });
       //response is not setting in state
       setProject(response.data);
@@ -111,10 +112,13 @@ const Navbar = () => {
   useEffect(() => {
     handleProjectdata();
   }, []);
+  useEffect(()=>
+    {
+      console.log();
+    }
+  )
 
   useEffect(() => {
-  
-    
     if (
       project &&
       project.length > 0 &&
