@@ -67,24 +67,6 @@ const Project = () => {
   const [value, setValue] = useState(false);
   let name = localStorage.getItem("name");
 
-const handleProjectData = (project)=>{
-  const projectData = {
-    id: project._id,
-    projectName: project.projectName,
-    status: project.status,
-    sourceLanguage: project.sourceLanguage,
-    sourceUpload: project.sourceUpload,
-    targetLanguage: project.targetLanguage,
-    createdAt: project.createdAt,
-    tasks:project.tasks
-  };
-  console.log("projectData====>",projectData);
-  setProjectData(projectData)
-}
-// useEffect(()=>{
-//   console.log("projectData====>",projectData);
-// },[projectData])
-
   const handleClickOpen = (index, project) => {
     setIndex(index);
     setOpenPopup(true);
@@ -352,7 +334,6 @@ const handleProjectData = (project)=>{
   useEffect(() => {
     fetchProjects();
   }, [sourceFileLength]);
-let name = localStorage.getItem("name")
   const handleCreateProject = async () => {
     const email = localStorage.getItem("email");
 
@@ -377,7 +358,6 @@ let name = localStorage.getItem("name")
           sourceLanguage,
           targetLanguage,
           assignedBy: name,
-          assignedBy: name
         }
       );
       if (response.status == 200) {
@@ -413,102 +393,6 @@ let name = localStorage.getItem("name")
     }
   };
 
-  const handleSourceUploadChange = async (e, index) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-  
-    const updatedProjects = [...projects]; // Assuming projects is your state variable
-    const project = updatedProjects[index]; // Get the specific project
-    const targetLanguages = project.targetLanguage; // Get the target languages
-  
-    // Iterate through each selected file
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-  
-      for (let j = 0; j < targetLanguages.length; j++) {
-        const formData = new FormData();
-  
-        // Modify the file name to include the target language
-        const modifiedFileName = `${targetLanguages[j]}_${file.name}`;
-        console.log("targetLanguage[j]",file.name);
-        // Create a new File object with the modified name
-        const modifiedFile = new File([file], modifiedFileName, { type: file.type });
-  
-        formData.append("sourceUpload", modifiedFile);
-        formData.append("targetLanguage", targetLanguages[j]); // Append the current target language
-  
-        try {
-          const response = await axios.post(
-            `http://localhost:8000/api/projects/${project._id}/upload-source`,
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-          );
-  
-          // Assuming your API returns the file name or some identifier
-          if (response.status === 200) {
-            if (!project.sourceUpload) {
-              project.sourceUpload = [];
-            }
-            project.sourceUpload.push({ fileName: response?.data?.fileName, language: targetLanguages[j] }); // Update project with uploaded file info
-  
-            // Additional logic if needed
-            setFileUpload(true);
-            fetchProjects();
-          }
-        } catch (error) {
-          console.error("Error uploading source file:", error);
-        }
-      }
-    }
-  
-    // Update state with updated projects
-    setProjects(updatedProjects);
-    setSourceFileLength(updatedProjects); // Update file length state if needed
-  };
-  
-   
-  // const handleSourceUploadChange = async (e, index) => {
-   
-  //   console.log("projectData====>",projectData);
-  //   const files = e.target.files;
-  //   if (!files || files.length === 0) return;
-  
-  //   const updatedProjects = [...projects]; // Assuming projects is your state variable
-  //   const formData = new FormData();
-  
-  //   // Iterate through each selected file
-  //   for (let i = 0; i < files.length; i++) {
-  //     const file = files[i];
-  //     formData.append("sourceUpload", file);
-  
-  //     try {
-  //       const response = await axios.post(
-  //         `http://localhost:8000/api/projects/${updatedProjects[index]._id}/upload-source`,
-  //         formData,
-  //         { headers: { "Content-Type": "multipart/form-data" } }
-  //       );
-  
-  //       // Assuming your API returns the file name or some identifier
-  //       updatedProjects[index].sourceUpload = response?.data?.fileName; // Update project with uploaded file info
-  
-  //       // Update state with updated projects
-  //       setProjects(updatedProjects);
-  
-  //       // Additional logic if needed
-  //       setSourceFileLength(updatedProjects); // Update file length state
-  //       if (response.status === 200) {
-  //         setFileUpload(true);
-  //         fetchProjects()
-  //       }
-  //     } catch (error) {
-  //       console.error("Error uploading source file:", error);
-  //     }
-  
-  //     // Clear formData for the next iteration
-  //     formData.delete("sourceUpload");
-  //   }
-  // };
-  
   const filterProjects = (searchProjectName) => {
     if (!searchProjectName) {
       setProjects(null);
@@ -522,7 +406,7 @@ let name = localStorage.getItem("name")
     );
     setProjects(filteredProjects);
   };
-  const handleUserName = async (e, index) => {
+  const handleUserName = async () => {
     try {
       const response = await axios.post(
         // `http://localhost:8000/api/projects/FT`,
@@ -593,7 +477,7 @@ let name = localStorage.getItem("name")
         anchor="right"
         open={isDrawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{ style: { width: "35%" } }}
+        PaperProps={{ style: { width: "32%" } }}
       >
         <AppBar position="static">
           <Toolbar>
@@ -750,7 +634,7 @@ let name = localStorage.getItem("name")
         anchor="right"
         open={isDrawerOpenTasks}
         onClose={toggleDrawerAssignTasks(false)}
-        PaperProps={{ style: { width: "35%" } }}
+        PaperProps={{ style: { width: "44%" } }}
       >
         <div style={{ overflowX: "auto" }}>
           <AppBar position="static">
@@ -1141,7 +1025,7 @@ let name = localStorage.getItem("name")
             </TableHead>
             <TableBody>
               {projects?.map((project, index) => (
-                <TableRow key={index} onClick={() => handleProjectData(project)}>
+                <TableRow key={index}>
                   <TableCell style={{ fontSize: "1rem" }}>
                     {project.projectName}
                   </TableCell>
@@ -1151,18 +1035,12 @@ let name = localStorage.getItem("name")
                   </TableCell>
                   <TableCell onClick={() => handleProjectData(project)}>
                     <Box display="flex" alignItems="center">
-                  <TableCell >
-                    
-                    <Box display='flex' alignItems='center'>
                       <input
                         multiple
                         id={`source-file-input-${index}`}
                         type="file"
                         accept=".csv"
                         onChange={(e) => handleSourceUploadChange(e, index)}
-                        type='file'
-                        accept='.csv'
-                        onChange={(e) => handleSourceUploadChange(e, index,project)}
                         style={{ display: "none" }}
                       />
                       <label htmlFor={`source-file-input-${index}`}>
@@ -1184,9 +1062,6 @@ let name = localStorage.getItem("name")
                                     project.sourceUpload.length /
                                     project.targetLanguage.length
                                   } Files`
-                              project.sourceUpload.length / project.targetLanguage.length <= 1
-                                ? `${project.sourceUpload.length / project.targetLanguage.length} File`
-                                : `${project.sourceUpload.length / project.targetLanguage.length} Files`
                             }`
                           : "No file chosen"}
                       </Typography>

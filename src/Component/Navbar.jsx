@@ -94,14 +94,16 @@ const Navbar = () => {
   };
 
   const UserName = localStorage.getItem("name");
+  const department = localStorage.getItem("department");
   const handleProjectdata = async () => {
     try {
       const response = await axios.post("http://localhost:8000/api/Find", {
         name: UserName,
+        serviceType:department
       });
       //response is not setting in state
       setProject(response.data);
-      fileName();
+      // fileName();
       console.log("response", response.data);
     } catch (error) {
       console.error("Error fetching user", error);
@@ -111,44 +113,94 @@ const Navbar = () => {
   useEffect(() => {
     handleProjectdata();
   }, []);
-
   useEffect(() => {
+    console.log("fileName",fileName);
+  }, [fileName]);
+  useEffect(() => {
+    console.log("projectttttt", project);
+  }, [project]);
+  useEffect(() => {
+    console.log("useEffect triggered with project:", project);
   
-    
-    if (
-      project &&
-      project.length > 0 &&
-      project[0].tasks &&
-      project[0].tasks.length > 0
-    ) {
-      const assignTargetLanguage = project[0].tasks[0].assignTargetLanguage;
-
-      project[0].sourceUpload.forEach((item) => {
+    if (project && project.tasks && project.tasks.length > 0) {
+      console.log("Project and tasks are valid");
+  
+      const assignTargetLanguage = project.tasks[0].assignTargetLanguage;
+      console.log("assignTargetLanguage", assignTargetLanguage);
+  
+      project.sourceUpload.forEach((item, index) => {
+        console.log(`Processing item ${index + 1}/${project.sourceUpload.length}: ${item}`);
+  
         // Extract filename without extension
         const filename = item.split(".")[0];
-
+        console.log("Extracted filename (without extension):", filename);
+  
         // Extract language name from filename
         const parts = filename.split("-");
+        console.log("Filename parts after split by '-':", parts);
+  
         if (parts.length > 1) {
           const languagePart = parts[1];
           const language = languagePart.split("_")[0]; // Extract language part
-          console.log("language", language);
+          console.log("Extracted language:", language);
+  
           // Match language with assignTargetLanguage
           if (language && assignTargetLanguage.includes(language)) {
-            console.log(
-              `Matched language '${language}' with filename '${filename}'`
-            );
+            console.log(`Matched language '${language}' with filename '${filename}'`);
             setFileName(item);
             // Do something with language or filename here
           } else {
-            console.log(
-              `No matching language found for filename '${filename}'`
-            );
+            console.log(`No matching language found for filename '${filename}'`);
           }
+        } else {
+          console.log("Filename does not contain a language part:", filename);
         }
       });
+    } else {
+      console.log("Project or tasks are invalid or empty");
+      console.log("project:", project);
+      console.log("project.tasks:", project ? project.tasks : undefined);
+      console.log("project.tasks.length:", project && project.tasks ? project.tasks.length : undefined);
     }
   }, [project]);
+  
+  // useEffect(() => {
+  //   if (
+  //     project &&
+  //     project?.length > 0 &&
+  //     project?.tasks &&
+  //     project?.tasks.length > 0
+  //   ) {
+  //     console.log("inside");
+  //     const assignTargetLanguage = project?.tasks[0].assignTargetLanguage;
+  //     console.log("assignTargetLanguage",assignTargetLanguage);
+  //     project.sourceUpload.forEach((item) => {
+  //       // Extract filename without extension
+  //       const filename = item.split(".")[0];
+
+  //       // Extract language name from filename
+  //       const parts = filename.split("-");
+  //       if (parts.length > 1) {
+  //         const languagePart = parts[1];
+  //         const language = languagePart.split("_")[0]; // Extract language part
+  //         console.log("language", language);
+  //         // Match language with assignTargetLanguage
+  //         if (language && assignTargetLanguage.includes(language)) {
+  //           console.log(
+  //             `Matched language '${language}' with filename '${filename}'`
+  //           );
+  //           setFileName(item);
+  //           // Do something with language or filename here
+  //         } else {
+  //           console.log(
+  //             `No matching language found for filename '${filename}'`
+  //           );
+  //         }
+  //       }
+  //     });
+  //   }
+  // }, [project]);
+  
   useEffect(() => {
     if (dialogOpen) {
       handleProjectdata();
@@ -278,7 +330,7 @@ useEffect(()=>{
                   fullWidth
                   PaperProps={{
                     sx: {
-                      height: "52vh",
+                      height: "66vh",
                     },
                   }}
                 >
@@ -326,7 +378,7 @@ useEffect(()=>{
                         >
                           <span>Target Langauge</span>
                           <TextField
-                            value={project[0]?.tasks[0]?.assignTargetLanguage}
+                            value={project?.tasks[0]?.assignTargetLanguage}
                             sx={{ width: "350px " }}
                             margin="normal"
                             disabled
@@ -341,7 +393,7 @@ useEffect(()=>{
                         >
                           <span>Assign Date</span>
                           <TextField
-                            value={project[0]?.tasks[0]?.date}
+                            value={project?.tasks[0]?.date}
                             margin="normal"
                             sx={{ width: "350px " }}
                             disabled
@@ -364,7 +416,7 @@ useEffect(()=>{
                           />
                          
                         </div>
-                        {project[0]?.tasks[0].assignedStatus ? (
+                        {project?.tasks[0].assignedStatus ? (
                           <div
                             style={{
                               display: "flex",
@@ -374,7 +426,7 @@ useEffect(()=>{
                               color: "red",
                             }}
                           >
-                            {project[0]?.tasks[0].assignedStatus}
+                            {project?.tasks[0].assignedStatus}
                           </div>
                         ) : (
                           <div
