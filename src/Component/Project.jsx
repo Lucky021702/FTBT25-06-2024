@@ -64,6 +64,7 @@ const Project = () => {
   const [fileUpload, setFileUpload] = useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
   const [index, setIndex] = useState(null);
+  // const [domain, setDomain] = useState([]);
   const [value, setValue] = useState(false);
   let name = localStorage.getItem("name");
 
@@ -289,6 +290,22 @@ const Project = () => {
       console.error("Error fetching projects:", error);
     }
   };
+  // useEffect(()=>{
+  //   console.log("domain",domain);
+  // },domain)
+   
+  // const fetchDomain = async () => {
+  //   try {
+  //   let token = localStorage.getItem("token")
+
+  //     const response = await axios.get("https://astra.knowledgew.com/api/project/getDomains" ,{
+  //       token
+  //     })
+  //     setProjects(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching projects:", error);
+  //   }
+  // };
   const handleIconClick = (project) => {
     setIsDrawerOpenTasks(true);
     const projectData = {
@@ -468,7 +485,11 @@ const Project = () => {
           />
           <GoPlus
             style={{ fontSize: "2.5rem", color: "black" }}
-            onClick={toggleDrawer(true)}
+            onClick={() => {
+              toggleDrawer(true);
+              // fetchDomain();
+            }}
+            
             className="icon"
           />
         </Box>

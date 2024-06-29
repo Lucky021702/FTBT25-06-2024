@@ -19,9 +19,10 @@ import ChatIcon from "@mui/icons-material/Chat";
 import logo from "../images/Kw.png";
 import { IoMdCloseCircle } from "react-icons/io";
 import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
-import DownloadIcon from '@mui/icons-material/Download';
+import DownloadIcon from "@mui/icons-material/Download";
 import "./CSS/Component.css";
-
+import { useSelector, useDispatch } from 'react-redux';
+import { setFileName } from '../Redux/actions';
 import {
   Dialog,
   DialogTitle,
@@ -83,7 +84,7 @@ const Navbar = () => {
   const [assignedStatus, setAssignedStatus] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
   const [project, setProject] = useState([]);
-  const [fileName, setFileName] = useState("");
+  // const [fileName, setFileName] = useState("");
 
   const handleClickOpen = () => {
     setDialogOpen(true);
@@ -92,6 +93,11 @@ const Navbar = () => {
   const handleClose = () => {
     setDialogOpen(false);
   };
+  const handleCloseNotification = () => {
+    setAssignedStatus("Accept")
+    handleClose()
+    handleFileUpload()
+  };
 
   const UserName = localStorage.getItem("name");
   const department = localStorage.getItem("department");
@@ -99,7 +105,7 @@ const Navbar = () => {
     try {
       const response = await axios.post("http://localhost:8000/api/Find", {
         name: UserName,
-        serviceType:department
+        serviceType: department,
       });
       //response is not setting in state
       setProject(response.data);
@@ -109,48 +115,53 @@ const Navbar = () => {
       console.error("Error fetching user", error);
     }
   };
-
+  let dispatch = useDispatch()
   useEffect(() => {
     handleProjectdata();
   }, []);
-  useEffect(() => {
-    console.log("fileName",fileName);
-  }, [fileName]);
+  let fileName = useSelector((state)=>state)
+ console.log("fileNamefileName",fileName);
   useEffect(() => {
     console.log("projectttttt", project);
   }, [project]);
   useEffect(() => {
     console.log("useEffect triggered with project:", project);
-  
+
     if (project && project.tasks && project.tasks.length > 0) {
       console.log("Project and tasks are valid");
-  
+
       const assignTargetLanguage = project.tasks[0].assignTargetLanguage;
       console.log("assignTargetLanguage", assignTargetLanguage);
-  
+
       project.sourceUpload.forEach((item, index) => {
-        console.log(`Processing item ${index + 1}/${project.sourceUpload.length}: ${item}`);
-  
+        console.log(
+          `Processing item ${index + 1}/${project.sourceUpload.length}: ${item}`
+        );
+
         // Extract filename without extension
         const filename = item.split(".")[0];
         console.log("Extracted filename (without extension):", filename);
-  
+
         // Extract language name from filename
         const parts = filename.split("-");
         console.log("Filename parts after split by '-':", parts);
-  
+
         if (parts.length > 1) {
           const languagePart = parts[1];
           const language = languagePart.split("_")[0]; // Extract language part
           console.log("Extracted language:", language);
-  
+
           // Match language with assignTargetLanguage
           if (language && assignTargetLanguage.includes(language)) {
-            console.log(`Matched language '${language}' with filename '${filename}'`);
-            setFileName(item);
+            console.log(
+              `Matched language '${language}' with filename '${filename}'`
+            );
+            dispatch(setFileName(item))
             // Do something with language or filename here
           } else {
-            console.log(`No matching language found for filename '${filename}'`);
+            console.log(
+              `No matching language found for filename '${filename}'`
+            );
           }
         } else {
           console.log("Filename does not contain a language part:", filename);
@@ -160,10 +171,13 @@ const Navbar = () => {
       console.log("Project or tasks are invalid or empty");
       console.log("project:", project);
       console.log("project.tasks:", project ? project.tasks : undefined);
-      console.log("project.tasks.length:", project && project.tasks ? project.tasks.length : undefined);
+      console.log(
+        "project.tasks.length:",
+        project && project.tasks ? project.tasks.length : undefined
+      );
     }
   }, [project]);
-  
+
   // useEffect(() => {
   //   if (
   //     project &&
@@ -200,22 +214,19 @@ const Navbar = () => {
   //     });
   //   }
   // }, [project]);
-  
+
   useEffect(() => {
     if (dialogOpen) {
       handleProjectdata();
     }
   }, [dialogOpen]);
 
-  useEffect(() => {
-    if(assignedStatus == "Accept" || assignedStatus == "Reject")
-      {
-        handleStatusChange()
-      }
-    
-  }, [assignedStatus]);
+  // useEffect(() => {
+  //   if (assignedStatus == "Accept" || assignedStatus == "Reject") {
+  //     handleStatusChange();
+  //   }
+  // }, [assignedStatus]);
   const handleStatusChange = async () => {
-    
     try {
       const response = await axios.post(
         "http://localhost:8000/api/updateAssignStatus",
@@ -257,10 +268,9 @@ const Navbar = () => {
   const handleCloseChat = () => {
     setIsChatOpen(false);
   };
-useEffect(()=>{
-  console.log("project====>",project);
-
-},[project])
+  useEffect(() => {
+    console.log("project====>", project);
+  }, [project]);
 
   // UseEffect to set isLoggedIn, isFT, and isBT based on token and department
   useEffect(() => {
@@ -288,30 +298,29 @@ useEffect(()=>{
   const handleDownload = () => {
     axios({
       url: `http://localhost:8000/api/download`, // Adjust endpoint as needed
-      method: 'POST', // Use POST if you need to send data (including filename)
-      responseType: 'blob', // Response type should be blob for file download
+      method: "POST", // Use POST if you need to send data (including filename)
+      responseType: "blob", // Response type should be blob for file download
       data: {
-        fileName:  fileName  // Wrap filename in bold markers
-      }
+        fileName: fileName, // Wrap filename in bold markers
+      },
     })
-      .then(response => {
+      .then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
         // Consider using a user-friendly display name (optional)
-        const displayFileName = fileName.replace(/_/g, ' '); // Replace underscores with spaces for readability
-        link.setAttribute('download', displayFileName || fileName); // Use display name if available
+        const displayFileName = fileName.replace(/_/g, " "); // Replace underscores with spaces for readability
+        link.setAttribute("download", displayFileName || fileName); // Use display name if available
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link); // Clean up after download
       })
-      .catch(error => {
-        console.error('Error downloading file:', error);
+      .catch((error) => {
+        console.error("Error downloading file:", error);
         // Handle error, show user feedback, etc.
       });
   };
-  
-  
+
   // Function to render file upload buttons based on user's department
   const renderFileUpload = () => {
     if (isLoggedIn) {
@@ -320,13 +329,13 @@ useEffect(()=>{
           {isFT && (
             <>
               <div>
-                <IconButton onClick={handleClickOpen} color="inherit">
+                <IconButton onClick={handleClickOpen} color='inherit'>
                   <CircleNotificationsIcon />
                 </IconButton>
                 <Dialog
                   open={dialogOpen}
                   onClose={handleClose}
-                  maxWidth="sm"
+                  maxWidth='sm'
                   fullWidth
                   PaperProps={{
                     sx: {
@@ -337,7 +346,7 @@ useEffect(()=>{
                   <DialogTitle>
                     Notifications
                     <IconButton
-                      aria-label="close"
+                      aria-label='close'
                       onClick={handleClose}
                       sx={{
                         position: "absolute",
@@ -350,111 +359,116 @@ useEffect(()=>{
                     </IconButton>
                   </DialogTitle>
                   <DialogContent>
-                    {
-                      project.length == 0 ? "No Notification" : 
+                    {project.length == 0 ? (
+                      "No Notification"
+                    ) : (
                       <Card>
-                      <CardContent>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span>Name</span>
-                          <TextField
-                            disabled
-                            sx={{ width: "350px " }}
-                            value={name}
-                            margin="normal"
-                          />
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span>Target Langauge</span>
-                          <TextField
-                            value={project?.tasks[0]?.assignTargetLanguage}
-                            sx={{ width: "350px " }}
-                            margin="normal"
-                            disabled
-                          />
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span>Assign Date</span>
-                          <TextField
-                            value={project?.tasks[0]?.date}
-                            margin="normal"
-                            sx={{ width: "350px " }}
-                            disabled
-                          />
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span>Source File Name</span>
-                          <DownloadIcon className="icon" sx={{color:"#367af7"}} onClick={handleDownload}/>
-                          <TextField
-                            value={fileName}
-                            sx={{ width: "350px " }}
-                            margin="normal"
-                            disabled
-                          />
-                         
-                        </div>
-                        {project?.tasks[0].assignedStatus ? (
+                        <CardContent>
                           <div
                             style={{
                               display: "flex",
-                              justifyContent: "space-around",
+                              justifyContent: "space-between",
                               alignItems: "center",
-                              fontSize: "1.2rem",
-                              color: "red",
                             }}
                           >
-                            {project?.tasks[0].assignedStatus}
+                            <span>Name</span>
+                            <TextField
+                              disabled
+                              sx={{ width: "350px " }}
+                              value={name}
+                              margin='normal'
+                            />
                           </div>
-                        ) : (
                           <div
                             style={{
                               display: "flex",
-                              justifyContent: "space-around",
+                              justifyContent: "space-between",
                               alignItems: "center",
                             }}
                           >
-                            <Button
-                              onClick={() => setAssignedStatus("Reject")}
-                              variant="contained"
-                              color="secondary"
+                            <span>Target Langauge</span>
+                            <TextField
+                              value={project?.tasks[0]?.assignTargetLanguage}
+                              sx={{ width: "350px " }}
+                              margin='normal'
+                              disabled
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <span>Assign Date</span>
+                            <TextField
+                              value={project?.tasks[0]?.date}
+                              margin='normal'
+                              sx={{ width: "350px " }}
+                              disabled
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <span>Source File Name</span>
+                            <DownloadIcon
+                              className='icon'
+                              sx={{ color: "#367af7" }}
+                              onClick={handleDownload}
+                            />
+                            <TextField
+                              value={fileName?.savedData}
+                              sx={{ width: "350px " }}
+                              margin='normal'
+                              disabled
+                            />
+                          </div>
+                          {project?.tasks[0].assignedStatus ? (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-around",
+                                alignItems: "center",
+                                fontSize: "1.2rem",
+                                color: "red",
+                              }}
                             >
-                              Reject
-                            </Button>
+                              {project?.tasks[0].assignedStatus}
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-around",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Button
+                                onClick={() => setAssignedStatus("Reject")}
+                                variant='contained'
+                                color='secondary'
+                              >
+                                Reject
+                              </Button>
 
-                            <Button
-                              onClick={() => setAssignedStatus("Accept")}
-                              variant="contained"
-                              color="primary"
-                            >
-                              Accept
-                            </Button>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>}
+                              <Button
+                                onClick={() => handleCloseNotification()}
+                                variant='contained'
+                                color='primary'
+                              >
+                                Accept
+                              </Button>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
                   </DialogContent>
                 </Dialog>
               </div>
@@ -467,33 +481,33 @@ useEffect(()=>{
                 Chat
               </Button>
               <input
-                type="file"
-                accept=".csv"
+                type='file'
+                accept='.csv'
                 onChange={handleFileUploadQC}
                 style={{ display: "none" }}
-                id="fileQC"
+                id='fileQC'
               />
-              <label htmlFor="fileQC">
+              <label htmlFor='fileQC'>
                 <Button
                   className={classes.fileUploadButton}
-                  component="span"
+                  component='span'
                   onClick={handleQCClick}
                   startIcon={<CloudDownloadIcon />}
                 >
                   QC
                 </Button>
               </label>
-              <input
-                type="file"
-                accept=".csv,.docx,.doc"
+              {/* <input
+                type='file'
+                accept='.csv,.docx,.doc'
                 onChange={handleFileUpload}
                 style={{ display: "none" }}
-                id="fileInput"
-              />
-              <label htmlFor="fileInput">
+                id='fileInput'
+              /> */}
+              <label htmlFor='fileInput'>
                 <Button
                   className={classes.fileUploadButton}
-                  component="span"
+                  component='span'
                   onClick={handleSourceClick}
                   startIcon={<CloudUploadIcon />}
                 >
@@ -501,16 +515,16 @@ useEffect(()=>{
                 </Button>
               </label>
               <input
-                type="file"
-                accept=".tmx"
+                type='file'
+                accept='.tmx'
                 onChange={handleFileUploadTcx}
                 style={{ display: "none" }}
-                id="fileInput2"
+                id='fileInput2'
               />
-              <label htmlFor="fileInput2">
+              <label htmlFor='fileInput2'>
                 <Button
                   className={classes.fileUploadButton}
-                  component="span"
+                  component='span'
                   startIcon={<CloudUploadIcon />}
                 >
                   TMX
@@ -518,7 +532,7 @@ useEffect(()=>{
               </label>
               <Button
                 className={classes.fileUploadButton}
-                color="secondary"
+                color='secondary'
                 onClick={handleDownloadCSV}
                 // disabled={!downloadReady}
                 startIcon={<CloudDownloadIcon />}
@@ -537,16 +551,16 @@ useEffect(()=>{
                 Chat
               </Button>
               <input
-                type="file"
-                accept=".csv"
+                type='file'
+                accept='.csv'
                 onChange={handleFileUploadQC}
                 style={{ display: "none" }}
-                id="fileQC"
+                id='fileQC'
               />
-              <label htmlFor="fileQC">
+              <label htmlFor='fileQC'>
                 <Button
                   className={classes.fileUploadButton}
-                  component="span"
+                  component='span'
                   onClick={handleQCClick}
                   startIcon={<CloudDownloadIcon />}
                 >
@@ -554,16 +568,16 @@ useEffect(()=>{
                 </Button>
               </label>
               <input
-                type="file"
-                accept=".csv,.docx,.doc"
+                type='file'
+                accept='.csv,.docx,.doc'
                 onChange={handleFileUpload}
                 style={{ display: "none" }}
-                id="fileInput"
+                id='fileInput'
               />
-              <label htmlFor="fileInput">
+              <label htmlFor='fileInput'>
                 <Button
                   className={classes.fileUploadButton}
-                  component="span"
+                  component='span'
                   onClick={handleSourceClick}
                   startIcon={<CloudUploadIcon />}
                 >
@@ -571,16 +585,16 @@ useEffect(()=>{
                 </Button>
               </label>
               <input
-                type="file"
-                accept=".tmx"
+                type='file'
+                accept='.tmx'
                 onChange={handleFileUploadTcxBT}
                 style={{ display: "none" }}
-                id="fileInput2"
+                id='fileInput2'
               />
-              <label htmlFor="fileInput2">
+              <label htmlFor='fileInput2'>
                 <Button
                   className={classes.fileUploadButton}
-                  component="span"
+                  component='span'
                   startIcon={<CloudUploadIcon />}
                 >
                   TMX
@@ -588,7 +602,7 @@ useEffect(()=>{
               </label>
               <Button
                 className={classes.fileUploadButton}
-                color="secondary"
+                color='secondary'
                 onClick={handleDownloadCSV}
                 disabled={!downloadReady}
                 startIcon={<CloudDownloadIcon />}
@@ -599,6 +613,148 @@ useEffect(()=>{
           )}
           {isQC && (
             <>
+              <IconButton onClick={handleClickOpen} color='inherit'>
+                <CircleNotificationsIcon />
+              </IconButton>
+              <Dialog
+                  open={dialogOpen}
+                  onClose={handleClose}
+                  maxWidth='sm'
+                  fullWidth
+                  PaperProps={{
+                    sx: {
+                      height: "66vh",
+                    },
+                  }}
+                >
+                  <DialogTitle>
+                    Notifications
+                    <IconButton
+                      aria-label='close'
+                      onClick={handleClose}
+                      sx={{
+                        position: "absolute",
+                        right: 8,
+                        top: 8,
+                        color: "black",
+                      }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </DialogTitle>
+                  <DialogContent>
+                    {project.length == 0 ? (
+                      "No Notification"
+                    ) : (
+                      <Card>
+                        <CardContent>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <span>Name</span>
+                            <TextField
+                              disabled
+                              sx={{ width: "350px " }}
+                              value={name}
+                              margin='normal'
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <span>Target Langauge</span>
+                            <TextField
+                              value={project?.tasks[0]?.assignTargetLanguage}
+                              sx={{ width: "350px " }}
+                              margin='normal'
+                              disabled
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <span>Assign Date</span>
+                            <TextField
+                              value={project?.tasks[0]?.date}
+                              margin='normal'
+                              sx={{ width: "350px " }}
+                              disabled
+                            />
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <span>Source File Name</span>
+                            <DownloadIcon
+                              className='icon'
+                              sx={{ color: "#367af7" }}
+                              onClick={handleDownload}
+                            />
+                            <TextField
+                              value={fileName}
+                              sx={{ width: "350px " }}
+                              margin='normal'
+                              disabled
+                            />
+                          </div>
+                          {project?.tasks[0].assignedStatus ? (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-around",
+                                alignItems: "center",
+                                fontSize: "1.2rem",
+                                color: "red",
+                              }}
+                            >
+                              {project?.tasks[0].assignedStatus}
+                            </div>
+                          ) : (
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-around",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Button
+                                onClick={() => setAssignedStatus("Reject")}
+                                variant='contained'
+                                color='secondary'
+                              >
+                                Reject
+                              </Button>
+
+                              <Button
+                                onClick={() => setAssignedStatus("Accept")}
+                                variant='contained'
+                                color='primary'
+                              >
+                                Accept
+                              </Button>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </DialogContent>
+                </Dialog>
               <Button
                 className={classes.fileUploadButton}
                 onClick={handleOpenChat}
@@ -607,15 +763,15 @@ useEffect(()=>{
                 Chat
               </Button>
               <input
-                type="file"
-                accept=".csv,.xlsx"
+                type='file'
+                accept='.csv,.xlsx'
                 onChange={handleFileUploadQCSource}
                 style={{ display: "none" }}
-                id="fileInput"
+                id='fileInput'
               />
-              <label htmlFor="fileInput">
+              <label htmlFor='fileInput'>
                 <Button
-                  component="span"
+                  component='span'
                   startIcon={<CloudUploadIcon />}
                   className={classes.fileUploadButton}
                 >
@@ -623,15 +779,15 @@ useEffect(()=>{
                 </Button>
               </label>
               <input
-                type="file"
-                accept=".csv,.xlsx"
+                type='file'
+                accept='.csv,.xlsx'
                 onChange={handleFileUploadQCSource2}
                 style={{ display: "none" }}
-                id="fileInput2"
+                id='fileInput2'
               />
-              <label htmlFor="fileInput2">
+              <label htmlFor='fileInput2'>
                 <Button
-                  component="span"
+                  component='span'
                   startIcon={<CloudUploadIcon />}
                   className={classes.fileUploadButton}
                 >
@@ -665,12 +821,12 @@ useEffect(()=>{
   };
 
   return (
-    <AppBar position="sticky">
+    <AppBar position='sticky'>
       <Toolbar>
         <Typography className={classes.title}>
           <img
             src={logo}
-            alt="logo"
+            alt='logo'
             height={"70vh"}
             style={{ marginRight: "20px" }}
           />
@@ -686,11 +842,11 @@ useEffect(()=>{
           //     Logout
           //   </Link>
           // </Typography>
-          <Typography position="static">
+          <Typography position='static'>
             <Toolbar>
               <Box sx={{ flexGrow: 1 }} />
-              <IconButton onClick={handleClick} color="inherit">
-                <Avatar src="" alt="Profile" />
+              <IconButton onClick={handleClick} color='inherit'>
+                <Avatar src='' alt='Profile' />
               </IconButton>
               <Menu
                 anchorEl={anchorEl}
@@ -707,7 +863,7 @@ useEffect(()=>{
                 <MenuItem onClick={handleCloseProfile}>Profile</MenuItem>
                 <MenuItem onClick={handleCloseProfile}>Settings</MenuItem>
                 <Link
-                  to="/"
+                  to='/'
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
                   <MenuItem onClick={handleLogout}>Logout</MenuItem>
@@ -716,9 +872,9 @@ useEffect(()=>{
             </Toolbar>
           </Typography>
         ) : (
-          <Typography variant="h6">
+          <Typography variant='h6'>
             <Link
-              to="/login"
+              to='/login'
               style={{ textDecoration: "none", color: "inherit" }}
             >
               Login
@@ -730,7 +886,7 @@ useEffect(()=>{
         open={isChatOpen}
         onClose={handleCloseChat}
         fullWidth
-        maxWidth="lg"
+        maxWidth='lg'
       >
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <DialogTitle>

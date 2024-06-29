@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./CSS/Component.css";
 import {
   Button,
@@ -36,7 +36,9 @@ function FT() {
     handlehide,
     handleSave,
     handleEditorChange,
+    handleFileUpload
   } = context;
+
   return (
     <div>
       {isLoading && (
@@ -162,6 +164,7 @@ function FT() {
                         paddingTop: "3rem",
                       }}
                     >
+                      <div style={{display:"flex"}}>
                       <textarea
                         variant="outlined"
                         style={{
@@ -188,6 +191,34 @@ function FT() {
                           "Right"
                         }
                       />
+                     {/* <textarea
+  variant="outlined"
+  style={{
+    width: "60%",
+    padding: "1.3rem",
+    fontSize: "1rem",
+    resize: "none",
+  }}
+  multiline
+  rows={4}
+  
+  value={editableData[index] || ""}
+  onChange={(e) => {
+    const newEditableData = [...editableData];
+    newEditableData[index] = e.target.value;
+    setEditableData(newEditableData);
+  }}
+  disabled={
+    csvData && tcxData && compareAndSetFT(csvData[index] || "", tcxData[index] || "") === "100%"
+  }
+/> */}
+<div>
+{/* {
+    csvData?.length > 0 && tcxData?.length > 0
+      ? compareAndSetFT(csvData[index], tcxData[index]) 
+      : ""
+  } */}
+
                       <FaRegArrowAltCircleRight
                         style={{
                          fontSize:"2.5rem",
@@ -197,10 +228,11 @@ function FT() {
                         marginLeft:"0.5rem"
                         }}
                         onClick={() => handleSave(index)}
-                      >
-                        Save
-                      </FaRegArrowAltCircleRight>
-                    </TableCell>
+
+                      />
+                      </div>
+                      </div>
+                      </TableCell>
 
                     <TableCell
                       style={{
