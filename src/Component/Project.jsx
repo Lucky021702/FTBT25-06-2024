@@ -64,7 +64,7 @@ const Project = () => {
   const [fileUpload, setFileUpload] = useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
   const [index, setIndex] = useState(null);
-  // const [domain, setDomain] = useState([]);
+  const [domain, setDomain] = useState([]);
   const [value, setValue] = useState(false);
   let name = localStorage.getItem("name");
 
@@ -290,22 +290,19 @@ const Project = () => {
       console.error("Error fetching projects:", error);
     }
   };
-  // useEffect(()=>{
-  //   console.log("domain",domain);
-  // },domain)
-   
-  // const fetchDomain = async () => {
-  //   try {
-  //   let token = localStorage.getItem("token")
+  
+  const fetchDomain = async () => {
+    try {
+      const response = await axios.get("http://localhost:8000/api/projects/domain");
+      setDomain(response.data); // Assuming response.data contains the domain data array
+    } catch (error) {
+      console.error("Error fetching domains:", error);
+    }
+  };
 
-  //     const response = await axios.get("https://astra.knowledgew.com/api/project/getDomains" ,{
-  //       token
-  //     })
-  //     setProjects(response.data);
-  //   } catch (error) {
-  //     console.error("Error fetching projects:", error);
-  //   }
-  // };
+  useEffect(() => {
+    console.log("domain:", domain);
+  }, [domain]);
   const handleIconClick = (project) => {
     setIsDrawerOpenTasks(true);
     const projectData = {
@@ -487,7 +484,7 @@ const Project = () => {
             style={{ fontSize: "2.5rem", color: "black" }}
             onClick={() => {
               toggleDrawer(true);
-              // fetchDomain();
+              fetchDomain();
             }}
             
             className="icon"

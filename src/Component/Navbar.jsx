@@ -95,7 +95,6 @@ const Navbar = () => {
   };
   const handleCloseNotification = () => {
     setAssignedStatus("Accept")
-    handleClose()
     handleFileUpload()
   };
 
@@ -221,11 +220,11 @@ const Navbar = () => {
     }
   }, [dialogOpen]);
 
-  // useEffect(() => {
-  //   if (assignedStatus == "Accept" || assignedStatus == "Reject") {
-  //     handleStatusChange();
-  //   }
-  // }, [assignedStatus]);
+  useEffect(() => {
+    if (assignedStatus == "Accept" || assignedStatus == "Reject") {
+      handleStatusChange();
+    }
+  }, [assignedStatus]);
   const handleStatusChange = async () => {
     try {
       const response = await axios.post(
