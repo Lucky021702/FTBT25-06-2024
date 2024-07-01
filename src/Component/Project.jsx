@@ -406,7 +406,7 @@ const Project = () => {
     );
     setProjects(filteredProjects);
   };
-  const handleUserName = async (e, index) => {
+  const handleUserName = async () => {
     try {
       const response = await axios.post(
         // `http://localhost:8000/api/projects/FT`,
@@ -477,7 +477,7 @@ const Project = () => {
         anchor="right"
         open={isDrawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{ style: { width: "35%" } }}
+        PaperProps={{ style: { width: "32%" } }}
       >
         <AppBar position="static">
           <Toolbar>
@@ -634,7 +634,7 @@ const Project = () => {
         anchor="right"
         open={isDrawerOpenTasks}
         onClose={toggleDrawerAssignTasks(false)}
-        PaperProps={{ style: { width: "35%" } }}
+        PaperProps={{ style: { width: "44%" } }}
       >
         <div style={{ overflowX: "auto" }}>
           <AppBar position="static">

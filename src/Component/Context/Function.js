@@ -19,7 +19,7 @@ export const FunctionProvider = ({ children }) => {
   const [savedData, setSavedData] = useState([]);
   const [downloadReady, setDownloadReady] = useState(false);
   const [dataTrue, setDataTrue] = useState(false);
-  const [hideTmxColumn, sethideTmxColumn] = useState(false);
+  const [hideTmxColumn, setHideTmxColumn] = useState(false);
   const [englishSource, setEnglishSource] = useState([]);
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
@@ -413,8 +413,8 @@ export const FunctionProvider = ({ children }) => {
       setSavedData(newData);
     }
   }, [ftData]);
-  const handlehide = () => {
-    sethideTmxColumn((prevState) => !prevState);
+  const handleHide = () => {
+    setHideTmxColumn((prevState) => !prevState);
   };
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -467,7 +467,7 @@ export const FunctionProvider = ({ children }) => {
     setSavedData,
     setDownloadReady,
     setDataTrue,
-    sethideTmxColumn,
+    setHideTmxColumn,
     handleQCClick,
     handleSourceClick,
     handleFileUploadQC,
@@ -477,7 +477,7 @@ export const FunctionProvider = ({ children }) => {
     handleSave,
     handleDownloadCSV,
     handleEditorChange,
-    handlehide,
+    handleHide,
     handleFileUploadQCSource,
     handleFileUploadQCSource2,
     handleCommentChange,
