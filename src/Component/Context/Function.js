@@ -5,6 +5,9 @@ import * as ExcelJS from "exceljs";
 import * as docxPreview from "docx-preview";
 import parse from "html-react-parser";
 import mammoth from "mammoth";
+// import mammoth from "../../../../backend/uploads";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 export const FunctionContext = createContext();
 
@@ -24,13 +27,10 @@ export const FunctionProvider = ({ children }) => {
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
 
-  const navigate = useNavigate();
   
-  // useEffect(() => {
-  //   console.log("savedData", savedData);
-  // }, [savedData]);
 
-  //URL blockage
+  const navigate = useNavigate();
+ 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -76,25 +76,6 @@ export const FunctionProvider = ({ children }) => {
     };
     reader.readAsBinaryString(file);
   };
-  // const handleFileUpload = (event) => {
-  //   const file = event.target.files[0];
-  //   if (!file) return;
-  //   setIsLoading(true);
-  //   const fileReader = new FileReader();
-  //   fileReader.onload = (e) => {
-  //     const data = new Uint8Array(e.target.result);
-  //     const workbook = XLSX.read(data, { type: "array" });
-  //     const firstSheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[firstSheetName];
-  //     const parsedData = XLSX.utils.sheet_to_json(worksheet, {
-  //       header: 1,
-  //       range: 1,
-  //     });
-  //     setCSVData(parsedData);
-  //     setIsLoading(false);
-  //   };
-  //   fileReader.readAsArrayBuffer(file);
-  // };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -123,6 +104,67 @@ export const FunctionProvider = ({ children }) => {
     setCSVData(parsedData);
     setIsLoading(false);
   };
+ 
+  // let fileName = useSelector((state)=>state.savedData)
+
+  // const handleFileUpload = async () => {
+  //   if (!fileName) {
+  //     console.error("File name is not provided");
+  //     return;
+  //   }
+
+  //   const backendUrl = 'http://localhost:8000'; // Replace with your backend server URL
+  //   const filePath = `${backendUrl}/api/files/${fileName}`;
+  //   const extension = fileName.split('.').pop().toLowerCase();
+
+  //   setIsLoading(true);
+
+  //   try {
+  //     console.log(`Fetching file from: ${filePath}`);
+  //     const response = await axios.get(filePath, {
+  //       responseType: 'arraybuffer',
+  //     });
+
+  //     console.log(`File fetched successfully. Processing as ${extension}...`);
+
+  //     if (extension === 'csv') {
+  //       // Log the content before processing
+  //       const textDecoder = new TextDecoder('utf-8');
+  //       const csvContent = textDecoder.decode(new Uint8Array(response.data));
+  //       console.log('CSV Content:', csvContent);
+
+  //       // Process the CSV content
+  //       processCSV(new Uint8Array(response.data));
+  //     } else if (extension === 'docx') {
+  //       processDOCX(new Uint8Array(response.data));
+  //     } else {
+  //       throw new Error('Unsupported file extension');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error loading file:', error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // const processCSV = (data) => {
+  //   try {
+  //     console.log("Processing CSV data...");
+  //     const workbook = XLSX.read(data, { type: "array" });
+  //     const firstSheetName = workbook.SheetNames[0];
+  //     const worksheet = workbook.Sheets[firstSheetName];
+  //     const parsedData = XLSX.utils.sheet_to_json(worksheet, {
+  //       header: 1,
+  //       range: 1,
+  //     });
+  //     setCSVData(parsedData);
+  //     console.log("CSV data processed successfully");
+  //   } catch (error) {
+  //     console.error("Error processing CSV:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
   // const processDOCX = async (arrayBuffer) => {
   //   try {
   //     const { value } = await mammoth.convertToHtml({ arrayBuffer });
@@ -231,12 +273,43 @@ export const FunctionProvider = ({ children }) => {
   const compareAndSetFT = (sourceSentence, tmxSentence) => {
     const cleanSource = String(sourceSentence).trim().replace(/[^\w]/g, "");
     const cleanTmx = String(tmxSentence).trim().replace(/[^\w]/g, "");
+    console.log(tmxSentence);
     if (cleanSource === cleanTmx) {
       return "Right";
     } else {
       return "";
     }
   };
+//   const compareAndSetFT = (sourceSentence, tmxSentence) => {
+//     // Check if either sourceSentence or tmxSentence is undefined or null
+//     if (sourceSentence == null || tmxSentence == null) {
+//         return "Invalid input";
+//     }
+
+//     const cleanAndNormalize = (sentence) => {
+//         return String(sentence)
+//             .toLowerCase()
+//             .trim()
+//             .replace(/[^\w\s]/g, "")
+//             .replace(/\s+/g, " ");
+//     };
+
+//     const cleanSource = cleanAndNormalize(sourceSentence);
+//     const cleanTmx = cleanAndNormalize(tmxSentence);
+
+//     if (cleanSource === cleanTmx) {
+//         return "100%";
+//     } else {
+//         const sourceWords = cleanSource.split(" ");
+//         const tmxWords = cleanTmx.split(" ");
+//         const totalWords = Math.max(sourceWords.length, tmxWords.length);
+//         const matchingWords = sourceWords.filter(word => tmxWords.includes(word)).length;
+//         const similarityPercentage = (matchingWords / totalWords) * 100;
+//         return `${similarityPercentage.toFixed(2)}%`;
+//     }
+// };
+
+
   const handleSave = (index) => {
     const newSavedData = [...savedData];
     newSavedData[index] = editableData[index];
@@ -387,9 +460,6 @@ export const FunctionProvider = ({ children }) => {
       console.error("Error:", error);
     }
   };
-  // const handleSaveComment = (index) => {
-  //   console.log("Comment saved:", comments[index]);
-  // };
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -409,8 +479,10 @@ export const FunctionProvider = ({ children }) => {
         } else {
           newData[index] = editableData[index];
         }
+        console.log("tcxData[index]",tcxData[index]);
       });
       setSavedData(newData);
+     
     }
   }, [ftData]);
   const handleHide = () => {
@@ -424,22 +496,6 @@ export const FunctionProvider = ({ children }) => {
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [dataTrue]);
-  useEffect(() => {
-    if (ftData.length > 0) {
-      const newData = [...savedData];
-      ftData.forEach((value, index) => {
-        if (compareAndSetFT(csvData[index], tcxData[index]) === "Right") {
-          newData[index] = value;
-        } else {
-          newData[index] = editableData[index];
-        }
-      });
-      setSavedData(newData);
-    }
-  }, [ftData]);
-  // useEffect(() => {
-  //   console.log("saved data", savedData);
-  // }, [savedData]);
 
   const contextValue = {
     isQCSelected,

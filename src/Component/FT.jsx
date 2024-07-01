@@ -18,10 +18,10 @@ import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import { FaRegArrowAltCircleRight } from "react-icons/fa";
 import Loader from "../Component/Common_Component/Loader";
 import parse from "html-react-parser";
-
+ 
 function FT() {
   const context = useFunctionContext();
-
+ 
   const compareAndSetFT = (sourceSentence, tmxSentence) => {
     // Convert to string and handle null or undefined cases
     const sourceString = String(sourceSentence || "")
@@ -32,11 +32,11 @@ function FT() {
       .toLowerCase()
       .replace(/[^\w\s]/g, "")
       .trim();
-
+ 
     // Split sentences into words
     const sourceWords = sourceString.split(/\s+/);
     const tmxWords = tmxString.split(/\s+/);
-
+ 
     // Count matching words
     let matchCount = 0;
     sourceWords.forEach((word) => {
@@ -44,13 +44,13 @@ function FT() {
         matchCount++;
       }
     });
-
+ 
     // Calculate match percentage
     const matchPercentage = (matchCount / sourceWords.length) * 100;
-
+ 
     return `${Math.round(matchPercentage)}%`;
   };
-
+ 
   const {
     isQCSelected,
     isLoading,
@@ -66,7 +66,7 @@ function FT() {
     handleSave,
     handleEditorChange,
   } = context;
-
+ 
   return (
     <div>
       {isLoading && (
@@ -157,10 +157,7 @@ function FT() {
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableBody>
                 {csvData.map((csvRow, index) => {
-                  const matchPercentage = compareAndSetFT(
-                    csvRow[0],
-                    tcxData[index]
-                  );
+                  const matchPercentage = compareAndSetFT(csvRow[0], tcxData[index]);
                   return (
                     <TableRow key={index}>
                       <TableCell
@@ -231,7 +228,7 @@ function FT() {
                           onClick={() => handleSave(index)}
                         />
                       </TableCell>
-
+ 
                       <TableCell
                         style={{
                           width: "20%",
@@ -270,5 +267,5 @@ function FT() {
     </div>
   );
 }
-
+ 
 export default FT;
