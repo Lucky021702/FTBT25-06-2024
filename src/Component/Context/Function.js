@@ -26,6 +26,19 @@ export const FunctionProvider = ({ children }) => {
   const [comments, setComments] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
+  useEffect(() => {
+    console.log("rowsPerPage",rowsPerPage);
+  }, [rowsPerPage]);
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(event.target.value);
@@ -40,15 +53,6 @@ export const FunctionProvider = ({ children }) => {
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = csvData.slice(startIndex, endIndex);
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-    }
-  }, [navigate]);
 
   const handleQCClick = () => {
     setIsQCSelected(true);
@@ -115,31 +119,6 @@ export const FunctionProvider = ({ children }) => {
     });
     setCSVData(parsedData);
     setIsLoading(false);
-  };
-
-  const compareAndSetFT = (sourceSentence, tmxSentence) => {
-    // Convert to string and handle null or undefined cases
-    const sourceString = String(sourceSentence || "")
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .trim();
-    const tmxString = String(tmxSentence || "")
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .trim();
-    // Split sentences into words
-    const sourceWords = sourceString.split(/\s+/);
-    const tmxWords = tmxString.split(/\s+/);
-    // Count matching words
-    let matchCount = 0;
-    sourceWords.forEach((word) => {
-      if (tmxWords.includes(word)) {
-        matchCount++;
-      }
-    });
-    // Calculate match percentage
-    const matchPercentage = (matchCount / sourceWords.length) * 100;
-    return `${Math.round(matchPercentage)}%`;
   };
 
   // let fileName = useSelector((state)=>state.savedData)
@@ -318,22 +297,30 @@ export const FunctionProvider = ({ children }) => {
   //     return "";
   //   }
   // };
-  //   const compareAndSetFT = (sourceSentence, tmxSentence) => {
-  //     // Check if either sourceSentence or tmxSentence is undefined or null
-  //     if (sourceSentence == null || tmxSentence == null) {
-  //         return "Invalid input";
-  //     }
-
-  //     const cleanAndNormalize = (sentence) => {
-  //         return String(sentence)
-  //             .toLowerCase()
-  //             .trim()
-  //             .replace(/[^\w\s]/g, "")
-  //             .replace(/\s+/g, " ");
-  //     };
-
-  //     const cleanSource = cleanAndNormalize(sourceSentence);
-  //     const cleanTmx = cleanAndNormalize(tmxSentence);
+  const compareAndSetFT = (sourceSentence, tmxSentence) => {
+    // Convert to string and handle null or undefined cases
+    const sourceString = String(sourceSentence || "")
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .trim();
+    const tmxString = String(tmxSentence || "")
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .trim();
+    // Split sentences into words
+    const sourceWords = sourceString.split(/\s+/);
+    const tmxWords = tmxString.split(/\s+/);
+    // Count matching words
+    let matchCount = 0;
+    sourceWords.forEach((word) => {
+      if (tmxWords.includes(word)) {
+        matchCount++;
+      }
+    });
+    // Calculate match percentage
+    const matchPercentage = (matchCount / sourceWords.length) * 100;
+    return `${Math.round(matchPercentage)}%`;
+  };
 
   //     if (cleanSource === cleanTmx) {
   //         return "100%";

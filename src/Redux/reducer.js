@@ -3,7 +3,6 @@ import { SET_FILENAME } from './actions';  // Correct import path to action type
 
 const initialState = {
     savedData: [],
-    editableData: []
 };
 
 const rootReducer = (state = initialState, action) => {
