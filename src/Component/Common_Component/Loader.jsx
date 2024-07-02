@@ -8,10 +8,6 @@ function Loading() {
         position: "fixed",
         top: "50%",
         left: "50%",
-        transform: "translate(-50%, -50%)",
-        padding: "20px",
-        backgroundColor: "rgba(255, 255, 255, 0.8)",
-        zIndex: "9999",
       }}
     >
        <CircularProgress disableShrink />

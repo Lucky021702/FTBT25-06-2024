@@ -18,11 +18,16 @@ import {
   AppBar,
   Toolbar,
   Card,
+  InputLabel,
+  Select,
+  MenuItem,
   IconButton as MUIButton,
 } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { MdDelete, MdOutlinePeople } from "react-icons/md";
 import { GoPlus } from "react-icons/go";
+import { FaArrowRight } from "react-icons/fa6";
+import { FaArrowLeft } from "react-icons/fa6";
 import axios from "axios";
 import CloseIcon from "@mui/icons-material/Close";
 import "./CSS/Component.css";
@@ -36,8 +41,8 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import AddIcon from "@mui/icons-material/Add";
+import { useFunctionContext } from "./Context/Function";
 const Project = () => {
   const [projectName, setProjectName] = useState([]);
   const [projects, setProjects] = useState(null);
@@ -64,8 +69,20 @@ const Project = () => {
   const [fileUpload, setFileUpload] = useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
   const [index, setIndex] = useState(null);
-  const [domain, setDomain] = useState([]);
   const [value, setValue] = useState(false);
+
+  const context = useFunctionContext();
+  const {
+    handleRowsPerPageChange,
+    handleNextPage,
+    handlePreviousPage,
+    paginatedData,
+    currentPage,
+    rowsPerPage,
+    endIndex,
+    startIndex,
+  } = context;
+
   let name = localStorage.getItem("name");
 
   const handleClickOpen = (index, project) => {
@@ -290,21 +307,6 @@ const Project = () => {
       console.error("Error fetching projects:", error);
     }
   };
-
-  const fetchDomain = async () => {
-    try {
-      const response = await axios.get(
-        "http://localhost:8000/api/projects/domain"
-      );
-      setDomain(response.data); // Assuming response.data contains the domain data array
-    } catch (error) {
-      console.error("Error fetching domains:", error);
-    }
-  };
-
-  useEffect(() => {
-    console.log("domain:", domain);
-  }, [domain]);
   const handleIconClick = (project) => {
     setIsDrawerOpenTasks(true);
     const projectData = {
@@ -484,10 +486,7 @@ const Project = () => {
           />
           <GoPlus
             style={{ fontSize: "2.5rem", color: "black" }}
-            onClick={() => {
-              toggleDrawer(true);
-              fetchDomain();
-            }}
+            onClick={toggleDrawer(true)}
             className="icon"
           />
         </Box>
@@ -496,7 +495,7 @@ const Project = () => {
         anchor="right"
         open={isDrawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{ style: { width: "32%" } }}
+        PaperProps={{ style: { width: "35%" } }}
       >
         <AppBar position="static">
           <Toolbar>
@@ -653,7 +652,7 @@ const Project = () => {
         anchor="right"
         open={isDrawerOpenTasks}
         onClose={toggleDrawerAssignTasks(false)}
-        PaperProps={{ style: { width: "44%" } }}
+        PaperProps={{ style: { width: "35%" } }}
       >
         <div style={{ overflowX: "auto" }}>
           <AppBar position="static">
@@ -1127,6 +1126,55 @@ const Project = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        <Typography
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: "1rem",
+            position: "fixed",
+            bottom: "0",
+            width: "100%",
+            backgroundColor: "white",
+            padding: "1rem",
+          }}
+        >
+          <Typography style={{ display: "flex", alignItems: "center" }}>
+            <InputLabel style={{ marginRight: "0.5rem" }}>
+              Rows per page:
+            </InputLabel>
+            <Select
+              value={rowsPerPage}
+              onChange={handleRowsPerPageChange}
+              label="Rows per page"
+            >
+              <MenuItem value={10}>10</MenuItem>
+              <MenuItem value={20}>20</MenuItem>
+              <MenuItem value={30}>30</MenuItem>
+            </Select>
+          </Typography>
+          <Typography
+            style={{
+              fontSize: "1.5rem",
+              cursor: "pointer",
+              marginLeft: "1rem",
+            }}
+          >
+            <FaArrowLeft
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="icon"
+              style={{
+                marginRight: "1rem",
+              }}
+            />
+            <FaArrowRight
+              onClick={handleNextPage}
+              disabled={endIndex >= projects.length}
+              className="icon"
+            />
+          </Typography>
+        </Typography>
       </div>
       <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
         <Alert

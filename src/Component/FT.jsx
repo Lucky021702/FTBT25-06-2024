@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./CSS/Component.css";
 import {
   Button,
@@ -9,48 +9,24 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Select,
+  MenuItem,
+  Typography,
+  InputLabel,
 } from "@material-ui/core";
 import { useFunctionContext } from "./Context/Function";
 import ClassicEditor from "ckeditor5-build-classic-extended";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
-import { FaRegArrowAltCircleRight } from "react-icons/fa";
 import Loader from "../Component/Common_Component/Loader";
 import parse from "html-react-parser";
- 
+import { FaArrowRight } from "react-icons/fa6";
+import { FaArrowLeft } from "react-icons/fa6";
+import { IoArrowRedoOutline } from "react-icons/io5";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
+
 function FT() {
   const context = useFunctionContext();
- 
-  const compareAndSetFT = (sourceSentence, tmxSentence) => {
-    // Convert to string and handle null or undefined cases
-    const sourceString = String(sourceSentence || "")
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .trim();
-    const tmxString = String(tmxSentence || "")
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .trim();
- 
-    // Split sentences into words
-    const sourceWords = sourceString.split(/\s+/);
-    const tmxWords = tmxString.split(/\s+/);
- 
-    // Count matching words
-    let matchCount = 0;
-    sourceWords.forEach((word) => {
-      if (tmxWords.includes(word)) {
-        matchCount++;
-      }
-    });
- 
-    // Calculate match percentage
-    const matchPercentage = (matchCount / sourceWords.length) * 100;
- 
-    return `${Math.round(matchPercentage)}%`;
-  };
- 
   const {
     isQCSelected,
     isLoading,
@@ -62,18 +38,23 @@ function FT() {
     savedData,
     hideTmxColumn,
     setEditableData,
-    handlehide,
+    handleHide,
     handleSave,
     handleEditorChange,
+    compareAndSetFT,
+    handleRowsPerPageChange,
+    handleNextPage,
+    handlePreviousPage,
+    paginatedData,
+    currentPage,
+    rowsPerPage,
+    endIndex,
+    startIndex,
   } = context;
- 
+
   return (
     <div>
-      {isLoading && (
-        <div className="loader-container">
-          <Loader />
-        </div>
-      )}
+      {isLoading && <Loader />}
       {isQCSelected ? (
         <div>
           <TableContainer component={Paper}>
@@ -146,7 +127,7 @@ function FT() {
             <b>Source(English)</b>
             <span>
               <b>TMX</b>
-              <Button onClick={() => handlehide()}>
+              <Button onClick={() => handleHide()}>
                 {hideTmxColumn ? <VisibilityOffIcon /> : <RemoveRedEyeIcon />}
               </Button>
             </span>
@@ -156,8 +137,11 @@ function FT() {
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableBody>
-                {csvData.map((csvRow, index) => {
-                  const matchPercentage = compareAndSetFT(csvRow[0], tcxData[index]);
+                {paginatedData.map((csvRow, index) => {
+                  const matchPercentage = compareAndSetFT(
+                    csvRow[0],
+                    tcxData[startIndex + index]
+                  );
                   return (
                     <TableRow key={index}>
                       <TableCell
@@ -168,7 +152,7 @@ function FT() {
                       >
                         <div style={{ display: "flex" }}>
                           <div>
-                            <b>({index + 1})</b>
+                            <b>({startIndex + index + 1})</b>
                           </div>
                           <div style={{ marginLeft: "0.5rem" }}>
                             {parse(csvRow[0])}
@@ -186,7 +170,7 @@ function FT() {
                           visibility: hideTmxColumn ? "hidden" : "visible",
                         }}
                       >
-                        {tcxData[index]}
+                        {tcxData[startIndex + index]}
                       </TableCell>
                       <TableCell
                         style={{
@@ -209,26 +193,27 @@ function FT() {
                               ? matchPercentage
                               : ""
                           }
-                          value={editableData[index]}
+                          value={editableData[startIndex + index]}
                           onChange={(e) => {
                             const newEditableData = [...editableData];
-                            newEditableData[index] = e.target.value;
+                            newEditableData[startIndex + index] =
+                              e.target.value;
                             setEditableData(newEditableData);
                           }}
                           disabled={matchPercentage === "100%"}
                         />
-                        <FaRegArrowAltCircleRight
+                        <IoArrowRedoOutline
                           style={{
                             fontSize: "2.5rem",
-                            color: "green",
+                            color: "black",
                             cursor: "pointer",
                             marginBottom: "2.5rem",
                             marginLeft: "0.5rem",
                           }}
-                          onClick={() => handleSave(index)}
+                          onClick={() => handleSave(startIndex + index)}
                         />
                       </TableCell>
- 
+
                       <TableCell
                         style={{
                           width: "20%",
@@ -239,11 +224,15 @@ function FT() {
                           editor={ClassicEditor}
                           data={
                             matchPercentage === "100%"
-                              ? ftData[index]
-                              : savedData[index]
+                              ? ftData[startIndex + index]
+                              : savedData[startIndex + index]
                           }
                           onChange={(event, editor) =>
-                            handleEditorChange(event, editor, index)
+                            handleEditorChange(
+                              event,
+                              editor,
+                              startIndex + index
+                            )
                           }
                           config={{
                             toolbar: [
@@ -262,10 +251,59 @@ function FT() {
               </TableBody>
             </Table>
           </TableContainer>
+          <Typography
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: "1rem",
+              position: "fixed",
+              bottom: "0",
+              width: "100%",
+              backgroundColor: "white",
+              padding: "1rem 0",
+            }}
+          >
+            <Typography style={{ display: "flex", alignItems: "center" }}>
+              <InputLabel style={{ marginRight: "0.5rem" }}>
+                Rows per page:
+              </InputLabel>
+              <Select
+                value={rowsPerPage}
+                onChange={handleRowsPerPageChange}
+                label="Rows per page"
+              >
+                <MenuItem value={10}>10</MenuItem>
+                <MenuItem value={20}>20</MenuItem>
+                <MenuItem value={30}>30</MenuItem>
+              </Select>
+            </Typography>
+            <Typography
+              style={{
+                fontSize: "1.5rem",
+                cursor: "pointer",
+                marginLeft: "1rem",
+              }}
+            >
+              <FaArrowLeft
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+                className="icon"
+                style={{
+                  marginRight: "1rem",
+                }}
+              />
+              <FaArrowRight
+                onClick={handleNextPage}
+                disabled={endIndex >= csvData.length}
+                className="icon"
+              />
+            </Typography>
+          </Typography>
         </div>
       )}
     </div>
   );
 }
- 
+
 export default FT;

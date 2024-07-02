@@ -2,10 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import * as ExcelJS from "exceljs";
-import * as docxPreview from "docx-preview";
-import parse from "html-react-parser";
 import mammoth from "mammoth";
-// import mammoth from "../../../../backend/uploads";
+// import mammoth from "../../../../Backend/uploads";
 import { useSelector } from "react-redux";
 import axios from "axios";
 
@@ -26,11 +24,25 @@ export const FunctionProvider = ({ children }) => {
   const [englishSource, setEnglishSource] = useState([]);
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  
+  const handleRowsPerPageChange = (event) => {
+    setRowsPerPage(event.target.value);
+    setCurrentPage(1);
+  };
+  const handleNextPage = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+  };
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = csvData.slice(startIndex, endIndex);
 
   const navigate = useNavigate();
- 
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -104,7 +116,32 @@ export const FunctionProvider = ({ children }) => {
     setCSVData(parsedData);
     setIsLoading(false);
   };
- 
+
+  const compareAndSetFT = (sourceSentence, tmxSentence) => {
+    // Convert to string and handle null or undefined cases
+    const sourceString = String(sourceSentence || "")
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .trim();
+    const tmxString = String(tmxSentence || "")
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .trim();
+    // Split sentences into words
+    const sourceWords = sourceString.split(/\s+/);
+    const tmxWords = tmxString.split(/\s+/);
+    // Count matching words
+    let matchCount = 0;
+    sourceWords.forEach((word) => {
+      if (tmxWords.includes(word)) {
+        matchCount++;
+      }
+    });
+    // Calculate match percentage
+    const matchPercentage = (matchCount / sourceWords.length) * 100;
+    return `${Math.round(matchPercentage)}%`;
+  };
+
   // let fileName = useSelector((state)=>state.savedData)
 
   // const handleFileUpload = async () => {
@@ -177,6 +214,7 @@ export const FunctionProvider = ({ children }) => {
   //     setIsLoading(false);
   //   }
   // };
+
   const processDOCX = async (arrayBuffer) => {
     try {
       const { value } = await mammoth.convertToHtml({ arrayBuffer });
@@ -270,45 +308,44 @@ export const FunctionProvider = ({ children }) => {
     };
     reader.readAsText(file, "ISO-8859-1");
   };
-  const compareAndSetFT = (sourceSentence, tmxSentence) => {
-    const cleanSource = String(sourceSentence).trim().replace(/[^\w]/g, "");
-    const cleanTmx = String(tmxSentence).trim().replace(/[^\w]/g, "");
-    console.log(tmxSentence);
-    if (cleanSource === cleanTmx) {
-      return "Right";
-    } else {
-      return "";
-    }
-  };
-//   const compareAndSetFT = (sourceSentence, tmxSentence) => {
-//     // Check if either sourceSentence or tmxSentence is undefined or null
-//     if (sourceSentence == null || tmxSentence == null) {
-//         return "Invalid input";
-//     }
+  // const compareAndSetFT = (sourceSentence, tmxSentence) => {
+  //   const cleanSource = String(sourceSentence).trim().replace(/[^\w]/g, "");
+  //   const cleanTmx = String(tmxSentence).trim().replace(/[^\w]/g, "");
+  //   console.log(tmxSentence);
+  //   if (cleanSource === cleanTmx) {
+  //     return "Right";
+  //   } else {
+  //     return "";
+  //   }
+  // };
+  //   const compareAndSetFT = (sourceSentence, tmxSentence) => {
+  //     // Check if either sourceSentence or tmxSentence is undefined or null
+  //     if (sourceSentence == null || tmxSentence == null) {
+  //         return "Invalid input";
+  //     }
 
-//     const cleanAndNormalize = (sentence) => {
-//         return String(sentence)
-//             .toLowerCase()
-//             .trim()
-//             .replace(/[^\w\s]/g, "")
-//             .replace(/\s+/g, " ");
-//     };
+  //     const cleanAndNormalize = (sentence) => {
+  //         return String(sentence)
+  //             .toLowerCase()
+  //             .trim()
+  //             .replace(/[^\w\s]/g, "")
+  //             .replace(/\s+/g, " ");
+  //     };
 
-//     const cleanSource = cleanAndNormalize(sourceSentence);
-//     const cleanTmx = cleanAndNormalize(tmxSentence);
+  //     const cleanSource = cleanAndNormalize(sourceSentence);
+  //     const cleanTmx = cleanAndNormalize(tmxSentence);
 
-//     if (cleanSource === cleanTmx) {
-//         return "100%";
-//     } else {
-//         const sourceWords = cleanSource.split(" ");
-//         const tmxWords = cleanTmx.split(" ");
-//         const totalWords = Math.max(sourceWords.length, tmxWords.length);
-//         const matchingWords = sourceWords.filter(word => tmxWords.includes(word)).length;
-//         const similarityPercentage = (matchingWords / totalWords) * 100;
-//         return `${similarityPercentage.toFixed(2)}%`;
-//     }
-// };
-
+  //     if (cleanSource === cleanTmx) {
+  //         return "100%";
+  //     } else {
+  //         const sourceWords = cleanSource.split(" ");
+  //         const tmxWords = cleanTmx.split(" ");
+  //         const totalWords = Math.max(sourceWords.length, tmxWords.length);
+  //         const matchingWords = sourceWords.filter(word => tmxWords.includes(word)).length;
+  //         const similarityPercentage = (matchingWords / totalWords) * 100;
+  //         return `${similarityPercentage.toFixed(2)}%`;
+  //     }
+  // };
 
   const handleSave = (index) => {
     const newSavedData = [...savedData];
@@ -479,10 +516,9 @@ export const FunctionProvider = ({ children }) => {
         } else {
           newData[index] = editableData[index];
         }
-        console.log("tcxData[index]",tcxData[index]);
+        // console.log("tcxData[index]", tcxData[index]);
       });
       setSavedData(newData);
-     
     }
   }, [ftData]);
   const handleHide = () => {
@@ -538,7 +574,14 @@ export const FunctionProvider = ({ children }) => {
     handleFileUploadQCSource2,
     handleCommentChange,
     handleDownloadQC,
-   
+    handleRowsPerPageChange,
+    handleNextPage,
+    handlePreviousPage,
+    paginatedData,
+    currentPage,
+    rowsPerPage,
+    endIndex,
+    startIndex,
   };
 
   return (
