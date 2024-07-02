@@ -23,6 +23,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import "./CSS/Component.css";
 import { useSelector, useDispatch } from 'react-redux';
 import { setFileName } from '../Redux/actions';
+import CachedIcon from '@mui/icons-material/Cached';
 import {
   Dialog,
   DialogTitle,
@@ -34,7 +35,7 @@ import {
   Grid,
   TextField,
 } from "@mui/material";
-
+import Tooltip from '@mui/material/Tooltip';
 import Chat from "./Chat";
 import axios from "axios";
 
@@ -97,7 +98,9 @@ const Navbar = () => {
     setAssignedStatus("Accept")
     handleFileUpload()
   };
-
+const handleUpload   = () =>{
+  handleFileUpload()
+}
   const UserName = localStorage.getItem("name");
   const department = localStorage.getItem("department");
   const handleProjectdata = async () => {
@@ -119,12 +122,7 @@ const Navbar = () => {
     handleProjectdata();
   }, []);
   let fileName = useSelector((state)=>state)
- console.log("fileNamefileName",fileName);
   useEffect(() => {
-    console.log("projectttttt", project);
-  }, [project]);
-  useEffect(() => {
-    console.log("useEffect triggered with project:", project);
 
     if (project && project.tasks && project.tasks.length > 0) {
       console.log("Project and tasks are valid");
@@ -421,6 +419,13 @@ const Navbar = () => {
                               sx={{ color: "#367af7" }}
                               onClick={handleDownload}
                             />
+                           {
+  project?.tasks[0].assignedStatus == "Accept" && (
+    <Tooltip title="Reload source file" arrow>
+      <CachedIcon onClick={handleUpload} className="icon" sx={{ color: "#367AF7" }} />
+    </Tooltip>
+  )
+}
                             <TextField
                               value={fileName?.savedData}
                               sx={{ width: "350px " }}
