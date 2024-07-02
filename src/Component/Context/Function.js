@@ -38,9 +38,7 @@ export const FunctionProvider = ({ children }) => {
       navigate("/login");
     }
   }, [navigate]);
-  useEffect(() => {
-    console.log("rowsPerPage",rowsPerPage);
-  }, [rowsPerPage]);
+
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(event.target.value);
@@ -48,10 +46,13 @@ export const FunctionProvider = ({ children }) => {
   };
   const handleNextPage = () => {
     setCurrentPage((prevPage) => prevPage + 1);
+    console.log(currentPage);
   };
   const handlePreviousPage = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
+  const totalLines = csvData.length;
+  console.log("totalLines",totalLines);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = csvData.slice(startIndex, endIndex);
@@ -143,9 +144,9 @@ export const FunctionProvider = ({ children }) => {
   //   setIsLoading(false);
   // };
 
-  let fileName = useSelector((state)=>state.savedData)
+  // let fileName = useSelector((state)=>state.savedData)
 
-  const handleFileUpload = async () => {
+  const handleFileUpload = async (fileName) => {
     if (!fileName) {
       console.error("File name is not provided");
       return;
@@ -580,6 +581,7 @@ export const FunctionProvider = ({ children }) => {
     rowsPerPage,
     endIndex,
     startIndex,
+    totalLines
   };
 
   return (

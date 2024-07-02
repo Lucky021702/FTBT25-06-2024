@@ -66,6 +66,7 @@ const Project = () => {
   const [index, setIndex] = useState(null);
   const [domain, setDomain] = useState([]);
   const [value, setValue] = useState(false);
+  const [selectedDomain, setSelectedDomain] = useState("");
   let name = localStorage.getItem("name");
 
   const handleClickOpen = (index, project) => {
@@ -211,8 +212,8 @@ const Project = () => {
     setSourceFileLength(updatedProjects); // Update file length state if needed
   };
   useEffect(() => {
-    console.log("assign", assign);
-  }, [assign]);
+    console.log("selectedDomain", selectedDomain);
+  }, [selectedDomain]);
   const AssignTasksApi = async () => {
     try {
       const tasksToUpdate = [
@@ -259,6 +260,7 @@ const Project = () => {
   };
   useEffect(() => {
     fetchProjects();
+    fetchDomain();
     fetchLanguage();
   }, []);
 
@@ -294,9 +296,10 @@ const Project = () => {
   const fetchDomain = async () => {
     try {
       const response = await axios.get("http://localhost:8000/api/projects/domain");
-      setDomain(response.data); // Assuming response.data contains the domain data array
-    } catch (error) {
+      setDomain(response.data); 
       console.error("Error fetching domains:", error);
+    }catch(err){
+
     }
   };
 
@@ -372,6 +375,7 @@ const Project = () => {
           sourceLanguage,
           targetLanguage,
           assignedBy: name,
+          domain: selectedDomain
         }
       );
       if (response.status == 200) {
@@ -482,10 +486,9 @@ const Project = () => {
           />
           <GoPlus
             style={{ fontSize: "2.5rem", color: "black" }}
-            onClick={() => {
-              toggleDrawer(true);
-              fetchDomain();
-            }}
+            onClick={
+              toggleDrawer(true)
+             }
             
             className="icon"
           />
@@ -527,6 +530,32 @@ const Project = () => {
               sx={{ width: "315px" }}
             />
           </span>
+        </div>
+        <div
+          style={{
+            margin: "70px 22px 0px 20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+            Domain Name<span style={{ color: "red" }}>*</span>
+          </span>
+          <select
+              value={selectedDomain}
+              onChange={(e) => setSelectedDomain(e.target.value)}
+              style={{ width: "200px" }}
+            >
+              <option value="" disabled>
+                Domain
+              </option>
+              {domain?.domains?.map((domain) => (
+                <option key={domain._id} value={domain.domainName}>
+                  {domain.domainName}
+                </option>
+              ))}
+            </select>
         </div>
         <div
           style={{

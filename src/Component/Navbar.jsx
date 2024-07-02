@@ -85,7 +85,7 @@ const Navbar = () => {
   const [assignedStatus, setAssignedStatus] = useState("");
   const [responseMessage, setResponseMessage] = useState("");
   const [project, setProject] = useState([]);
-  // const [fileName, setFileName] = useState("");
+  const [cardData, setCardData] = useState(null);
 
   const handleClickOpen = () => {
     setDialogOpen(true);
@@ -94,12 +94,12 @@ const Navbar = () => {
   const handleClose = () => {
     setDialogOpen(false);
   };
-  const handleCloseNotification = () => {
+  const handleCloseNotification = (fileName) => {
     setAssignedStatus("Accept")
-    handleFileUpload()
+    handleFileUpload(fileName)
   };
-const handleUpload   = () =>{
-  handleFileUpload()
+const handleUpload   = (fileName) =>{
+  handleFileUpload(fileName)
 }
   const UserName = localStorage.getItem("name");
   const department = localStorage.getItem("department");
@@ -122,95 +122,106 @@ const handleUpload   = () =>{
     handleProjectdata();
   }, []);
   let fileName = useSelector((state)=>state)
+
   useEffect(() => {
-
     if (project && project.tasks && project.tasks.length > 0) {
-      console.log("Project and tasks are valid");
-
-      const assignTargetLanguage = project.tasks[0].assignTargetLanguage;
-      console.log("assignTargetLanguage", assignTargetLanguage);
-
+      const allLanguages = project.tasks.flatMap(task => task.assignTargetLanguage);
+      console.log("All languages to match:", allLanguages);
+  
+      const filenames = [];
+  
       project.sourceUpload.forEach((item, index) => {
-        console.log(
-          `Processing item ${index + 1}/${project.sourceUpload.length}: ${item}`
-        );
-
+        console.log(`Processing item ${index + 1}/${project.sourceUpload.length}: ${item}`);
+  
         // Extract filename without extension
         const filename = item.split(".")[0];
         console.log("Extracted filename (without extension):", filename);
-
+  
         // Extract language name from filename
         const parts = filename.split("-");
         console.log("Filename parts after split by '-':", parts);
-
+  
         if (parts.length > 1) {
           const languagePart = parts[1];
           const language = languagePart.split("_")[0]; // Extract language part
           console.log("Extracted language:", language);
-
-          // Match language with assignTargetLanguage
-          if (language && assignTargetLanguage.includes(language)) {
-            console.log(
-              `Matched language '${language}' with filename '${filename}'`
-            );
-            dispatch(setFileName(item))
-            // Do something with language or filename here
+  
+          // Store filename if language matches any of the assignTargetLanguage
+          if (allLanguages.includes(language)) {
+            console.log(`Matched language '${language}' with filename '${filename}'`);
+            filenames.push(item);
+            // Dispatch action or handle filename here
           } else {
-            console.log(
-              `No matching language found for filename '${filename}'`
-            );
+            console.log(`No matching language found for filename '${filename}'`);
           }
         } else {
           console.log("Filename does not contain a language part:", filename);
         }
       });
+  
+      console.log("Filenames:", filenames);
+  dispatch(setFileName(filenames))
+      // You can dispatch or store filenames in state here
     } else {
       console.log("Project or tasks are invalid or empty");
       console.log("project:", project);
       console.log("project.tasks:", project ? project.tasks : undefined);
-      console.log(
-        "project.tasks.length:",
-        project && project.tasks ? project.tasks.length : undefined
-      );
+      console.log("project.tasks.length:", project && project.tasks ? project.tasks.length : undefined);
     }
-  }, [project]);
-
+  }, [project, dispatch]);
+  
   // useEffect(() => {
-  //   if (
-  //     project &&
-  //     project?.length > 0 &&
-  //     project?.tasks &&
-  //     project?.tasks.length > 0
-  //   ) {
-  //     console.log("inside");
-  //     const assignTargetLanguage = project?.tasks[0].assignTargetLanguage;
-  //     console.log("assignTargetLanguage",assignTargetLanguage);
-  //     project.sourceUpload.forEach((item) => {
+
+  //   if (project && project.tasks && project.tasks.length > 0) {
+   
+
+  //     const assignTargetLanguage = project.tasks[0].assignTargetLanguage;
+  //     console.log("assignTargetLanguage", assignTargetLanguage);
+
+  //     project.sourceUpload.forEach((item, index) => {
+  //       console.log(
+  //         `Processing item ${index + 1}/${project.sourceUpload.length}: ${item}`
+  //       );
+
   //       // Extract filename without extension
   //       const filename = item.split(".")[0];
+  //       console.log("Extracted filename (without extension):", filename);
 
   //       // Extract language name from filename
   //       const parts = filename.split("-");
+  //       console.log("Filename parts after split by '-':", parts);
+
   //       if (parts.length > 1) {
   //         const languagePart = parts[1];
   //         const language = languagePart.split("_")[0]; // Extract language part
-  //         console.log("language", language);
+  //         console.log("Extracted language:", language);
+
   //         // Match language with assignTargetLanguage
   //         if (language && assignTargetLanguage.includes(language)) {
   //           console.log(
   //             `Matched language '${language}' with filename '${filename}'`
   //           );
-  //           setFileName(item);
+  //           dispatch(setFileName(item))
   //           // Do something with language or filename here
   //         } else {
   //           console.log(
   //             `No matching language found for filename '${filename}'`
   //           );
   //         }
+  //       } else {
+  //         console.log("Filename does not contain a language part:", filename);
   //       }
   //     });
+  //   } else {
+  //     console.log("Project or tasks are invalid or empty");
+  //     console.log("project:", project);
+  //     console.log("project.tasks:", project ? project.tasks : undefined);
+  //     console.log(
+  //       "project.tasks.length:",
+  //       project && project.tasks ? project.tasks.length : undefined
+  //     );
   //   }
-  // }, [project]);
+  // }, [project,dispatch]);
 
   useEffect(() => {
     if (dialogOpen) {
@@ -228,7 +239,7 @@ const handleUpload   = () =>{
       const response = await axios.post(
         "http://localhost:8000/api/updateAssignStatus",
         {
-          name,
+          taskId : cardData?._id,
           assignedStatus: assignedStatus,
         }
       );
@@ -266,8 +277,8 @@ const handleUpload   = () =>{
     setIsChatOpen(false);
   };
   useEffect(() => {
-    console.log("project====>", project);
-  }, [project]);
+    console.log("fileName", fileName.savedData.map((name)=>name));
+  }, [fileName]);
 
   // UseEffect to set isLoggedIn, isFT, and isBT based on token and department
   useEffect(() => {
@@ -291,14 +302,17 @@ const handleUpload   = () =>{
       setIsPM(false);
     }
   }, [location.pathname]);
+  const handleCardData = (data) =>{
+  setCardData(data)
+  }
 
-  const handleDownload = () => {
+  const handleDownload = (fileName) => {
     axios({
       url: `http://localhost:8000/api/download`, // Adjust endpoint as needed
       method: "POST", // Use POST if you need to send data (including filename)
       responseType: "blob", // Response type should be blob for file download
       data: {
-        fileName: fileName, // Wrap filename in bold markers
+        fileName: fileName,
       },
     })
       .then((response) => {
@@ -317,8 +331,7 @@ const handleUpload   = () =>{
         // Handle error, show user feedback, etc.
       });
   };
-
-  // Function to render file upload buttons based on user's department
+  
   const renderFileUpload = () => {
     if (isLoggedIn) {
       return (
@@ -355,123 +368,138 @@ const handleUpload   = () =>{
                       <CloseIcon />
                     </IconButton>
                   </DialogTitle>
-                  <DialogContent>
+                  <DialogContent >
                     {project.length == 0 ? (
                       "No Notification"
                     ) : (
-                      <Card>
-                        <CardContent>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <span>Name</span>
-                            <TextField
-                              disabled
-                              sx={{ width: "350px " }}
-                              value={name}
-                              margin='normal'
-                            />
-                          </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <span>Target Langauge</span>
-                            <TextField
-                              value={project?.tasks[0]?.assignTargetLanguage}
-                              sx={{ width: "350px " }}
-                              margin='normal'
-                              disabled
-                            />
-                          </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <span>Assign Date</span>
-                            <TextField
-                              value={project?.tasks[0]?.date}
-                              margin='normal'
-                              sx={{ width: "350px " }}
-                              disabled
-                            />
-                          </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <span>Source File Name</span>
-                            <DownloadIcon
-                              className='icon'
-                              sx={{ color: "#367af7" }}
-                              onClick={handleDownload}
-                            />
-                           {
-  project?.tasks[0].assignedStatus == "Accept" && (
-    <Tooltip title="Reload source file" arrow>
-      <CachedIcon onClick={handleUpload} className="icon" sx={{ color: "#367AF7" }} />
-    </Tooltip>
-  )
-}
-                            <TextField
-                              value={fileName?.savedData}
-                              sx={{ width: "350px " }}
-                              margin='normal'
-                              disabled
-                            />
-                          </div>
-                          {project?.tasks[0].assignedStatus ? (
+                      <div >
+                      {project?.tasks.map((task, index) => (
+                        <Card key={index} 
+                        style={{
+                          maxWidth: 535,
+                          minWidth: 535,
+                          marginTop: "20px",
+                          border: "2px solid #F3F4F6", // Blue border for highlighting
+                          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Adding shadow for depth
+                          backgroundColor: "#f3f4f6", // Light background color for highlighting
+                        }}>
+                          <CardContent>
                             <div
                               style={{
                                 display: "flex",
-                                justifyContent: "space-around",
+                                justifyContent: "space-between",
                                 alignItems: "center",
-                                fontSize: "1.2rem",
-                                color: "red",
                               }}
                             >
-                              {project?.tasks[0].assignedStatus}
+                              <span>Name</span>
+                              <TextField
+                                disabled
+                                sx={{ width: "350px " }}
+                                value={name}
+                                margin='normal'
+                              />
                             </div>
-                          ) : (
                             <div
                               style={{
                                 display: "flex",
-                                justifyContent: "space-around",
+                                justifyContent: "space-between",
                                 alignItems: "center",
                               }}
                             >
-                              <Button
-                                onClick={() => setAssignedStatus("Reject")}
-                                variant='contained'
-                                color='secondary'
-                              >
-                                Reject
-                              </Button>
-
-                              <Button
-                                onClick={() => handleCloseNotification()}
-                                variant='contained'
-                                color='primary'
-                              >
-                                Accept
-                              </Button>
+                              <span>Target Language</span>
+                              <TextField
+                                value={task?.assignTargetLanguage}
+                                sx={{ width: "350px " }}
+                                margin='normal'
+                                disabled
+                              />
                             </div>
-                          )}
-                        </CardContent>
-                      </Card>
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <span>Assign Date</span>
+                              <TextField
+                                value={task?.date}
+                                margin='normal'
+                                sx={{ width: "350px " }}
+                                disabled
+                              />
+                            </div>
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                              }}
+                            >
+                              <span>Source File Name</span>
+                              <DownloadIcon
+            className='icon'
+            sx={{ color: "#367af7" }}
+            onClick={() => handleDownload(fileName?.savedData[index])}
+          />
+                              {task.assignedStatus == "Accept" && (
+                                <Tooltip title="Reload source file" arrow>
+                                  <CachedIcon onClick={()=> handleUpload(fileName?.savedData[index])} className="icon" sx={{ color: "#367AF7" }} />
+                                </Tooltip>
+                              )}
+                              <TextField
+                                value={fileName?.savedData[index]}
+                                sx={{ width: "350px " }}
+                                margin='normal'
+                                disabled
+                              />
+                            </div>
+                            {task.assignedStatus ? (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-around",
+                                  alignItems: "center",
+                                  fontSize: "1.2rem",
+                                  color: "red",
+                                }}
+                              >
+                                {task.assignedStatus}
+                              </div>
+                            ) : (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "space-around",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <Button
+                                  onClick={() => {setAssignedStatus("Reject")
+                                    handleCardData(task)}
+                                  }
+                                  variant='contained'
+                                  color='secondary'
+                                >
+                                  Reject
+                                </Button>
+                
+                                <Button
+                                  onClick={()=>{
+                                    handleCardData(task)
+                                    handleCloseNotification(fileName?.savedData[index])
+                                  }}
+                                  variant='contained'
+                                  color='primary'
+                                >
+                                  Accept
+                                </Button>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                      </div>
                     )}
                   </DialogContent>
                 </Dialog>
@@ -501,13 +529,6 @@ const handleUpload   = () =>{
                   QC
                 </Button>
               </label>
-              {/* <input
-                type='file'
-                accept='.csv,.docx,.doc'
-                onChange={handleFileUpload}
-                style={{ display: "none" }}
-                id='fileInput'
-              /> */}
               <label htmlFor='fileInput'>
                 <Button
                   className={classes.fileUploadButton}
@@ -650,7 +671,7 @@ const handleUpload   = () =>{
                     {project.length == 0 ? (
                       "No Notification"
                     ) : (
-                      <Card>
+                      <Card >
                         <CardContent>
                           <div
                             style={{
@@ -746,7 +767,8 @@ const handleUpload   = () =>{
                               </Button>
 
                               <Button
-                                onClick={() => setAssignedStatus("Accept")}
+                                onClick={() => {setAssignedStatus("Accept") 
+                                  handleCloseNotification()}}
                                 variant='contained'
                                 color='primary'
                               >

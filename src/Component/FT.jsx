@@ -50,6 +50,7 @@ function FT() {
     rowsPerPage,
     endIndex,
     startIndex,
+    totalLines
   } = context;
 
   return (
@@ -147,214 +148,288 @@ function FT() {
                   tcxData[startIndex + index]
                 );
                 return (
-                  <TableRow key={index}>
-                    <TableCell
-                      style={{
-                        fontSize: "1rem",
-                        width: "25%",
-                      }}
-                    >
-                      <div style={{ display: "flex" }}>
-                        <div>
-                          <b>({startIndex + index + 1})</b>
-                        </div>
-                        <div style={{ marginLeft: "0.5rem" }}>
-                          {parse(csvRow[0])}
-                        </div>
-                      </div>
-                    </TableCell>
-                    {csvRow.slice(1).map((cell, cellIndex) => (
-                      <TableCell key={cellIndex}>{parse(cell)}</TableCell>
-                    ))}
-                    <TableCell
-                      style={{
-                        fontSize: "1rem",
-                        width: "25%",
-                        paddingTop: "1rem",
-                        visibility: hideTmxColumn ? "hidden" : "visible",
-                      }}
-                    >
-                      {tcxData[startIndex + index]}
-                    </TableCell>
-                    <TableCell
-                      style={{
-                        width: "20%",
-                        paddingTop: "3rem",
-                      }}
-                    >
-                      <textarea
-                        variant="outlined"
-                        style={{
-                          width: "60%",
-                          padding: "1.3rem",
-                          fontSize: "1rem",
-                          resize: "none",
-                        }}
-                        multiline
-                        rows={4}
-                        placeholder={
-                          csvData.length > 0 && tcxData.length > 0
-                            ? matchPercentage
-                            : ""
-                        }
-                        value={editableData[startIndex + index]}
-                        onChange={(e) => {
-                          const newEditableData = [...editableData];
-                          newEditableData[startIndex + index] =
-                            e.target.value;
-                          setEditableData(newEditableData);
-                        }}
-                        disabled={matchPercentage === "100%"}
-                      />
-                      <IoArrowRedoOutline
-                        style={{
-                          fontSize: "2.5rem",
-                          color: "black",
-                          cursor: "pointer",
-                          marginBottom: "2.5rem",
-                          marginLeft: "0.5rem",
-                        }}
-                        onClick={() => handleSave(startIndex + index)}
-                      />
-                    </TableCell>
+                  // <TableRow key={index}>
+                  //   <TableCell
+                  //     style={{
+                  //       fontSize: "1rem",
+                  //       width: "25%",
+                  //     }}
+                  //   >
+                  //     <div style={{ display: "flex" }}>
+                  //       <div>
+                  //         <b>({startIndex + index + 1})</b>
+                  //       </div>
+                  //       <div style={{ marginLeft: "0.5rem" }}>
+                  //         {parse(csvRow[0])}
+                  //       </div>
+                  //     </div>
+                  //   </TableCell>
+                  //   {csvRow.slice(1).map((cell, cellIndex) => (
+                  //     <TableCell key={cellIndex}>{parse(cell)}</TableCell>
+                  //   ))}
+                  //   <TableCell
+                  //     style={{
+                  //       fontSize: "1rem",
+                  //       width: "25%",
+                  //       paddingTop: "1rem",
+                  //       visibility: hideTmxColumn ? "hidden" : "visible",
+                  //     }}
+                  //   >
+                  //     {tcxData[startIndex + index]}
+                  //   </TableCell>
+                  //   <TableCell
+                  //     style={{
+                  //       width: "20%",
+                  //       paddingTop: "3rem",
+                  //     }}
+                  //   >
+                  //     <textarea
+                  //       variant="outlined"
+                  //       style={{
+                  //         width: "60%",
+                  //         padding: "1.3rem",
+                  //         fontSize: "1rem",
+                  //         resize: "none",
+                  //       }}
+                  //       multiline
+                  //       rows={4}
+                  //       placeholder={
+                  //         csvData.length > 0 && tcxData.length > 0
+                  //           ? matchPercentage
+                  //           : ""
+                  //       }
+                  //       value={editableData[startIndex + index]}
+                  //       onChange={(e) => {
+                  //         const newEditableData = [...editableData];
+                  //         newEditableData[startIndex + index] =
+                  //           e.target.value;
+                  //         setEditableData(newEditableData);
+                  //       }}
+                  //       disabled={matchPercentage === "100%"}
+                  //     />
+                  //     <IoArrowRedoOutline
+                  //       style={{
+                  //         fontSize: "2.5rem",
+                  //         color: "black",
+                  //         cursor: "pointer",
+                  //         marginBottom: "2.5rem",
+                  //         marginLeft: "0.5rem",
+                  //       }}
+                  //       onClick={() => handleSave(startIndex + index)}
+                  //     />
+                  //   </TableCell>
 
-                    <TableCell
-                      style={{
-                        width: "20%",
-                        fontSize: "1rem",
-                      }}
-                    >
-                      <CKEditor
-                        editor={ClassicEditor}
-                        data={
-                          matchPercentage === "100%"
-                            ? ftData[startIndex + index]
-                            : savedData[startIndex + index]
-                        }
-                        onChange={(event, editor) =>
-                          handleEditorChange(
-                            event,
-                            editor,
-                            startIndex + index
-                          )
-                        }
-                        config={{
-                          toolbar: [
-                            "bold",
-                            "italic",
-                            "subscript",
-                            "superscript",
-                          ],
+                  //   <TableCell
+                  //     style={{
+                  //       width: "20%",
+                  //       fontSize: "1rem",
+                  //     }}
+                  //   >
+                  //     <CKEditor
+                  //       editor={ClassicEditor}
+                  //       data={
+                  //         matchPercentage === "100%"
+                  //           ? ftData[startIndex + index]
+                  //           : savedData[startIndex + index]
+                  //       }
+                  //       onChange={(event, editor) =>
+                  //         handleEditorChange(
+                  //           event,
+                  //           editor,
+                  //           startIndex + index
+                  //         )
+                  //       }
+                  //       config={{
+                  //         toolbar: [
+                  //           "bold",
+                  //           "italic",
+                  //           "subscript",
+                  //           "superscript",
+                  //         ],
+                  //       }}
+                  //       className="custom-editor"
+                  //     />
+                  //   </TableCell>
+                  // </TableRow>
+                      <>
+                      <TableRow key={index}>
+                        <TableCell
+                          style={{
+                            fontSize: "1rem",
+                            width: "25%",
+                          }}
+                        >
+                          <div style={{ display: "flex" }}>
+                            <div>
+                              <b>({startIndex + index + 1})</b>
+                            </div>
+                            <div style={{ marginLeft: "0.5rem" }}>
+                              {parse(csvRow[0])}
+                            </div>
+                          </div>
+                        </TableCell>
+                        {csvRow.slice(1).map((cell, cellIndex) => (
+                          <TableCell key={cellIndex}>{parse(cell)}</TableCell>
+                        ))}
+                        <TableCell
+                          style={{
+                            fontSize: "1rem",
+                            width: "25%",
+                            paddingTop: "1rem",
+                            visibility: hideTmxColumn ? "hidden" : "visible",
+                          }}
+                        >
+                          {tcxData[startIndex + index]}
+                        </TableCell>
+                        <TableCell
+                          style={{
+                            width: "20%",
+                            paddingTop: "3rem",
+                          }}
+                        >
+                          <textarea
+                            variant="outlined"
+                            style={{
+                              width: "60%",
+                              padding: "1.3rem",
+                              fontSize: "1rem",
+                              resize: "none",
+                            }}
+                            multiline
+                            rows={4}
+                            placeholder={
+                              csvData.length > 0 && tcxData.length > 0
+                                ? matchPercentage
+                                : ""
+                            }
+                            value={editableData[startIndex + index]}
+                            onChange={(e) => {
+                              const newEditableData = [...editableData];
+                              newEditableData[startIndex + index] =
+                                e.target.value;
+                              setEditableData(newEditableData);
+                            }}
+                            disabled={matchPercentage === "100%"}
+                          />
+                          <IoArrowRedoOutline
+                            style={{
+                              fontSize: "2.5rem",
+                              color: "black",
+                              cursor: "pointer",
+                              marginBottom: "2.5rem",
+                              marginLeft: "0.5rem",
+                            }}
+                            onClick={() => handleSave(startIndex + index)}
+                          />
+                        </TableCell>
+ 
+                        <TableCell
+                          style={{
+                            width: "20%",
+                            fontSize: "1rem",
+                          }}
+                        >
+                          <CKEditor
+                            editor={ClassicEditor}
+                            data={
+                              matchPercentage === "100%"
+                                ? ftData[startIndex + index]
+                                : savedData[startIndex + index]
+                            }
+                            onChange={(event, editor) =>
+                              handleEditorChange(
+                                event,
+                                editor,
+                                startIndex + index
+                              )
+                            }
+                            config={{
+                              toolbar: [
+                                "bold",
+                                "italic",
+                                "subscript",
+                                "superscript",
+                              ],
+                            }}
+                            className="custom-editor"
+                          />
+                        </TableCell>
+                      </TableRow>
+                      <div
+                        style={{
+                          position: "fixed",
+                          bottom: 0,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          width: "100%",
+                          backgroundColor: "white",
+                          height: "4vh",
                         }}
-                        className="custom-editor"
-                      />
-                    </TableCell>
-                  </TableRow>
+                      >
+                        <Typography
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            marginRight: "1rem",
+                          }}
+                        >
+                          <InputLabel
+                            style={{
+                              marginRight: "1rem",
+                              fontSize: "1.2rem",
+                              color: "black",
+                            }}
+                          >
+                            Rows per page:
+                          </InputLabel>
+                          <Select
+                            value={rowsPerPage}
+                            onChange={handleRowsPerPageChange}
+                            label="Rows per page"
+                            style={{ fontSize: "1rem", color: "black" }}
+                          >
+                            <MenuItem value={10}>10</MenuItem>
+                            <MenuItem value={20}>20</MenuItem>
+                            <MenuItem value={30}>30</MenuItem>
+                          </Select>
+                        </Typography>
+                        <Typography
+                          style={{
+                            fontSize: "2rem",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <FaArrowLeft
+                            onClick={handlePreviousPage}
+                            disabled={currentPage === 1}
+                            className="icon"
+                            style={{ fontSize:"2rem", cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                              color: currentPage === 1 ? "grey" : "black",marginLeft:"0.5rem" }}
+                          />
+                          <FaArrowRight
+                            onClick={endIndex >= csvData.length ? null : handleNextPage}
+                            disabled={endIndex >= csvData.length}
+                            className="icon"
+                            style={{
+                              fontSize: "2rem",
+                              cursor: endIndex >= csvData.length ? "not-allowed" : "pointer",
+                              color: endIndex >= csvData.length ? "grey" : "black",marginLeft:"0.5rem"
+                            }}
+                          />
+                        </Typography>
+                      </div>
+                    </>
                 );
               })}
             </TableBody>
           </Table>
         </TableContainer>
-        <Typography
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: "1rem",
-            position: "fixed",
-            bottom: "0",
-            width: "100%",
-            backgroundColor: "white",
-            padding: "1rem 0",
-          }}
-        >
-          <Typography style={{ display: "flex", alignItems: "center" }}>
-            <InputLabel style={{ marginRight: "0.5rem" }}>
-              Rows per page:
-            </InputLabel>
-            <Select
-              value={rowsPerPage}
-              onChange={handleRowsPerPageChange}
-              label="Rows per page"
-            >
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={20}>20</MenuItem>
-              <MenuItem value={30}>30</MenuItem>
-            </Select>
-          </Typography>
-          <Typography
-            style={{
-              fontSize: "1.5rem",
-              cursor: "pointer",
-              marginLeft: "1rem",
-            }}
-          >
-            <FaArrowLeft
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-              className="icon"
-              style={{
-                marginRight: "1rem",
-              }}
-            />
-            <FaArrowRight
-              onClick={handleNextPage}
-              disabled={endIndex >= csvData.length}
-              className="icon"
-            />
-          </Typography>
-        </Typography>
       </div>
       )}
-      <Typography
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          marginTop: "1rem",
-          position: "fixed",
-          bottom: "0",
-          width: "100%",
-          backgroundColor: "white",
-          padding: "1rem 0",
-        }}
-      >
-        <Typography style={{ display: "flex", alignItems: "center" }}>
-          <InputLabel style={{ marginRight: "0.5rem" }}>
-            Rows per page:
-          </InputLabel>
-          <Select
-            value={rowsPerPage}
-            onChange={handleRowsPerPageChange}
-            label='Rows per page'
-          >
-            <MenuItem value={10}>10</MenuItem>
-            <MenuItem value={20}>20</MenuItem>
-            <MenuItem value={30}>30</MenuItem>
-          </Select>
-        </Typography>
-        <Typography
-          style={{
-            fontSize: "1.5rem",
-            cursor: "pointer",
-            marginLeft: "1rem",
-          }}
-        >
-          <FaArrowLeft
-            onClick={handlePreviousPage}
-            disabled={currentPage === 1}
-            className='icon'
-            style={{
-              marginRight: "1rem",
-            }}
-          />
-          <FaArrowRight
-            onClick={handleNextPage}
-            disabled={endIndex >= csvData.length}
-            className='icon'
-          />
-        </Typography>
-      </Typography>
+     
     </div>
   );
 }
