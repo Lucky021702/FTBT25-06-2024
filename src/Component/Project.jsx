@@ -42,9 +42,11 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import AddIcon from "@mui/icons-material/Add";
-import { useFunctionContext } from "./Context/Function";
+import { Domain } from "@material-ui/icons";
+// import { useFunctionContext } from "./Context/Function";
+
 const Project = () => {
-  const [projectName, setProjectName] = useState([]);
+  // const [projectName, setProjectName] = useState([]) ;
   const [projects, setProjects] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [language, setLanguage] = useState([]);
@@ -71,17 +73,15 @@ const Project = () => {
   const [index, setIndex] = useState(null);
   const [value, setValue] = useState(false);
 
-  const context = useFunctionContext();
-  const {
-    handleRowsPerPageChange,
-    handleNextPage,
-    handlePreviousPage,
-    paginatedData,
-    currentPage,
-    rowsPerPage,
-    endIndex,
-    startIndex,
-  } = context;
+  // const context = useFunctionContext();
+  // const {
+  //   handleRowsPerPageChange,
+  //   handleNextPage,
+  //   handlePreviousPage,
+  //   currentPage,
+  //   rowsPerPage,
+  //   endIndex,
+  // } = context;
 
   let name = localStorage.getItem("name");
 
@@ -376,6 +376,7 @@ const Project = () => {
           sourceLanguage,
           targetLanguage,
           assignedBy: name,
+          index:`${projectName}_${sourceLanguage}_${targetLanguage.map((item)=>{item + "_"})}_${domain}`
         }
       );
       if (response.status == 200) {
@@ -1041,7 +1042,7 @@ const Project = () => {
                 ))}
               </TableRow>
             </TableHead>
-            <TableBody>
+            <TableBody style={{ border: "2px solid red" }}>
               {projects?.map((project, index) => (
                 <TableRow key={index}>
                   <TableCell style={{ fontSize: "1rem" }}>
@@ -1109,9 +1110,8 @@ const Project = () => {
                         className="icon"
                         onClick={() => handleIconClick(project)}
                       />
-
                       <MdDelete
-                        onClick={(index) => handleClickOpen(index, project)}
+                        onClick={() => handleClickOpen(index, project)}
                         style={{
                           fontSize: "1.5rem",
                           marginLeft: "15px",
@@ -1126,55 +1126,6 @@ const Project = () => {
             </TableBody>
           </Table>
         </TableContainer>
-        <Typography
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: "1rem",
-            position: "fixed",
-            bottom: "0",
-            width: "100%",
-            backgroundColor: "white",
-            padding: "1rem",
-          }}
-        >
-          <Typography style={{ display: "flex", alignItems: "center" }}>
-            <InputLabel style={{ marginRight: "0.5rem" }}>
-              Rows per page:
-            </InputLabel>
-            <Select
-              value={rowsPerPage}
-              onChange={handleRowsPerPageChange}
-              label="Rows per page"
-            >
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={20}>20</MenuItem>
-              <MenuItem value={30}>30</MenuItem>
-            </Select>
-          </Typography>
-          <Typography
-            style={{
-              fontSize: "1.5rem",
-              cursor: "pointer",
-              marginLeft: "1rem",
-            }}
-          >
-            <FaArrowLeft
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-              className="icon"
-              style={{
-                marginRight: "1rem",
-              }}
-            />
-            <FaArrowRight
-              onClick={handleNextPage}
-              disabled={endIndex >= projects.length}
-              className="icon"
-            />
-          </Typography>
-        </Typography>
       </div>
       <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
         <Alert

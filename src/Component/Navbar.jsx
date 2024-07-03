@@ -21,9 +21,10 @@ import { IoMdCloseCircle } from "react-icons/io";
 import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
 import DownloadIcon from "@mui/icons-material/Download";
 import "./CSS/Component.css";
-import { useSelector, useDispatch } from 'react-redux';
-import { setFileName } from '../Redux/actions';
-import CachedIcon from '@mui/icons-material/Cached';
+import { useSelector, useDispatch } from "react-redux";
+import { setFileName } from "../Redux/actions";
+import CachedIcon from "@mui/icons-material/Cached";
+import { MdEmail } from "react-icons/md";
 import {
   Dialog,
   DialogTitle,
@@ -35,9 +36,10 @@ import {
   Grid,
   TextField,
 } from "@mui/material";
-import Tooltip from '@mui/material/Tooltip';
+import Tooltip from "@mui/material/Tooltip";
 import Chat from "./Chat";
 import axios from "axios";
+import { Email } from "@material-ui/icons";
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -95,14 +97,15 @@ const Navbar = () => {
     setDialogOpen(false);
   };
   const handleCloseNotification = () => {
-    setAssignedStatus("Accept")
-    handleFileUpload()
+    setAssignedStatus("Accept");
+    handleFileUpload();
   };
-const handleUpload   = () =>{
-  handleFileUpload()
-}
+  const handleUpload = () => {
+    handleFileUpload();
+  };
   const UserName = localStorage.getItem("name");
   const department = localStorage.getItem("department");
+  const email = localStorage.getItem("email");
   const handleProjectdata = async () => {
     try {
       const response = await axios.post("http://localhost:8000/api/Find", {
@@ -117,13 +120,12 @@ const handleUpload   = () =>{
       console.error("Error fetching user", error);
     }
   };
-  let dispatch = useDispatch()
+  let dispatch = useDispatch();
   useEffect(() => {
     handleProjectdata();
   }, []);
-  let fileName = useSelector((state)=>state)
+  let fileName = useSelector((state) => state);
   useEffect(() => {
-
     if (project && project.tasks && project.tasks.length > 0) {
       console.log("Project and tasks are valid");
 
@@ -153,7 +155,7 @@ const handleUpload   = () =>{
             console.log(
               `Matched language '${language}' with filename '${filename}'`
             );
-            dispatch(setFileName(item))
+            dispatch(setFileName(item));
             // Do something with language or filename here
           } else {
             console.log(
@@ -326,24 +328,24 @@ const handleUpload   = () =>{
           {isFT && (
             <>
               <div>
-                <IconButton onClick={handleClickOpen} color='inherit'>
+                <IconButton onClick={handleClickOpen} color="inherit">
                   <CircleNotificationsIcon />
                 </IconButton>
                 <Dialog
                   open={dialogOpen}
                   onClose={handleClose}
-                  maxWidth='sm'
+                  maxWidth="sm"
                   fullWidth
                   PaperProps={{
                     sx: {
-                      height: "66vh",
+                      height: "50vh",
                     },
                   }}
                 >
                   <DialogTitle>
-                    Notifications
+                    Notifications:
                     <IconButton
-                      aria-label='close'
+                      aria-label="close"
                       onClick={handleClose}
                       sx={{
                         position: "absolute",
@@ -368,12 +370,12 @@ const handleUpload   = () =>{
                               alignItems: "center",
                             }}
                           >
-                            <span>Name</span>
+                            <span>Name:</span>
                             <TextField
                               disabled
                               sx={{ width: "350px " }}
                               value={name}
-                              margin='normal'
+                              margin="normal"
                             />
                           </div>
                           <div
@@ -383,11 +385,11 @@ const handleUpload   = () =>{
                               alignItems: "center",
                             }}
                           >
-                            <span>Target Langauge</span>
+                            <span>Target Language:</span>
                             <TextField
                               value={project?.tasks[0]?.assignTargetLanguage}
                               sx={{ width: "350px " }}
-                              margin='normal'
+                              margin="normal"
                               disabled
                             />
                           </div>
@@ -398,10 +400,10 @@ const handleUpload   = () =>{
                               alignItems: "center",
                             }}
                           >
-                            <span>Assign Date</span>
+                            <span>Assign Date:</span>
                             <TextField
                               value={project?.tasks[0]?.date}
-                              margin='normal'
+                              margin="normal"
                               sx={{ width: "350px " }}
                               disabled
                             />
@@ -415,21 +417,23 @@ const handleUpload   = () =>{
                           >
                             <span>Source File Name</span>
                             <DownloadIcon
-                              className='icon'
+                              className="icon"
                               sx={{ color: "#367af7" }}
                               onClick={handleDownload}
                             />
-                           {
-  project?.tasks[0].assignedStatus == "Accept" && (
-    <Tooltip title="Reload source file" arrow>
-      <CachedIcon onClick={handleUpload} className="icon" sx={{ color: "#367AF7" }} />
-    </Tooltip>
-  )
-}
+                            {project?.tasks[0].assignedStatus == "Accept" && (
+                              <Tooltip title="Reload source file" arrow>
+                                <CachedIcon
+                                  onClick={handleUpload}
+                                  className="icon"
+                                  sx={{ color: "#367AF7" }}
+                                />
+                              </Tooltip>
+                            )}
                             <TextField
                               value={fileName?.savedData}
                               sx={{ width: "350px " }}
-                              margin='normal'
+                              margin="normal"
                               disabled
                             />
                           </div>
@@ -455,16 +459,15 @@ const handleUpload   = () =>{
                             >
                               <Button
                                 onClick={() => setAssignedStatus("Reject")}
-                                variant='contained'
-                                color='secondary'
+                                variant="contained"
+                                color="secondary"
                               >
                                 Reject
                               </Button>
-
                               <Button
                                 onClick={() => handleCloseNotification()}
-                                variant='contained'
-                                color='primary'
+                                variant="contained"
+                                color="primary"
                               >
                                 Accept
                               </Button>
@@ -485,16 +488,16 @@ const handleUpload   = () =>{
                 Chat
               </Button>
               <input
-                type='file'
-                accept='.csv'
+                type="file"
+                accept=".csv"
                 onChange={handleFileUploadQC}
                 style={{ display: "none" }}
-                id='fileQC'
+                id="fileQC"
               />
-              <label htmlFor='fileQC'>
+              <label htmlFor="fileQC">
                 <Button
                   className={classes.fileUploadButton}
-                  component='span'
+                  component="span"
                   onClick={handleQCClick}
                   startIcon={<CloudDownloadIcon />}
                 >
@@ -508,10 +511,10 @@ const handleUpload   = () =>{
                 style={{ display: "none" }}
                 id='fileInput'
               /> */}
-              <label htmlFor='fileInput'>
+              <label htmlFor="fileInput">
                 <Button
                   className={classes.fileUploadButton}
-                  component='span'
+                  component="span"
                   onClick={handleSourceClick}
                   startIcon={<CloudUploadIcon />}
                 >
@@ -519,16 +522,16 @@ const handleUpload   = () =>{
                 </Button>
               </label>
               <input
-                type='file'
-                accept='.tmx'
+                type="file"
+                accept=".tmx"
                 onChange={handleFileUploadTcx}
                 style={{ display: "none" }}
-                id='fileInput2'
+                id="fileInput2"
               />
-              <label htmlFor='fileInput2'>
+              <label htmlFor="fileInput2">
                 <Button
                   className={classes.fileUploadButton}
-                  component='span'
+                  component="span"
                   startIcon={<CloudUploadIcon />}
                 >
                   TMX
@@ -536,7 +539,7 @@ const handleUpload   = () =>{
               </label>
               <Button
                 className={classes.fileUploadButton}
-                color='secondary'
+                color="secondary"
                 onClick={handleDownloadCSV}
                 // disabled={!downloadReady}
                 startIcon={<CloudDownloadIcon />}
@@ -555,16 +558,16 @@ const handleUpload   = () =>{
                 Chat
               </Button>
               <input
-                type='file'
-                accept='.csv'
+                type="file"
+                accept=".csv"
                 onChange={handleFileUploadQC}
                 style={{ display: "none" }}
-                id='fileQC'
+                id="fileQC"
               />
-              <label htmlFor='fileQC'>
+              <label htmlFor="fileQC">
                 <Button
                   className={classes.fileUploadButton}
-                  component='span'
+                  component="span"
                   onClick={handleQCClick}
                   startIcon={<CloudDownloadIcon />}
                 >
@@ -572,16 +575,16 @@ const handleUpload   = () =>{
                 </Button>
               </label>
               <input
-                type='file'
-                accept='.csv,.docx,.doc'
+                type="file"
+                accept=".csv,.docx,.doc"
                 onChange={handleFileUpload}
                 style={{ display: "none" }}
-                id='fileInput'
+                id="fileInput"
               />
-              <label htmlFor='fileInput'>
+              <label htmlFor="fileInput">
                 <Button
                   className={classes.fileUploadButton}
-                  component='span'
+                  component="span"
                   onClick={handleSourceClick}
                   startIcon={<CloudUploadIcon />}
                 >
@@ -589,16 +592,16 @@ const handleUpload   = () =>{
                 </Button>
               </label>
               <input
-                type='file'
-                accept='.tmx'
+                type="file"
+                accept=".tmx"
                 onChange={handleFileUploadTcxBT}
                 style={{ display: "none" }}
-                id='fileInput2'
+                id="fileInput2"
               />
-              <label htmlFor='fileInput2'>
+              <label htmlFor="fileInput2">
                 <Button
                   className={classes.fileUploadButton}
-                  component='span'
+                  component="span"
                   startIcon={<CloudUploadIcon />}
                 >
                   TMX
@@ -606,7 +609,7 @@ const handleUpload   = () =>{
               </label>
               <Button
                 className={classes.fileUploadButton}
-                color='secondary'
+                color="secondary"
                 onClick={handleDownloadCSV}
                 disabled={!downloadReady}
                 startIcon={<CloudDownloadIcon />}
@@ -617,148 +620,148 @@ const handleUpload   = () =>{
           )}
           {isQC && (
             <>
-              <IconButton onClick={handleClickOpen} color='inherit'>
+              <IconButton onClick={handleClickOpen} color="inherit">
                 <CircleNotificationsIcon />
               </IconButton>
               <Dialog
-                  open={dialogOpen}
-                  onClose={handleClose}
-                  maxWidth='sm'
-                  fullWidth
-                  PaperProps={{
-                    sx: {
-                      height: "66vh",
-                    },
-                  }}
-                >
-                  <DialogTitle>
-                    Notifications
-                    <IconButton
-                      aria-label='close'
-                      onClick={handleClose}
-                      sx={{
-                        position: "absolute",
-                        right: 8,
-                        top: 8,
-                        color: "black",
-                      }}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  </DialogTitle>
-                  <DialogContent>
-                    {project.length == 0 ? (
-                      "No Notification"
-                    ) : (
-                      <Card>
-                        <CardContent>
+                open={dialogOpen}
+                onClose={handleClose}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                  sx: {
+                    height: "60vh",
+                  },
+                }}
+              >
+                <DialogTitle>
+                  Notifications:
+                  <IconButton
+                    aria-label="close"
+                    onClick={handleClose}
+                    sx={{
+                      position: "absolute",
+                      right: 8,
+                      top: 8,
+                      color: "black",
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </DialogTitle>
+                <DialogContent>
+                  {project.length == 0 ? (
+                    "No Notification"
+                  ) : (
+                    <Card>
+                      <CardContent>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span>Name:</span>
+                          <TextField
+                            disabled
+                            sx={{ width: "350px " }}
+                            value={name}
+                            margin="normal"
+                          />
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span>Target Language:</span>
+                          <TextField
+                            value={project?.tasks[0]?.assignTargetLanguage}
+                            sx={{ width: "350px " }}
+                            margin="normal"
+                            disabled
+                          />
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span>Assign Date:</span>
+                          <TextField
+                            value={project?.tasks[0]?.date}
+                            margin="normal"
+                            sx={{ width: "350px " }}
+                            disabled
+                          />
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span>Source File Name:</span>
+                          <DownloadIcon
+                            className="icon"
+                            sx={{ color: "#367af7" }}
+                            onClick={handleDownload}
+                          />
+                          <TextField
+                            value={fileName}
+                            sx={{ width: "350px " }}
+                            margin="normal"
+                            disabled
+                          />
+                        </div>
+                        {project?.tasks[0].assignedStatus ? (
                           <div
                             style={{
                               display: "flex",
-                              justifyContent: "space-between",
+                              justifyContent: "space-around",
                               alignItems: "center",
+                              fontSize: "1.2rem",
+                              color: "red",
                             }}
                           >
-                            <span>Name</span>
-                            <TextField
-                              disabled
-                              sx={{ width: "350px " }}
-                              value={name}
-                              margin='normal'
-                            />
+                            {project?.tasks[0].assignedStatus}
                           </div>
+                        ) : (
                           <div
                             style={{
                               display: "flex",
-                              justifyContent: "space-between",
+                              justifyContent: "space-around",
                               alignItems: "center",
                             }}
                           >
-                            <span>Target Langauge</span>
-                            <TextField
-                              value={project?.tasks[0]?.assignTargetLanguage}
-                              sx={{ width: "350px " }}
-                              margin='normal'
-                              disabled
-                            />
-                          </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <span>Assign Date</span>
-                            <TextField
-                              value={project?.tasks[0]?.date}
-                              margin='normal'
-                              sx={{ width: "350px " }}
-                              disabled
-                            />
-                          </div>
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                            }}
-                          >
-                            <span>Source File Name</span>
-                            <DownloadIcon
-                              className='icon'
-                              sx={{ color: "#367af7" }}
-                              onClick={handleDownload}
-                            />
-                            <TextField
-                              value={fileName}
-                              sx={{ width: "350px " }}
-                              margin='normal'
-                              disabled
-                            />
-                          </div>
-                          {project?.tasks[0].assignedStatus ? (
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-around",
-                                alignItems: "center",
-                                fontSize: "1.2rem",
-                                color: "red",
-                              }}
+                            <Button
+                              onClick={() => setAssignedStatus("Reject")}
+                              variant="contained"
+                              color="secondary"
                             >
-                              {project?.tasks[0].assignedStatus}
-                            </div>
-                          ) : (
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-around",
-                                alignItems: "center",
-                              }}
-                            >
-                              <Button
-                                onClick={() => setAssignedStatus("Reject")}
-                                variant='contained'
-                                color='secondary'
-                              >
-                                Reject
-                              </Button>
+                              Reject
+                            </Button>
 
-                              <Button
-                                onClick={() => setAssignedStatus("Accept")}
-                                variant='contained'
-                                color='primary'
-                              >
-                                Accept
-                              </Button>
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                            <Button
+                              onClick={() => setAssignedStatus("Accept")}
+                              variant="contained"
+                              color="primary"
+                            >
+                              Accept
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </DialogContent>
+              </Dialog>
               <Button
                 className={classes.fileUploadButton}
                 onClick={handleOpenChat}
@@ -767,15 +770,15 @@ const handleUpload   = () =>{
                 Chat
               </Button>
               <input
-                type='file'
-                accept='.csv,.xlsx'
+                type="file"
+                accept=".csv,.xlsx"
                 onChange={handleFileUploadQCSource}
                 style={{ display: "none" }}
-                id='fileInput'
+                id="fileInput"
               />
-              <label htmlFor='fileInput'>
+              <label htmlFor="fileInput">
                 <Button
-                  component='span'
+                  component="span"
                   startIcon={<CloudUploadIcon />}
                   className={classes.fileUploadButton}
                 >
@@ -783,15 +786,15 @@ const handleUpload   = () =>{
                 </Button>
               </label>
               <input
-                type='file'
-                accept='.csv,.xlsx'
+                type="file"
+                accept=".csv,.xlsx"
                 onChange={handleFileUploadQCSource2}
                 style={{ display: "none" }}
-                id='fileInput2'
+                id="fileInput2"
               />
-              <label htmlFor='fileInput2'>
+              <label htmlFor="fileInput2">
                 <Button
-                  component='span'
+                  component="span"
                   startIcon={<CloudUploadIcon />}
                   className={classes.fileUploadButton}
                 >
@@ -825,12 +828,12 @@ const handleUpload   = () =>{
   };
 
   return (
-    <AppBar position='sticky'>
+    <AppBar position="sticky">
       <Toolbar>
         <Typography className={classes.title}>
           <img
             src={logo}
-            alt='logo'
+            alt="logo"
             height={"70vh"}
             style={{ marginRight: "20px" }}
           />
@@ -846,39 +849,51 @@ const handleUpload   = () =>{
           //     Logout
           //   </Link>
           // </Typography>
-          <Typography position='static'>
+          <Typography>
             <Toolbar>
               <Box sx={{ flexGrow: 1 }} />
-              <IconButton onClick={handleClick} color='inherit'>
-                <Avatar src='' alt='Profile' />
+              <IconButton onClick={handleClick} color="inherit">
+                <Avatar src="" alt="Profile" />
               </IconButton>
               <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleCloseProfile}
-                PaperProps={{
-                  style: {
-                    width: "250px",
-                    height: "200px",
-                    marginTop: "40px",
-                  },
-                }}
-              >
-                <MenuItem onClick={handleCloseProfile}>Profile</MenuItem>
-                <MenuItem onClick={handleCloseProfile}>Settings</MenuItem>
-                <Link
-                  to='/'
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                </Link>
-              </Menu>
+      anchorEl={anchorEl}
+      open={Boolean(anchorEl)}
+      onClose={handleCloseProfile}
+      PaperProps={{
+        style: {
+          width: "250px",
+          height: "200px",
+          marginTop: "50px",
+          marginLeft: "-1rem",
+          padding: "1rem",
+        },
+      }}
+    >
+      <h3 style={{ marginBottom: "1rem" }}>
+        User Profile
+      </h3>
+      <div style={{ display: "flex", alignItems: "center", borderBottom: "1px solid #ccc", paddingBottom: "1rem", marginBottom: "1rem" }}>
+        <IconButton color="inherit">
+          <Avatar src="" alt="Profile" />
+        </IconButton>
+        <div style={{ marginLeft: "1rem",}}>
+          <div style={{ fontWeight: "bold" }}>{UserName}</div>
+          <div>{department}</div>
+          <div style={{display:"flex",gap:"0.5rem"}}><Email/>{email}</div>
+        </div>
+      </div>
+      <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+        <Button onClick={handleLogout} variant="outlined" color="primary" fullWidth>
+          Logout
+        </Button>
+      </Link>
+    </Menu>
             </Toolbar>
           </Typography>
         ) : (
-          <Typography variant='h6'>
+          <Typography variant="h6">
             <Link
-              to='/login'
+              to="/login"
               style={{ textDecoration: "none", color: "inherit" }}
             >
               Login
@@ -890,7 +905,7 @@ const handleUpload   = () =>{
         open={isChatOpen}
         onClose={handleCloseChat}
         fullWidth
-        maxWidth='lg'
+        maxWidth="lg"
       >
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <DialogTitle>

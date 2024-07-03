@@ -2,13 +2,15 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import * as ExcelJS from "exceljs";
+import * as docxPreview from "docx-preview";
+import parse from "html-react-parser";
 import mammoth from "mammoth";
-// import mammoth from "../../../../Backend/uploads";
+// import mammoth from "../../../../backend/uploads";
 import { useSelector } from "react-redux";
 import axios from "axios";
-
+ 
 export const FunctionContext = createContext();
-
+ 
 export const FunctionProvider = ({ children }) => {
   const [isQCSelected, setIsQCSelected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,16 +22,16 @@ export const FunctionProvider = ({ children }) => {
   const [savedData, setSavedData] = useState([]);
   const [downloadReady, setDownloadReady] = useState(false);
   const [dataTrue, setDataTrue] = useState(false);
-  const [hideTmxColumn, setHideTmxColumn] = useState(false);
+  const [hideTmxColumn, sethideTmxColumn] = useState(false);
   const [englishSource, setEnglishSource] = useState([]);
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  
-
+ 
+ 
   const navigate = useNavigate();
-
+ 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -39,10 +41,11 @@ export const FunctionProvider = ({ children }) => {
   useEffect(() => {
     console.log("rowsPerPage",rowsPerPage);
   }, [rowsPerPage]);
-
+ 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(event.target.value);
     setCurrentPage(1);
+    console.log(rowsPerPage);
   };
   const handleNextPage = () => {
     setCurrentPage((prevPage) => prevPage + 1);
@@ -50,10 +53,12 @@ export const FunctionProvider = ({ children }) => {
   const handlePreviousPage = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
+
+
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = csvData.slice(startIndex, endIndex);
-
+ 
   const handleQCClick = () => {
     setIsQCSelected(true);
   };
@@ -92,80 +97,13 @@ export const FunctionProvider = ({ children }) => {
     };
     reader.readAsBinaryString(file);
   };
-
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    setIsLoading(true);
-    const extension = file.name.split(".").pop().toLowerCase();
-    const fileReader = new FileReader();
-    fileReader.onload = (e) => {
-      const data = new Uint8Array(e.target.result);
-      if (extension === "csv") {
-        processCSV(data);
-      } else if (extension === "docx") {
-        processDOCX(data);
-      }
-    };
-    fileReader.readAsArrayBuffer(file);
-  };
-  const processCSV = (data) => {
-    const workbook = XLSX.read(data, { type: "array" });
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
-    const parsedData = XLSX.utils.sheet_to_json(worksheet, {
-      header: 1,
-      range: 1,
-    });
-    setCSVData(parsedData);
-    setIsLoading(false);
-  };
-
-  // let fileName = useSelector((state)=>state.savedData)
-
-  // const handleFileUpload = async () => {
-  //   if (!fileName) {
-  //     console.error("File name is not provided");
-  //     return;
-  //   }
-
-  //   const backendUrl = 'http://localhost:8000'; // Replace with your backend server URL
-  //   const filePath = `${backendUrl}/api/files/${fileName}`;
-  //   const extension = fileName.split('.').pop().toLowerCase();
-
+  // const handleFileUpload = (event) => {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
   //   setIsLoading(true);
-
-  //   try {
-  //     console.log(`Fetching file from: ${filePath}`);
-  //     const response = await axios.get(filePath, {
-  //       responseType: 'arraybuffer',
-  //     });
-
-  //     console.log(`File fetched successfully. Processing as ${extension}...`);
-
-  //     if (extension === 'csv') {
-  //       // Log the content before processing
-  //       const textDecoder = new TextDecoder('utf-8');
-  //       const csvContent = textDecoder.decode(new Uint8Array(response.data));
-  //       console.log('CSV Content:', csvContent);
-
-  //       // Process the CSV content
-  //       processCSV(new Uint8Array(response.data));
-  //     } else if (extension === 'docx') {
-  //       processDOCX(new Uint8Array(response.data));
-  //     } else {
-  //       throw new Error('Unsupported file extension');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error loading file:', error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // const processCSV = (data) => {
-  //   try {
-  //     console.log("Processing CSV data...");
+  //   const fileReader = new FileReader();
+  //   fileReader.onload = (e) => {
+  //     const data = new Uint8Array(e.target.result);
   //     const workbook = XLSX.read(data, { type: "array" });
   //     const firstSheetName = workbook.SheetNames[0];
   //     const worksheet = workbook.Sheets[firstSheetName];
@@ -174,13 +112,100 @@ export const FunctionProvider = ({ children }) => {
   //       range: 1,
   //     });
   //     setCSVData(parsedData);
-  //     console.log("CSV data processed successfully");
-  //   } catch (error) {
-  //     console.error("Error processing CSV:", error);
-  //   } finally {
   //     setIsLoading(false);
-  //   }
+  //   };
+  //   fileReader.readAsArrayBuffer(file);
   // };
+ 
+  // const handleFileUpload = (event) => {
+  //   const file = event.target.files[0];
+  //   if (!file) return;
+  //   setIsLoading(true);
+  //   const extension = file.name.split(".").pop().toLowerCase();
+  //   const fileReader = new FileReader();
+  //   fileReader.onload = (e) => {
+  //     const data = new Uint8Array(e.target.result);
+  //     if (extension === "csv") {
+  //       processCSV(data);
+  //     } else if (extension === "docx") {
+  //       processDOCX(data);
+  //     }
+  //   };
+  //   fileReader.readAsArrayBuffer(file);
+  // };
+ 
+  // const processCSV = (data) => {
+  //   const workbook = XLSX.read(data, { type: "array" });
+  //   const firstSheetName = workbook.SheetNames[0];
+  //   const worksheet = workbook.Sheets[firstSheetName];
+  //   const parsedData = XLSX.utils.sheet_to_json(worksheet, {
+  //     header: 1,
+  //     range: 1,
+  //   });
+  //   setCSVData(parsedData);
+  //   setIsLoading(false);
+  // };
+ 
+  let fileName = useSelector((state)=>state.savedData)
+ 
+  const handleFileUpload = async () => {
+    if (!fileName) {
+      console.error("File name is not provided");
+      return;
+    }
+ 
+    const backendUrl = 'http://localhost:8000'; // Replace with your backend server URL
+    const filePath = `${backendUrl}/api/files/${fileName}`;
+    const extension = fileName.split('.').pop().toLowerCase();
+ 
+    setIsLoading(true);
+ 
+    try {
+      console.log(`Fetching file from: ${filePath}`);
+      const response = await axios.get(filePath, {
+        responseType: 'arraybuffer',
+      });
+ 
+      console.log(`File fetched successfully. Processing as ${extension}...`);
+ 
+      if (extension === 'csv') {
+        // Log the content before processing
+        const textDecoder = new TextDecoder('utf-8');
+        const csvContent = textDecoder.decode(new Uint8Array(response.data));
+        console.log('CSV Content:', csvContent);
+ 
+        // Process the CSV content
+        processCSV(new Uint8Array(response.data));
+      } else if (extension === 'docx') {
+        processDOCX(new Uint8Array(response.data));
+      } else {
+        throw new Error('Unsupported file extension');
+      }
+    } catch (error) {
+      console.error('Error loading file:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+ 
+  const processCSV = (data) => {
+    try {
+      console.log("Processing CSV data...");
+      const workbook = XLSX.read(data, { type: "array" });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const parsedData = XLSX.utils.sheet_to_json(worksheet, {
+        header: 1,
+        range: 1,
+      });
+      setCSVData(parsedData);
+      console.log("CSV data processed successfully");
+    } catch (error) {
+      console.error("Error processing CSV:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // const processDOCX = async (arrayBuffer) => {
   //   try {
   //     const { value } = await mammoth.convertToHtml({ arrayBuffer });
@@ -193,7 +218,6 @@ export const FunctionProvider = ({ children }) => {
   //     setIsLoading(false);
   //   }
   // };
-
   const processDOCX = async (arrayBuffer) => {
     try {
       const { value } = await mammoth.convertToHtml({ arrayBuffer });
@@ -240,7 +264,7 @@ export const FunctionProvider = ({ children }) => {
   //     setIsLoading(false);
   //   }
   // };
-
+ 
   const handleFileUploadTcx = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -321,19 +345,8 @@ export const FunctionProvider = ({ children }) => {
     const matchPercentage = (matchCount / sourceWords.length) * 100;
     return `${Math.round(matchPercentage)}%`;
   };
-
-  //     if (cleanSource === cleanTmx) {
-  //         return "100%";
-  //     } else {
-  //         const sourceWords = cleanSource.split(" ");
-  //         const tmxWords = cleanTmx.split(" ");
-  //         const totalWords = Math.max(sourceWords.length, tmxWords.length);
-  //         const matchingWords = sourceWords.filter(word => tmxWords.includes(word)).length;
-  //         const similarityPercentage = (matchingWords / totalWords) * 100;
-  //         return `${similarityPercentage.toFixed(2)}%`;
-  //     }
-  // };
-
+ 
+ 
   const handleSave = (index) => {
     const newSavedData = [...savedData];
     newSavedData[index] = editableData[index];
@@ -423,7 +436,7 @@ export const FunctionProvider = ({ children }) => {
   const handleFileUploadQCSource2 = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
+ 
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = new Uint8Array(e.target.result);
@@ -474,7 +487,7 @@ export const FunctionProvider = ({ children }) => {
         },
         body: JSON.stringify(data),
       });
-
+ 
       if (response.ok) {
         console.log("Filename added successfully");
       } else {
@@ -484,7 +497,7 @@ export const FunctionProvider = ({ children }) => {
       console.error("Error:", error);
     }
   };
-
+ 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (dataTrue) {
@@ -493,7 +506,7 @@ export const FunctionProvider = ({ children }) => {
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [dataTrue]);
-
+ 
   useEffect(() => {
     if (ftData.length > 0) {
       const newData = [...savedData];
@@ -503,13 +516,14 @@ export const FunctionProvider = ({ children }) => {
         } else {
           newData[index] = editableData[index];
         }
-        // console.log("tcxData[index]", tcxData[index]);
+        console.log("tcxData[index]",tcxData[index]);
       });
       setSavedData(newData);
+     
     }
-  }, [ftData]);
-  const handleHide = () => {
-    setHideTmxColumn((prevState) => !prevState);
+  }, [tcxData]);
+  const handlehide = () => {
+    sethideTmxColumn((prevState) => !prevState);
   };
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -519,7 +533,7 @@ export const FunctionProvider = ({ children }) => {
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [dataTrue]);
-
+ 
   const contextValue = {
     isQCSelected,
     isLoading,
@@ -546,7 +560,7 @@ export const FunctionProvider = ({ children }) => {
     setSavedData,
     setDownloadReady,
     setDataTrue,
-    setHideTmxColumn,
+    sethideTmxColumn,
     handleQCClick,
     handleSourceClick,
     handleFileUploadQC,
@@ -556,7 +570,7 @@ export const FunctionProvider = ({ children }) => {
     handleSave,
     handleDownloadCSV,
     handleEditorChange,
-    handleHide,
+    handlehide,
     handleFileUploadQCSource,
     handleFileUploadQCSource2,
     handleCommentChange,
@@ -570,12 +584,12 @@ export const FunctionProvider = ({ children }) => {
     endIndex,
     startIndex,
   };
-
+ 
   return (
     <FunctionContext.Provider value={contextValue}>
       {children}
     </FunctionContext.Provider>
   );
 };
-
+ 
 export const useFunctionContext = () => useContext(FunctionContext);
