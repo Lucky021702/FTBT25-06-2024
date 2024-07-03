@@ -353,32 +353,38 @@ const Project = () => {
   }, [sourceFileLength]);
   const handleCreateProject = async () => {
     const email = localStorage.getItem("email");
-
+  
     try {
       const formatDate = (date) => {
         const day = String(date.getDate()).padStart(2, "0");
         const month = String(date.getMonth() + 1).padStart(2, "0");
         const year = date.getFullYear();
-
+  
         return `${day}${month}${year}`;
       };
+  
       const getRandomFourDigitString = () =>
         Math.floor(1000 + Math.random() * 9000).toString();
-
+  
+      const projectName = `${clientName}_${getRandomFourDigitString()}${formatDate(
+        new Date()
+      )}`;
       const response = await axios.post(
         "http://localhost:8000/api/createProject",
         {
-          projectName: `${clientName}_${getRandomFourDigitString()}${formatDate(
-            new Date()
-          )}`,
+          projectName: projectName,
           email: email,
           sourceLanguage,
           targetLanguage,
           assignedBy: name,
-          domain: selectedDomain
+          domain: selectedDomain,
+          index: `${projectName}_${sourceLanguage}_${targetLanguage.join('_')}_${selectedDomain}`
         }
       );
-      if (response.status == 200) {
+  
+
+  
+      if (response.status === 200) {
         setIsDrawerOpen(false);
         fetchProjects();
         setOpenProjectAdd(true);
@@ -388,6 +394,7 @@ const Project = () => {
       console.error("Error creating project:", error);
     }
   };
+  
   const handleAssignChange = (event) => {
     setAssign(event.target.value);
   };
@@ -1052,6 +1059,7 @@ const Project = () => {
                   "Project Name",
                   "Status",
                   "Source File",
+                  "Domain",
                   "Source Language",
                   "Target Language",
                   "CreatedOn",
@@ -1113,6 +1121,9 @@ const Project = () => {
                           : "No file chosen"}
                       </Typography>
                     </Box>
+                  </TableCell>
+                  <TableCell style={{ fontSize: "1rem" }}>
+                    {project?.domain}
                   </TableCell>
                   <TableCell style={{ fontSize: "1rem" }}>
                     {project?.sourceLanguage}

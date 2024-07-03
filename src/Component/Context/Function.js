@@ -39,7 +39,9 @@ export const FunctionProvider = ({ children }) => {
     }
   }, [navigate]);
 
-
+useEffect(()=>{
+console.log("csvData",csvData);
+},[csvData])
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(event.target.value);
     setCurrentPage(1);
