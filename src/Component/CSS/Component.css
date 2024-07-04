@@ -20,7 +20,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(8px); 
   z-index: 9999; 
 }
 .docx-table-container {
@@ -102,6 +101,9 @@ select option {
 
 select option:hover {
   background-color: #f1f1f1;
+}
+.custom-editor {
+  width: 80%;
 }
 
 .highlight-text {

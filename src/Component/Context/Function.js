@@ -38,10 +38,10 @@ export const FunctionProvider = ({ children }) => {
       navigate("/login");
     }
   }, [navigate]);
-  useEffect(() => {
-    console.log("rowsPerPage",rowsPerPage);
-  }, [rowsPerPage]);
- 
+
+useEffect(()=>{
+console.log("csvData",csvData);
+},[csvData])
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(event.target.value);
     setCurrentPage(1);
@@ -49,12 +49,13 @@ export const FunctionProvider = ({ children }) => {
   };
   const handleNextPage = () => {
     setCurrentPage((prevPage) => prevPage + 1);
+    console.log(currentPage);
   };
   const handlePreviousPage = () => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
   };
-
-
+  const totalLines = csvData.length;
+  console.log("totalLines",totalLines);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedData = csvData.slice(startIndex, endIndex);
@@ -145,10 +146,10 @@ export const FunctionProvider = ({ children }) => {
   //   setCSVData(parsedData);
   //   setIsLoading(false);
   // };
- 
-  let fileName = useSelector((state)=>state.savedData)
- 
-  const handleFileUpload = async () => {
+
+  // let fileName = useSelector((state)=>state.savedData)
+
+  const handleFileUpload = async (fileName) => {
     if (!fileName) {
       console.error("File name is not provided");
       return;
@@ -343,7 +344,9 @@ export const FunctionProvider = ({ children }) => {
     });
     // Calculate match percentage
     const matchPercentage = (matchCount / sourceWords.length) * 100;
-    return `${Math.round(matchPercentage)}%`;
+    // console.log("matchPercentage", matchPercentage); 
+
+    return Math.round(matchPercentage);
   };
  
  
@@ -583,6 +586,7 @@ export const FunctionProvider = ({ children }) => {
     rowsPerPage,
     endIndex,
     startIndex,
+    totalLines
   };
  
   return (

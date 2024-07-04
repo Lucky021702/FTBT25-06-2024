@@ -147,6 +147,8 @@ function FT() {
                     csvRow[0],
                     tcxData[startIndex + index]
                   );
+                  console.log("matchPercentage", matchPercentage);
+
                   return (
                     <>
                       <TableRow key={index}>
@@ -206,7 +208,7 @@ function FT() {
                                 e.target.value;
                               setEditableData(newEditableData);
                             }}
-                            disabled={matchPercentage === "100%"}
+                            disabled={matchPercentage === 100}
                           />
                           <IoArrowRedoOutline
                             style={{
@@ -219,17 +221,11 @@ function FT() {
                             onClick={() => handleSave(startIndex + index)}
                           />
                         </TableCell>
-
-                        <TableCell
-                          style={{
-                            width: "20%",
-                            fontSize: "1rem",
-                          }}
-                        >
+                        <TableCell>
                           <CKEditor
                             editor={ClassicEditor}
                             data={
-                              matchPercentage === "100%"
+                              matchPercentage >= 50
                                 ? ftData[startIndex + index]
                                 : savedData[startIndex + index]
                             }
@@ -248,7 +244,6 @@ function FT() {
                                 "superscript",
                               ],
                             }}
-                            className="custom-editor"
                           />
                         </TableCell>
                       </TableRow>

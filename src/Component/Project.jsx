@@ -23,11 +23,14 @@ import {
   MenuItem,
   IconButton as MUIButton,
 } from "@mui/material";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { MdDelete, MdOutlinePeople } from "react-icons/md";
 import { GoPlus } from "react-icons/go";
 import { FaArrowRight } from "react-icons/fa6";
 import { FaArrowLeft } from "react-icons/fa6";
+import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import axios from "axios";
 import CloseIcon from "@mui/icons-material/Close";
 import "./CSS/Component.css";
@@ -72,16 +75,8 @@ const Project = () => {
   const [openPopup, setOpenPopup] = React.useState(false);
   const [index, setIndex] = useState(null);
   const [value, setValue] = useState(false);
-
-  // const context = useFunctionContext();
-  // const {
-  //   handleRowsPerPageChange,
-  //   handleNextPage,
-  //   handlePreviousPage,
-  //   currentPage,
-  //   rowsPerPage,
-  //   endIndex,
-  // } = context;
+  const [selectedDomain, setSelectedDomain] = useState("");
+  const [domain, setDomain] = useState("");
 
   let name = localStorage.getItem("name");
 
@@ -228,8 +223,8 @@ const Project = () => {
     setSourceFileLength(updatedProjects); // Update file length state if needed
   };
   useEffect(() => {
-    console.log("assign", assign);
-  }, [assign]);
+    console.log("selectedDomain", selectedDomain);
+  }, [selectedDomain]);
   const AssignTasksApi = async () => {
     try {
       const tasksToUpdate = [
@@ -276,6 +271,7 @@ const Project = () => {
   };
   useEffect(() => {
     fetchProjects();
+    fetchDomain();
     fetchLanguage();
   }, []);
 
@@ -307,6 +303,20 @@ const Project = () => {
       console.error("Error fetching projects:", error);
     }
   };
+
+  const fetchDomain = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/projects/domain"
+      );
+      setDomain(response.data);
+      console.error("Error fetching domains:", error);
+    } catch (err) {}
+  };
+
+  useEffect(() => {
+    console.log("domain:", domain);
+  }, [domain]);
   const handleIconClick = (project) => {
     setIsDrawerOpenTasks(true);
     const projectData = {
@@ -363,23 +373,29 @@ const Project = () => {
 
         return `${day}${month}${year}`;
       };
+
       const getRandomFourDigitString = () =>
         Math.floor(1000 + Math.random() * 9000).toString();
 
+      const projectName = `${clientName}_${getRandomFourDigitString()}${formatDate(
+        new Date()
+      )}`;
       const response = await axios.post(
         "http://localhost:8000/api/createProject",
         {
-          projectName: `${clientName}_${getRandomFourDigitString()}${formatDate(
-            new Date()
-          )}`,
+          projectName: projectName,
           email: email,
           sourceLanguage,
           targetLanguage,
           assignedBy: name,
-          index:`${projectName}_${sourceLanguage}_${targetLanguage.map((item)=>{item + "_"})}_${domain}`
+          domain: selectedDomain,
+          index: `${projectName}_${sourceLanguage}_${targetLanguage.join(
+            "_"
+          )}_${selectedDomain}`,
         }
       );
-      if (response.status == 200) {
+
+      if (response.status === 200) {
         setIsDrawerOpen(false);
         fetchProjects();
         setOpenProjectAdd(true);
@@ -389,6 +405,7 @@ const Project = () => {
       console.error("Error creating project:", error);
     }
   };
+
   const handleAssignChange = (event) => {
     setAssign(event.target.value);
   };
@@ -496,7 +513,7 @@ const Project = () => {
         anchor="right"
         open={isDrawerOpen}
         onClose={toggleDrawer(false)}
-        PaperProps={{ style: { width: "35%" } }}
+        PaperProps={{ style: { width: "32%" } }}
       >
         <AppBar position="static">
           <Toolbar>
@@ -528,6 +545,32 @@ const Project = () => {
               sx={{ width: "315px" }}
             />
           </span>
+        </div>
+        <div
+          style={{
+            margin: "70px 22px 0px 20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+            Domain Name<span style={{ color: "red" }}>*</span>
+          </span>
+          <select
+            value={selectedDomain}
+            onChange={(e) => setSelectedDomain(e.target.value)}
+            style={{ width: "200px" }}
+          >
+            <option value="" disabled>
+              Domain
+            </option>
+            {domain?.domains?.map((domain) => (
+              <option key={domain._id} value={domain.domainName}>
+                {domain.domainName}
+              </option>
+            ))}
+          </select>
         </div>
         <div
           style={{
@@ -653,7 +696,7 @@ const Project = () => {
         anchor="right"
         open={isDrawerOpenTasks}
         onClose={toggleDrawerAssignTasks(false)}
-        PaperProps={{ style: { width: "35%" } }}
+        PaperProps={{ style: { width: "44%" } }}
       >
         <div style={{ overflowX: "auto" }}>
           <AppBar position="static">
@@ -720,13 +763,19 @@ const Project = () => {
                 <CardContent>
                   <div
                     style={{
-                      margin: "70px 22px 0px 20px",
+                      margin: "5px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
                     }}
                   >
-                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                    <span
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: "bold",
+                        margin: "0px 12px 12px 12px",
+                      }}
+                    >
                       Source Language<span style={{ color: "red" }}>*</span>
                     </span>
                     <span>
@@ -734,13 +783,13 @@ const Project = () => {
                         name="fullName"
                         variant="standard"
                         value={projectData?.sourceLanguage}
-                        sx={{ width: "307px" }}
+                        sx={{ width: "307px", marginRight: "8px" }}
                       />
                     </span>
                   </div>
                   <div
                     style={{
-                      margin: "70px 22px 0px 20px",
+                      margin: "12px 12px 12px 12px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -774,7 +823,7 @@ const Project = () => {
                   </div>
                   <div
                     style={{
-                      margin: "70px 22px 0px 20px",
+                      margin: "12px 12px 12px 12px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -800,7 +849,7 @@ const Project = () => {
                   </div>
                   <div
                     style={{
-                      margin: "70px 22px 0px 20px",
+                      margin: "12px 12px 12px 12px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -836,7 +885,7 @@ const Project = () => {
                   </div>
                   <div
                     style={{
-                      margin: "70px 22px 0px 20px",
+                      margin: "12px 12px 12px 12px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -900,7 +949,7 @@ const Project = () => {
                 </CardContent>
               </Card>
             ) : null}
-            {projectData?.tasks &&
+            {/* {projectData?.tasks &&
               projectData.tasks.map((task, index) => (
                 <Card
                   key={index}
@@ -1011,7 +1060,55 @@ const Project = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              ))} */}
+            {projectData?.tasks != 0 ? (
+              <TableContainer
+                component={Paper}
+                sx={{ maxWidth: 650, margin: "20px auto" }}
+              >
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ width: "10%" }}>No.</TableCell>
+                      <TableCell sx={{ width: "20%" }}>
+                        Source Language
+                      </TableCell>
+                      <TableCell sx={{ width: "15%" }}>
+                        Target Language
+                      </TableCell>
+                      <TableCell sx={{ width: "15%" }}>Service Type</TableCell>
+                      <TableCell sx={{ width: "30%" }}>Assign To</TableCell>
+                      <TableCell sx={{ width: "10%" }}>TAT</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {projectData?.tasks &&
+                      projectData.tasks.map((task, index) => (
+                        <TableRow key={index}>
+                          <TableCell sx={{ width: "10%" }}>
+                            {index + 1}
+                          </TableCell>
+                          <TableCell sx={{ width: "20%" }}>
+                            {projectData?.sourceLanguage}
+                          </TableCell>
+                          <TableCell sx={{ width: "20%" }}>
+                            {task.assignTargetLanguage}
+                          </TableCell>
+                          <TableCell sx={{ width: "20%" }}>
+                            {task.serviceType}
+                          </TableCell>
+                          <TableCell sx={{ width: "20%" }}>
+                            {task.assignTo || ""}
+                          </TableCell>
+                          <TableCell sx={{ width: "10%" }}>
+                            {task.date}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : null}
           </div>
         </div>
       </Drawer>
@@ -1024,6 +1121,7 @@ const Project = () => {
                   "Project Name",
                   "Status",
                   "Source File",
+                  "Domain",
                   "Source Language",
                   "Target Language",
                   "CreatedOn",
@@ -1042,7 +1140,7 @@ const Project = () => {
                 ))}
               </TableRow>
             </TableHead>
-            <TableBody style={{ border: "2px solid red" }}>
+            <TableBody>
               {projects?.map((project, index) => (
                 <TableRow key={index}>
                   <TableCell style={{ fontSize: "1rem" }}>
@@ -1087,6 +1185,9 @@ const Project = () => {
                     </Box>
                   </TableCell>
                   <TableCell style={{ fontSize: "1rem" }}>
+                    {project?.domain}
+                  </TableCell>
+                  <TableCell style={{ fontSize: "1rem" }}>
                     {project?.sourceLanguage}
                   </TableCell>
                   <TableCell style={{ fontSize: "1rem" }}>
@@ -1110,8 +1211,9 @@ const Project = () => {
                         className="icon"
                         onClick={() => handleIconClick(project)}
                       />
+
                       <MdDelete
-                        onClick={() => handleClickOpen(index, project)}
+                        onClick={(index) => handleClickOpen(index, project)}
                         style={{
                           fontSize: "1.5rem",
                           marginLeft: "15px",
