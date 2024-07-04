@@ -42,24 +42,24 @@ export const FunctionProvider = ({ children }) => {
 useEffect(()=>{
 console.log("csvData",csvData);
 },[csvData])
-  const handleRowsPerPageChange = (event) => {
-    setRowsPerPage(event.target.value);
-    setCurrentPage(1);
-    console.log(rowsPerPage);
-  };
-  const handleNextPage = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
-    console.log(currentPage);
-  };
-  const handlePreviousPage = () => {
-    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
-  };
-  const totalLines = csvData.length;
-  console.log("totalLines",totalLines);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedData = csvData.slice(startIndex, endIndex);
- 
+const handleRowsPerPageChange = (event) => {
+  setRowsPerPage(event.target.value);
+  setCurrentPage(1);
+  console.log(rowsPerPage);
+};
+const handleNextPage = () => {
+  setCurrentPage((prevPage) => prevPage + 1);
+  console.log(currentPage);
+};
+const handlePreviousPage = () => {
+  setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+};
+const totalLines = csvData.length;
+console.log("totalLines",totalLines);
+const startIndex = (currentPage - 1) * rowsPerPage;
+const endIndex = startIndex + rowsPerPage;
+const paginatedData = csvData.slice(startIndex, endIndex);
+
   const handleQCClick = () => {
     setIsQCSelected(true);
   };
@@ -312,44 +312,36 @@ console.log("csvData",csvData);
     };
     reader.readAsText(file, "ISO-8859-1");
   };
-  // const compareAndSetFT = (sourceSentence, tmxSentence) => {
-  //   const cleanSource = String(sourceSentence).trim().replace(/[^\w]/g, "");
-  //   const cleanTmx = String(tmxSentence).trim().replace(/[^\w]/g, "");
-  //   console.log(tmxSentence);
-  //   if (cleanSource === cleanTmx) {
-  //     return "Right";
-  //   } else {
-  //     return "";
-  //   }
-  // };
-  const compareAndSetFT = (sourceSentence, tmxSentence) => {
-    // Convert to string and handle null or undefined cases
-    const sourceString = String(sourceSentence || "")
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .trim();
-    const tmxString = String(tmxSentence || "")
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .trim();
-    // Split sentences into words
-    const sourceWords = sourceString.split(/\s+/);
-    const tmxWords = tmxString.split(/\s+/);
-    // Count matching words
-    let matchCount = 0;
-    sourceWords.forEach((word) => {
-      if (tmxWords.includes(word)) {
-        matchCount++;
-      }
-    });
-    // Calculate match percentage
-    const matchPercentage = (matchCount / sourceWords.length) * 100;
-    // console.log("matchPercentage", matchPercentage); 
 
-    return Math.round(matchPercentage);
-  };
- 
- 
+  const compareAndSetFT = (sourceSentence, tmxSentence) => {
+     // Convert to string and handle null or undefined cases
+     const sourceString = String(sourceSentence || "")
+       .toLowerCase()
+       .replace(/[^\w\s]/g, "")
+       .trim();
+     const tmxString = String(tmxSentence || "")
+       .toLowerCase()
+       .replace(/[^\w\s]/g, "")
+       .trim();
+     // Split sentences into words
+     const sourceWords = sourceString.split(/\s+/);
+     const tmxWords = tmxString.split(/\s+/);
+     // Count matching words
+     let matchCount = 0;
+     sourceWords.forEach((word) => {
+       if (tmxWords.includes(word)) {
+         matchCount++;
+       }
+     });
+     // Calculate match percentage
+     const matchPercentage = (matchCount / sourceWords.length) * 100;
+     // console.log("matchPercentage", matchPercentage);
+  
+     return Math.round(matchPercentage);
+   };
+  
+
+
   const handleSave = (index) => {
     const newSavedData = [...savedData];
     newSavedData[index] = editableData[index];
