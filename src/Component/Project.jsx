@@ -18,8 +18,11 @@ import {
   AppBar,
   Toolbar,
   Card,
+  Select,
+  MenuItem,
   IconButton as MUIButton,
 } from "@mui/material";
+import { format } from 'date-fns';
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { MdDelete, MdOutlinePeople } from "react-icons/md";
 import { GoPlus } from "react-icons/go";
@@ -67,6 +70,7 @@ const Project = () => {
   const [domain, setDomain] = useState([]);
   const [value, setValue] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState("");
+  const [fileSoureName, setFileSoureName] = useState("");
   let name = localStorage.getItem("name");
 
   const handleClickOpen = (index, project) => {
@@ -153,75 +157,123 @@ const Project = () => {
     console.log("projectData====>", projectData);
     setProjectData(projectData);
   };
-
   const handleSourceUploadChange = async (e, index) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
+  
     const updatedProjects = [...projects]; // Assuming projects is your state variable
     const project = updatedProjects[index]; // Get the specific project
     const targetLanguages = project.targetLanguage; // Get the target languages
-
+  
     // Iterate through each selected file
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-
-      for (let j = 0; j < targetLanguages.length; j++) {
-        const formData = new FormData();
-
-        // Modify the file name to include the target language
-        const modifiedFileName = `${targetLanguages[j]}_${file.name}`;
-
-        // Create a new File object with the modified name
-        const modifiedFile = new File([file], modifiedFileName, {
-          type: file.type,
-        });
-
-        formData.append("sourceUpload", modifiedFile);
-        formData.append("targetLanguage", targetLanguages[j]); // Append the current target language
-
-        try {
-          const response = await axios.post(
-            `http://localhost:8000/api/projects/${project._id}/upload-source`,
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-          );
-
-          // Assuming your API returns the file name or some identifier
-          if (response.status === 200) {
-            if (!project.sourceUpload) {
-              project.sourceUpload = [];
-            }
-            project.sourceUpload.push({
-              fileName: response?.data?.fileName,
-              language: targetLanguages[j],
-            }); // Update project with uploaded file info
-
-            // Additional logic if needed
-            setFileUpload(true);
-            fetchProjects();
+      const formData = new FormData();
+  
+      formData.append("sourceUpload", file); // Append the original file
+      formData.append("targetLanguages", JSON.stringify(targetLanguages)); // Append all target languages as a JSON string
+  
+      try {
+        const response = await axios.post(
+          `http://localhost:8000/api/projects/${project._id}/upload-source`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+  
+        // Assuming your API returns the file name or some identifier
+        if (response.status === 200) {
+          if (!project.sourceUpload) {
+            project.sourceUpload = [];
           }
-        } catch (error) {
-          console.error("Error uploading source file:", error);
+          project.sourceUpload.push({
+            fileName: response?.data?.fileName || file.name, // Use original file name if no fileName returned
+            languages: targetLanguages, // Store all target languages associated with this file
+          }); // Update project with uploaded file info
+  
+          // Additional logic if needed
+          setFileUpload(true);
+          fetchProjects();
         }
+      } catch (error) {
+        console.error("Error uploading source file:", error);
       }
     }
-
+  
     // Update state with updated projects
     setProjects(updatedProjects);
     setSourceFileLength(updatedProjects); // Update file length state if needed
   };
+  
+  // const handleSourceUploadChange = async (e, index) => {
+  //   const files = e.target.files;
+  //   if (!files || files.length === 0) return;
+
+  //   const updatedProjects = [...projects]; // Assuming projects is your state variable
+  //   const project = updatedProjects[index]; // Get the specific project
+  //   const targetLanguages = project.targetLanguage; // Get the target languages
+
+  //   // Iterate through each selected file
+  //   for (let i = 0; i < files.length; i++) {
+  //     const file = files[i];
+
+  //     for (let j = 0; j < targetLanguages.length; j++) {
+  //       const formData = new FormData();
+
+  //       // Modify the file name to include the target language
+  //       const modifiedFileName = `${targetLanguages[j]}_${file.name}`;
+
+  //       // Create a new File object with the modified name
+  //       const modifiedFile = new File([file], modifiedFileName, {
+  //         type: file.type,
+  //       });
+
+  //       formData.append("sourceUpload", modifiedFile);
+  //       formData.append("targetLanguage", targetLanguages[j]); // Append the current target language
+
+  //       try {
+  //         const response = await axios.post(
+  //           `http://localhost:8000/api/projects/${project._id}/upload-source`,
+  //           formData,
+  //           { headers: { "Content-Type": "multipart/form-data" } }
+  //         );
+
+  //         // Assuming your API returns the file name or some identifier
+  //         if (response.status === 200) {
+  //           if (!project.sourceUpload) {
+  //             project.sourceUpload = [];
+  //           }
+  //           project.sourceUpload.push({
+  //             fileName: response?.data?.fileName,
+  //             language: targetLanguages[j],
+  //           }); // Update project with uploaded file info
+
+  //           // Additional logic if needed
+  //           setFileUpload(true);
+  //           fetchProjects();
+  //         }
+  //       } catch (error) {
+  //         console.error("Error uploading source file:", error);
+  //       }
+  //     }
+  //   }
+
+  //   // Update state with updated projects
+  //   setProjects(updatedProjects);
+  //   setSourceFileLength(updatedProjects); // Update file length state if needed
+  // };
   useEffect(() => {
-    console.log("selectedDomain", selectedDomain);
-  }, [selectedDomain]);
+    console.log("formattedDateTime", formattedDateTime);
+  }, [formattedDateTime]);
   const AssignTasksApi = async () => {
     try {
+      const formattedFileName = `${assignTargetLanguage}_${fileSoureName}`;
       const tasksToUpdate = [
         {
           assignTargetLanguage,
           serviceType,
           assignTo: assign,
           date: formattedDateTime,
+          assignSourceFilename :  formattedFileName
         },
       ];
       const response = await axios.put(
@@ -254,9 +306,12 @@ const Project = () => {
       setFormattedDateTime(dateTimeString);
     }
   };
-
+  
   const handleServiceTypeChange = (e) => {
     setServiceType(e.target.value);
+  };
+  const handleFileSoureName = (e) => {
+    setFileSoureName(e.target.value);
   };
   useEffect(() => {
     fetchProjects();
@@ -277,10 +332,15 @@ const Project = () => {
       setSelectedDate(null);
       setSelectedTime(null);
       setServiceType("");
+      setFileSoureName("")
       setAssignTargetLanguage("");
     }
   }, [isDrawerOpenTasks]);
-
+  const formatDateTask = (dateString) => {
+    // Example: "2024-07-03T04:20:00.000Z"
+    const date = new Date(dateString);
+    return format(date, 'yyyy-MM-dd hh:mm a');
+  };
   const fetchProjects = async () => {
     try {
       const email = localStorage.getItem("email");
@@ -399,7 +459,7 @@ const Project = () => {
     setAssign(event.target.value);
   };
   useEffect(() => {
-    console.log(projectData);
+    console.log("projectData?.sourceUpload",projectData?.sourceUpload);
   }, [projectData]);
   const handleDelete = async () => {
     try {
@@ -451,9 +511,6 @@ const Project = () => {
   };
   const toggleDrawerAssignTasks = (isOpen) => () => {
     setIsDrawerOpenTasks(isOpen);
-    // if(isOpen == false){
-    //   setValue(false)
-    // }
   };
   useEffect(() => {
     if (isDrawerOpenTasks == false) {
@@ -755,13 +812,13 @@ const Project = () => {
                 <CardContent>
                   <div
                     style={{
-                      margin: "70px 22px 0px 20px",
+                      margin: "5px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
                     }}
                   >
-                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                    <span style={{ fontSize: "15px", fontWeight: "bold",margin: "0px 12px 12px 12px" }}>
                       Source Language<span style={{ color: "red" }}>*</span>
                     </span>
                     <span>
@@ -769,13 +826,13 @@ const Project = () => {
                         name="fullName"
                         variant="standard"
                         value={projectData?.sourceLanguage}
-                        sx={{ width: "307px" }}
+                        sx={{ width: "307px",marginRight:"8px" }}
                       />
                     </span>
                   </div>
                   <div
                     style={{
-                      margin: "70px 22px 0px 20px",
+                      margin: "12px 12px 12px 12px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -809,7 +866,7 @@ const Project = () => {
                   </div>
                   <div
                     style={{
-                      margin: "70px 22px 0px 20px",
+                      margin: "12px 12px 12px 12px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -817,6 +874,35 @@ const Project = () => {
                   >
                     <span style={{ fontSize: "15px", fontWeight: "bold" }}>
                       Service Type<span style={{ color: "red" }}>*</span>
+                    </span>
+                    <span>
+                      <select
+                        value={fileSoureName}
+                        onChange={handleFileSoureName}
+                        style={{ width: "255px" }}
+                      >
+                        <option value="" disabled>
+                          Source File Name
+                        </option>
+                        {projectData?.sourceUpload?.map((item) => (
+  <option key={item} value={item}>
+    {item}
+  </option>
+))}
+
+                      </select>
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      margin: "12px 12px 12px 12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span style={{ fontSize: "15px", fontWeight: "bold" }}>
+                      Assign File<span style={{ color: "red" }}>*</span>
                     </span>
                     <span>
                       <select
@@ -835,7 +921,7 @@ const Project = () => {
                   </div>
                   <div
                     style={{
-                      margin: "70px 22px 0px 20px",
+                      margin: "12px 12px 12px 12px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -871,7 +957,7 @@ const Project = () => {
                   </div>
                   <div
                     style={{
-                      margin: "70px 22px 0px 20px",
+                      margin: "12px 12px 12px 12px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
@@ -935,118 +1021,44 @@ const Project = () => {
                 </CardContent>
               </Card>
             ) : null}
-            {projectData?.tasks &&
-              projectData.tasks.map((task, index) => (
-                <Card
-                  key={index}
-                  sx={{
-                    maxWidth: 600,
-                    minWidth: 600,
-                    margin: "20px",
-                    border: "2px solid #F3F4F6",
-                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-                    backgroundColor: "#f3f4f6",
-                    marginBottom: 2,
-                  }}
-                >
-                  <CardContent>
-                    <div
-                      style={{
-                        margin: "70px 22px 0px 20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                        Source Language<span style={{ color: "red" }}>*</span>
-                      </span>
-                      <span>
-                        <TextField
-                          name="sourceLanguage"
-                          variant="standard"
-                          value={projectData?.sourceLanguage}
-                          sx={{ width: "307px" }}
-                        />
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        margin: "70px 22px 0px 20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                        Target Language<span style={{ color: "red" }}>*</span>
-                      </span>
-                      <span>
-                        <select
-                          value={task.assignTargetLanguage || null}
-                          style={{ width: "255px" }}
-                        >
-                          <option disabled>{task.assignTargetLanguage}</option>
-                        </select>
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        margin: "70px 22px 0px 20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                        Service Type<span style={{ color: "red" }}>*</span>
-                      </span>
-                      <span>
-                        <select
-                          value={task.serviceType || serviceType}
-                          onChange={(e) => handleServiceTypeChange(e, index)}
-                          style={{ width: "255px" }}
-                        >
-                          <option disabled>{task.serviceType}</option>
-                        </select>
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        margin: "70px 22px 0px 20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                        Assign To<span style={{ color: "red" }}>*</span>
-                      </span>
-                      <span>
-                        <TextField
-                          name="assignTo"
-                          variant="standard"
-                          value={task.assignTo || ""}
-                          sx={{ width: "307px" }}
-                        />
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        margin: "70px 22px 0px 20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                        TAT<span style={{ color: "red" }}>*</span>
-                      </span>
-                      <div style={{ fontWeight: "bold" }}>{task.date}</div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+               {projectData?.tasks !=0 ? 
+               <TableContainer component={Paper} sx={{ maxWidth: 650, margin: "20px auto" }}>
+     <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell sx={{ width: "10%" }}>No.</TableCell>
+          <TableCell sx={{ width: "20%" }}>Source Language</TableCell>
+          <TableCell sx={{ width: "15%" }}>Target Language</TableCell>
+          <TableCell sx={{ width: "15%" }}>Service Type</TableCell>
+          <TableCell sx={{ width: "20%" }}>Assign To</TableCell>
+          <TableCell sx={{ width: "20%" }}>TAT</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {projectData?.tasks &&
+          projectData.tasks.map((task, index) => (
+            <TableRow key={index}>
+              <TableCell sx={{ width: "10%" }}>{index + 1}</TableCell>
+              <TableCell sx={{ width: "20%" }}>
+                {projectData?.sourceLanguage}
+              </TableCell>
+              <TableCell sx={{ width: "15%" }}>
+                {task.assignTargetLanguage}
+              </TableCell>
+              <TableCell sx={{ width: "15%" }}>
+                {task.serviceType}
+              </TableCell>
+              <TableCell sx={{ width: "20%" }}>
+                {task.assignTo || ""}
+              </TableCell>
+              <TableCell sx={{ width: "20%" }}>
+                {formatDateTask(task.date)}
+              </TableCell>
+            </TableRow>
+          ))}
+      </TableBody>
+    </Table>
+    </TableContainer> : null}
           </div>
         </div>
       </Drawer>
@@ -1104,19 +1116,11 @@ const Project = () => {
                         </IconButton>
                       </label>
                       <Typography variant="body1">
-                        {project.sourceUpload
+                      {project.sourceUpload
                           ? `${
-                              project.sourceUpload.length /
-                                project.targetLanguage.length <=
-                              1
-                                ? `${
-                                    project.sourceUpload.length /
-                                    project.targetLanguage.length
-                                  } File`
-                                : `${
-                                    project.sourceUpload.length /
-                                    project.targetLanguage.length
-                                  } Files`
+                              project.sourceUpload.length <= 1
+                                ? `${project.sourceUpload.length} File`
+                                : `${project.sourceUpload.length} Files`
                             }`
                           : "No file chosen"}
                       </Typography>

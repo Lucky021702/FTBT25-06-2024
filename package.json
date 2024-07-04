@@ -26,6 +26,7 @@
     "crypto-browserify": "^3.12.0",
     "csv-parse": "^5.5.5",
     "csv-parser": "^3.0.0",
+    "date-fns": "^3.6.0",
     "docx": "^8.1.0",
     "docx-preview": "^0.3.2",
     "docx-to-pdf": "^1.1.0",

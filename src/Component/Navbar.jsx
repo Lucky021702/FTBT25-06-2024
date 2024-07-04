@@ -3,13 +3,21 @@ import {
   AppBar,
   Toolbar,
   makeStyles,
-  Button,
   Menu,
-  MenuItem,
   Avatar,
   Box,
   Card,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  
 } from "@material-ui/core";
+import { format } from 'date-fns';
 import { Link, useLocation } from "react-router-dom";
 import { useFunctionContext } from "./Context/Function";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
@@ -21,8 +29,6 @@ import { IoMdCloseCircle } from "react-icons/io";
 import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
 import DownloadIcon from "@mui/icons-material/Download";
 import "./CSS/Component.css";
-import { useSelector, useDispatch } from 'react-redux';
-import { setFileName } from '../Redux/actions';
 import CachedIcon from '@mui/icons-material/Cached';
 import {
   Dialog,
@@ -70,6 +76,7 @@ const Navbar = () => {
     handleFileUploadQCSource2,
     handleCommentChange,
     handleDownloadQC,
+    setCSVData
   } = context;
   const classes = useStyles();
   const location = useLocation();
@@ -87,19 +94,28 @@ const Navbar = () => {
   const [project, setProject] = useState([]);
   const [cardData, setCardData] = useState(null);
 
+  let email = localStorage.getItem('email')
   const handleClickOpen = () => {
     setDialogOpen(true);
   };
-
+useEffect(()=>{
+  if(assignedStatus == "Accept" || assignedStatus == "Reject"){
+    handleClose()
+  }
+},[assignedStatus])
   const handleClose = () => {
     setDialogOpen(false);
+    setAssignedStatus("")
   };
-  const handleCloseNotification = (fileName) => {
-    setAssignedStatus("Accept")
+  const handleCloseNotification = (fileName,status) => {
+    setAssignedStatus(status)
+    if(status == "Accept"){
     handleFileUpload(fileName)
+    }
   };
 const handleUpload   = (fileName) =>{
   handleFileUpload(fileName)
+  handleClose()
 }
   const UserName = localStorage.getItem("name");
   const department = localStorage.getItem("department");
@@ -117,111 +133,6 @@ const handleUpload   = (fileName) =>{
       console.error("Error fetching user", error);
     }
   };
-  let dispatch = useDispatch()
-  useEffect(() => {
-    handleProjectdata();
-  }, []);
-  let fileName = useSelector((state)=>state)
-
-  useEffect(() => {
-    if (project && project.tasks && project.tasks.length > 0) {
-      const allLanguages = project.tasks.flatMap(task => task.assignTargetLanguage);
-      console.log("All languages to match:", allLanguages);
-  
-      const filenames = [];
-  
-      project.sourceUpload.forEach((item, index) => {
-        console.log(`Processing item ${index + 1}/${project.sourceUpload.length}: ${item}`);
-  
-        // Extract filename without extension
-        const filename = item.split(".")[0];
-        console.log("Extracted filename (without extension):", filename);
-  
-        // Extract language name from filename
-        const parts = filename.split("-");
-        console.log("Filename parts after split by '-':", parts);
-  
-        if (parts.length > 1) {
-          const languagePart = parts[1];
-          const language = languagePart.split("_")[0]; // Extract language part
-          console.log("Extracted language:", language);
-  
-          // Store filename if language matches any of the assignTargetLanguage
-          if (allLanguages.includes(language)) {
-            console.log(`Matched language '${language}' with filename '${filename}'`);
-            filenames.push(item);
-            // Dispatch action or handle filename here
-          } else {
-            console.log(`No matching language found for filename '${filename}'`);
-          }
-        } else {
-          console.log("Filename does not contain a language part:", filename);
-        }
-      });
-  
-      console.log("Filenames:", filenames);
-  dispatch(setFileName(filenames))
-      // You can dispatch or store filenames in state here
-    } else {
-      console.log("Project or tasks are invalid or empty");
-      console.log("project:", project);
-      console.log("project.tasks:", project ? project.tasks : undefined);
-      console.log("project.tasks.length:", project && project.tasks ? project.tasks.length : undefined);
-    }
-  }, [project, dispatch]);
-  
-  // useEffect(() => {
-
-  //   if (project && project.tasks && project.tasks.length > 0) {
-   
-
-  //     const assignTargetLanguage = project.tasks[0].assignTargetLanguage;
-  //     console.log("assignTargetLanguage", assignTargetLanguage);
-
-  //     project.sourceUpload.forEach((item, index) => {
-  //       console.log(
-  //         `Processing item ${index + 1}/${project.sourceUpload.length}: ${item}`
-  //       );
-
-  //       // Extract filename without extension
-  //       const filename = item.split(".")[0];
-  //       console.log("Extracted filename (without extension):", filename);
-
-  //       // Extract language name from filename
-  //       const parts = filename.split("-");
-  //       console.log("Filename parts after split by '-':", parts);
-
-  //       if (parts.length > 1) {
-  //         const languagePart = parts[1];
-  //         const language = languagePart.split("_")[0]; // Extract language part
-  //         console.log("Extracted language:", language);
-
-  //         // Match language with assignTargetLanguage
-  //         if (language && assignTargetLanguage.includes(language)) {
-  //           console.log(
-  //             `Matched language '${language}' with filename '${filename}'`
-  //           );
-  //           dispatch(setFileName(item))
-  //           // Do something with language or filename here
-  //         } else {
-  //           console.log(
-  //             `No matching language found for filename '${filename}'`
-  //           );
-  //         }
-  //       } else {
-  //         console.log("Filename does not contain a language part:", filename);
-  //       }
-  //     });
-  //   } else {
-  //     console.log("Project or tasks are invalid or empty");
-  //     console.log("project:", project);
-  //     console.log("project.tasks:", project ? project.tasks : undefined);
-  //     console.log(
-  //       "project.tasks.length:",
-  //       project && project.tasks ? project.tasks.length : undefined
-  //     );
-  //   }
-  // }, [project,dispatch]);
 
   useEffect(() => {
     if (dialogOpen) {
@@ -268,6 +179,7 @@ const handleUpload   = (fileName) =>{
     setAnchorEl(null);
     setIsFT(false);
     setIsBT(false);
+    setCSVData([])
   };
 
   const handleOpenChat = () => {
@@ -276,9 +188,9 @@ const handleUpload   = (fileName) =>{
   const handleCloseChat = () => {
     setIsChatOpen(false);
   };
-  useEffect(() => {
-    console.log("fileName", fileName.savedData.map((name)=>name));
-  }, [fileName]);
+  // useEffect(() => {
+  //   console.log("fileName", fileName.savedData.map((name)=>name));
+  // }, [fileName]);
 
   // UseEffect to set isLoggedIn, isFT, and isBT based on token and department
   useEffect(() => {
@@ -325,6 +237,7 @@ const handleUpload   = (fileName) =>{
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link); // Clean up after download
+        handleClose()
       })
       .catch((error) => {
         console.error("Error downloading file:", error);
@@ -337,234 +250,540 @@ const handleUpload   = (fileName) =>{
       return (
         <div className={classes.fileUploadContainer}>
           {isFT && (
-            <>
+      //       <>
+      //         <div>
+      //           <IconButton onClick={handleClickOpen} color='inherit'>
+      //             <CircleNotificationsIcon />
+      //           </IconButton>
+      //           <Dialog
+      //             open={dialogOpen}
+      //             onClose={handleClose}
+      //             maxWidth='sm'
+      //             fullWidth
+      //             PaperProps={{
+      //               sx: {
+      //                 height: "66vh",
+      //               },
+      //             }}
+      //           >
+      //             <DialogTitle>
+      //               Notifications
+      //               <IconButton
+      //                 aria-label='close'
+      //                 onClick={handleClose}
+      //                 sx={{
+      //                   position: "absolute",
+      //                   right: 8,
+      //                   top: 8,
+      //                   color: "black",
+      //                 }}
+      //               >
+      //                 <CloseIcon />
+      //               </IconButton>
+      //             </DialogTitle>
+      //             <DialogContent >
+      //               {project.length == 0 ? (
+      //                 "No Notification"
+      //               ) : ( 
+      //                 <div>
+      //               {project?.tasks.map((task, index) => (
+        
+      //     <Card
+      //       key={index}
+      //       style={{
+      //         maxWidth: 535,
+      //         minWidth: 535,
+      //         marginTop: "20px",
+      //         border: "2px solid #F3F4F6",
+      //         boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      //         backgroundColor: "#f3f4f6",
+      //       }}
+      //     >
+      //       <CardContent>
+      //         <div
+      //           style={{
+      //             display: "flex",
+      //             justifyContent: "space-between",
+      //             alignItems: "center",
+      //           }}
+      //         >
+      //           <span>Name</span>
+      //           <TextField
+      //             disabled
+      //             sx={{ width: "350px" }}
+      //             value={name}
+      //             margin='normal'
+      //           />
+      //         </div>
+      //         <div
+      //           style={{
+      //             display: "flex",
+      //             justifyContent: "space-between",
+      //             alignItems: "center",
+      //           }}
+      //         >
+      //           <span>Target Language</span>
+      //           <TextField
+      //             value={task?.assignTargetLanguage}
+      //             sx={{ width: "350px" }}
+      //             margin='normal'
+      //             disabled
+      //           />
+      //         </div>
+      //         <div
+      //           style={{
+      //             display: "flex",
+      //             justifyContent: "space-between",
+      //             alignItems: "center",
+      //           }}
+      //         >
+      //           <span>Assign Date</span>
+      //           <TextField
+      //             value={task?.date}
+      //             margin='normal'
+      //             sx={{ width: "350px" }}
+      //             disabled
+      //           />
+      //         </div>
+      //         <div
+      //           style={{
+      //             display: "flex",
+      //             justifyContent: "space-between",
+      //             alignItems: "center",
+      //           }}
+      //         >
+      //           <span>Source File Name</span>
+      //           <DownloadIcon
+      //             className='icon'
+      //             sx={{ color: "#367af7" }}
+      //             onClick={() => handleDownload(fileName?.savedData[index])}
+      //           />
+      //           <Tooltip title="Reload source file" arrow>
+      //             <CachedIcon
+      //               onClick={() => handleUpload(fileName?.savedData[index])}
+      //               className="icon"
+      //               sx={{ color: "#367AF7" }}
+      //             />
+      //           </Tooltip>
+      //           <TextField
+      //             value={fileName?.savedData[index]}
+      //             sx={{ width: "350px" }}
+      //             margin='normal'
+      //             disabled
+      //           />
+      //         </div>
+      //         {task.assignedStatus ? (
+      //           <div
+      //             style={{
+      //               display: "flex",
+      //               justifyContent: "space-around",
+      //               alignItems: "center",
+      //               fontSize: "1.2rem",
+      //               color: "red",
+      //             }}
+      //           >
+      //             {task.assignedStatus}
+      //           </div>
+      //         ) : (
+      //           <div
+      //             style={{
+      //               display: "flex",
+      //               justifyContent: "space-around",
+      //               alignItems: "center",
+      //             }}
+      //           >
+      //             <Button
+      //               onClick={() => {
+      //                 setAssignedStatus("Reject");
+      //                 handleCardData(task);
+      //               }}
+      //               variant='contained'
+      //               color='secondary'
+      //             >
+      //               Reject
+      //             </Button>
+      //             <Button
+      //               onClick={() => {
+      //                 handleCardData(task);
+      //                 handleCloseNotification(fileName?.savedData[index]);
+      //               }}
+      //               variant='contained'
+      //               color='primary'
+      //             >
+      //               Accept
+      //             </Button>
+      //           </div>
+      //         )}
+      //       </CardContent>
+      //     </Card>
+        
+      // ))}
+      //                 </div>
+      //               )}
+      //             </DialogContent>
+      //           </Dialog>
+      //         </div>
+
+      //         <Button
+      //           className={classes.fileUploadButton}
+      //           onClick={handleOpenChat}
+      //           startIcon={<ChatIcon />}
+      //         >
+      //           Chat
+      //         </Button>
+      //         <input
+      //           type='file'
+      //           accept='.csv'
+      //           onChange={handleFileUploadQC}
+      //           style={{ display: "none" }}
+      //           id='fileQC'
+      //         />
+      //         <label htmlFor='fileQC'>
+      //           <Button
+      //             className={classes.fileUploadButton}
+      //             component='span'
+      //             onClick={handleQCClick}
+      //             startIcon={<CloudDownloadIcon />}
+      //           >
+      //             QC
+      //           </Button>
+      //         </label>
+      //         <label htmlFor='fileInput'>
+      //           <Button
+      //             className={classes.fileUploadButton}
+      //             component='span'
+      //             onClick={handleSourceClick}
+      //             startIcon={<CloudUploadIcon />}
+      //           >
+      //             Source
+      //           </Button>
+      //         </label>
+      //         <input
+      //           type='file'
+      //           accept='.tmx'
+      //           onChange={handleFileUploadTcx}
+      //           style={{ display: "none" }}
+      //           id='fileInput2'
+      //         />
+      //         <label htmlFor='fileInput2'>
+      //           <Button
+      //             className={classes.fileUploadButton}
+      //             component='span'
+      //             startIcon={<CloudUploadIcon />}
+      //           >
+      //             TMX
+      //           </Button>
+      //         </label>
+      //         <Button
+      //           className={classes.fileUploadButton}
+      //           color='secondary'
+      //           onClick={handleDownloadCSV}
+      //           // disabled={!downloadReady}
+      //           startIcon={<CloudDownloadIcon />}
+      //         >
+      //           FT
+      //         </Button>
+      //       </>
+      <>
+      <div>
+        <IconButton onClick={handleClickOpen} color='inherit'>
+          <CircleNotificationsIcon />
+        </IconButton>
+        <Dialog
+          open={dialogOpen}
+          onClose={handleClose}
+          maxWidth='lg'
+          fullWidth
+          PaperProps={{
+            sx: {
+              height: '66vh',
+            },
+          }}
+        >
+          <DialogTitle sx={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <span>
+            Notifications
+            </span>
+            <IconButton
+              aria-label='close'
+              onClick={handleClose}
+              sx={{
+                position: 'absolute',
+                right: 8,
+                top: 8,
+                color: 'black',
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent>
+            {project.length === 0 ? (
+              "No Notifications"
+            ) : (
               <div>
-                <IconButton onClick={handleClickOpen} color='inherit'>
-                  <CircleNotificationsIcon />
-                </IconButton>
-                <Dialog
-                  open={dialogOpen}
-                  onClose={handleClose}
-                  maxWidth='sm'
-                  fullWidth
-                  PaperProps={{
-                    sx: {
-                      height: "66vh",
-                    },
-                  }}
-                >
-                  <DialogTitle>
-                    Notifications
-                    <IconButton
-                      aria-label='close'
-                      onClick={handleClose}
-                      sx={{
-                        position: "absolute",
-                        right: 8,
-                        top: 8,
-                        color: "black",
+                {/* {project.map((project) => (
+                  project.tasks.map((task, index) => (
+                    ((task.assignedStatus != "Reject") ?
+                     <Card
+                      key={task._id}
+                      style={{
+                        maxWidth: 535,
+                        minWidth: 535,
+                        marginTop: '20px',
+                        border: '2px solid #F3F4F6',
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                        backgroundColor: '#f3f4f6',
                       }}
                     >
-                      <CloseIcon />
-                    </IconButton>
-                  </DialogTitle>
-                  <DialogContent >
-                    {project.length == 0 ? (
-                      "No Notification"
-                    ) : (
-                      <div >
-                      {project?.tasks.map((task, index) => (
-                        <Card key={index} 
-                        style={{
-                          maxWidth: 535,
-                          minWidth: 535,
-                          marginTop: "20px",
-                          border: "2px solid #F3F4F6", // Blue border for highlighting
-                          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Adding shadow for depth
-                          backgroundColor: "#f3f4f6", // Light background color for highlighting
-                        }}>
-                          <CardContent>
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
+                      <CardContent>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <span>Name</span>
+                          <TextField
+                            disabled
+                            sx={{ width: '350px' }}
+                            value={project.projectName}
+                            margin='normal'
+                          />
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <span>Target Language</span>
+                          <TextField
+                            value={task.assignTargetLanguage}
+                            sx={{ width: '350px' }}
+                            margin='normal'
+                            disabled
+                          />
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <span>Assign Date</span>
+                          <TextField
+                            value={formatDate(new Date(task.date), 'yyyy-MM-dd hh:mm a')}
+                            margin='normal'
+                            sx={{ width: '350px' }}
+                            disabled
+                          />
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <span>Source File Name</span>
+                          <DownloadIcon
+                            className='icon'
+                            sx={{ color: '#367af7' }}
+                            onClick={() => handleDownload(task.assignSourceFilename.replace(/^[^_]*_/, ""))}
+                          />
+                          <Tooltip title='Reload source file' arrow>
+                            <CachedIcon
+                              onClick={() => handleUpload(task.assignSourceFilename.replace(/^[^_]*_/, ""))}
+                              className='icon'
+                              sx={{ color: '#367AF7' }}
+                            />
+                          </Tooltip>
+                          <TextField
+                            value={task.assignSourceFilename}
+                            sx={{ width: '350px' }}
+                            margin='normal'
+                            disabled
+                          />
+                        </div>
+                        {task.assignedStatus ? (
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-around',
+                              alignItems: 'center',
+                              fontSize: '1.2rem',
+                              color: 'red',
+                            }}
+                          >
+                            {task.assignedStatus}
+                          </div>
+                        ) : (
+                          <div
+                            style={{
+                              display: 'flex',
+                              justifyContent: 'space-around',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Button
+                              onClick={() => {
+                                // setAssignedStatus("Reject");
+                                handleCloseNotification(null,"Reject")
+                                handleCardData(task);
                               }}
+                              variant='contained'
+                              color='secondary'
                             >
-                              <span>Name</span>
-                              <TextField
-                                disabled
-                                sx={{ width: "350px " }}
-                                value={name}
-                                margin='normal'
-                              />
-                            </div>
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
+                              Reject
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                // Assuming you have a function handleAccept defined to handle acceptance
+                                handleCardData(task);
+                                handleCloseNotification(project.sourceUpload[index]);
                               }}
+                              variant='contained'
+                              color='primary'
                             >
-                              <span>Target Language</span>
-                              <TextField
-                                value={task?.assignTargetLanguage}
-                                sx={{ width: "350px " }}
-                                margin='normal'
-                                disabled
-                              />
-                            </div>
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                              }}
-                            >
-                              <span>Assign Date</span>
-                              <TextField
-                                value={task?.date}
-                                margin='normal'
-                                sx={{ width: "350px " }}
-                                disabled
-                              />
-                            </div>
-                            <div
-                              style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                              }}
-                            >
-                              <span>Source File Name</span>
-                              <DownloadIcon
-            className='icon'
-            sx={{ color: "#367af7" }}
-            onClick={() => handleDownload(fileName?.savedData[index])}
-          />
-                              {task.assignedStatus == "Accept" && (
-                                <Tooltip title="Reload source file" arrow>
-                                  <CachedIcon onClick={()=> handleUpload(fileName?.savedData[index])} className="icon" sx={{ color: "#367AF7" }} />
-                                </Tooltip>
-                              )}
-                              <TextField
-                                value={fileName?.savedData[index]}
-                                sx={{ width: "350px " }}
-                                margin='normal'
-                                disabled
-                              />
-                            </div>
-                            {task.assignedStatus ? (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-around",
-                                  alignItems: "center",
-                                  fontSize: "1.2rem",
-                                  color: "red",
-                                }}
-                              >
-                                {task.assignedStatus}
-                              </div>
-                            ) : (
-                              <div
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-around",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <Button
-                                  onClick={() => {setAssignedStatus("Reject")
-                                    handleCardData(task)}
-                                  }
-                                  variant='contained'
-                                  color='secondary'
-                                >
-                                  Reject
-                                </Button>
-                
-                                <Button
-                                  onClick={()=>{
-                                    handleCardData(task)
-                                    handleCloseNotification(fileName?.savedData[index])
-                                  }}
-                                  variant='contained'
-                                  color='primary'
-                                >
-                                  Accept
-                                </Button>
-                              </div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      ))}
-                      </div>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                              Accept
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card> : null)
+                  ))
+                ))} */}
+                 <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="task table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Target Language</TableCell>
+            <TableCell>Assign Date</TableCell>
+            <TableCell>Source File Name</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {project.map((proj) => (
+            proj.tasks.map((task, index) => (
+              task.assignedStatus !== "Reject" && (
+                <TableRow key={task._id}>
+                  <TableCell>
+                    {proj.projectName}
+                  </TableCell>
+                  <TableCell>
+                  {task.assignTargetLanguage}
+                  </TableCell>
+                  <TableCell>
+                  {format(new Date(task.date), 'yyyy-MM-dd hh:mm a')}
+                  </TableCell>
+                  <TableCell>
+                      {task.assignSourceFilename}
+                  </TableCell>
+                  <TableCell>
+                    {task.assignedStatus ? (
+                      <span style={{ color: 'red' }}>{task.assignedStatus}</span>
+                    ) : null}
+                  </TableCell>
+                  <TableCell>
+                  <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <DownloadIcon
+                    className="icon"
+                    sx={{ color: '#367af7' }}
+                    onClick={() => handleDownload(task.assignSourceFilename.replace(/^[^_]*_/, ""))}
+                  />
+                  <Tooltip title="Reload source file" arrow>
+                    <CachedIcon
+                      onClick={() => handleUpload(task.assignSourceFilename.replace(/^[^_]*_/, ""))}
+                      className="icon"
+                      sx={{ color: '#367AF7' }}
+                    />
+                  </Tooltip></div>
+                  </TableCell>
+                </TableRow>
+              )
+            ))
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
               </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
 
-              <Button
-                className={classes.fileUploadButton}
-                onClick={handleOpenChat}
-                startIcon={<ChatIcon />}
-              >
-                Chat
-              </Button>
-              <input
-                type='file'
-                accept='.csv'
-                onChange={handleFileUploadQC}
-                style={{ display: "none" }}
-                id='fileQC'
-              />
-              <label htmlFor='fileQC'>
-                <Button
-                  className={classes.fileUploadButton}
-                  component='span'
-                  onClick={handleQCClick}
-                  startIcon={<CloudDownloadIcon />}
-                >
-                  QC
-                </Button>
-              </label>
-              <label htmlFor='fileInput'>
-                <Button
-                  className={classes.fileUploadButton}
-                  component='span'
-                  onClick={handleSourceClick}
-                  startIcon={<CloudUploadIcon />}
-                >
-                  Source
-                </Button>
-              </label>
-              <input
-                type='file'
-                accept='.tmx'
-                onChange={handleFileUploadTcx}
-                style={{ display: "none" }}
-                id='fileInput2'
-              />
-              <label htmlFor='fileInput2'>
-                <Button
-                  className={classes.fileUploadButton}
-                  component='span'
-                  startIcon={<CloudUploadIcon />}
-                >
-                  TMX
-                </Button>
-              </label>
-              <Button
-                className={classes.fileUploadButton}
-                color='secondary'
-                onClick={handleDownloadCSV}
-                // disabled={!downloadReady}
-                startIcon={<CloudDownloadIcon />}
-              >
-                FT
-              </Button>
-            </>
+      <Button
+        className={classes.fileUploadButton}
+        onClick={handleOpenChat}
+        startIcon={<ChatIcon />}
+      >
+        Chat
+      </Button>
+      <input
+        type='file'
+        accept='.csv'
+        onChange={handleFileUploadQC}
+        style={{ display: 'none' }}
+        id='fileQC'
+      />
+      <label htmlFor='fileQC'>
+        <Button
+          className={classes.fileUploadButton}
+          component='span'
+          onClick={handleQCClick}
+          startIcon={<CloudDownloadIcon />}
+        >
+          QC
+        </Button>
+      </label>
+      <label htmlFor='fileInput'>
+        <Button
+          className={classes.fileUploadButton}
+          component='span'
+          onClick={handleSourceClick}
+          startIcon={<CloudUploadIcon />}
+        >
+          Source
+        </Button>
+      </label>
+      <input
+        type='file'
+        accept='.tmx'
+        onChange={handleFileUploadTcx}
+        style={{ display: 'none' }}
+        id='fileInput2'
+      />
+      <label htmlFor='fileInput2'>
+        <Button
+          className={classes.fileUploadButton}
+          component='span'
+          startIcon={<CloudUploadIcon />}
+        >
+          TMX
+        </Button>
+      </label>
+      <Button
+        className={classes.fileUploadButton}
+        color='secondary'
+        onClick={handleDownloadCSV}
+        startIcon={<CloudDownloadIcon />}
+      >
+        FT
+      </Button>
+    </>
           )}
           {isBT && (
             <>
@@ -882,17 +1101,43 @@ const handleUpload   = (fileName) =>{
                   style: {
                     width: "250px",
                     height: "200px",
-                    marginTop: "40px",
+                    marginTop: "50px",
+                    marginLeft: "-1rem",
+                    padding: "1rem",
                   },
                 }}
               >
-                <MenuItem onClick={handleCloseProfile}>Profile</MenuItem>
-                <MenuItem onClick={handleCloseProfile}>Settings</MenuItem>
+                <h3 style={{ marginBottom: "1rem" }}>User Profile</h3>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    borderBottom: "1px solid #ccc",
+                    paddingBottom: "1rem",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <IconButton onClick={handleClick} color="inherit">
+                    <Avatar src="" alt="Profile" />
+                  </IconButton>
+                  <div style={{ marginLeft: "1rem" }}>
+                    <div style={{ fontWeight: "bold" }}>{UserName}</div>
+                    <div>{department}</div>
+                    <div>{email}</div>
+                  </div>
+                </div>
                 <Link
-                  to='/'
+                  to="/"
                   style={{ textDecoration: "none", color: "inherit" }}
                 >
-                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                  <Button
+                    onClick={handleLogout}
+                    variant="outlined"
+                    color="primary"
+                    fullWidth
+                  >
+                    Logout
+                  </Button>
                 </Link>
               </Menu>
             </Toolbar>
