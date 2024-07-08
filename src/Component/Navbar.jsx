@@ -110,65 +110,7 @@ const Navbar = () => {
     }, 1000);
   }, [csvData]);
 
-  // const searchIndexApi = async () => {
-  //   try {
-  //     const newSplitData = [];
-  //     for (let i = 0; i < csvData?.length; i++) {
-  //       if (csvData[i][0]) {
-  //         const payload = {
-  //           index,
-  //           query: csvData[i][0],
-  //         };
-  //         console.log("payload==", payload);
-  
-  //         const requestBody = JSON.stringify(payload);
-  //         console.log("request==", requestBody);
-  //         const result = await fetch("http://localhost:8000/api/searchIndex", {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json;charset=utf-8",
-  //           },
-  //           body: requestBody,
-  //         });
-  //         console.log("this is result==?", result);
-  //         if (result.ok) {
-  //           const data = await result.json();
-  //           for (let index = 0; index < data.length; index++) {
-  //             const source = data[0]?.source || "";
-  //           }
-  //           const decodedText = new TextDecoder("iso-8859-1").decode(
-  //             new Uint8Array([...source].map((char) => char.charCodeAt(0))))
-  //           const originalFieldValueEncoded = csvData[i][0];
-  //           const byteValues = [];
-  //           for (let j = 0; j < originalFieldValueEncoded.length; j++) {
-  //             byteValues.push(originalFieldValueEncoded.charCodeAt(j));
-  //           }
-  //           const originalFieldValueDecoded = new TextDecoder(
-  //             "iso-8859-1"
-  //           ).decode(new Uint8Array(byteValues));
-  
-  //           const newData = {
-  //             0: originalFieldValueDecoded,
-  //             "TM text": decodedText,
-  //             "Match Percentage": data?.matchPercentage || "0%",
-  //           };
-  //           newSplitData.push(newData);
-  //           console.log("datadatadata", data);
-  
-  //           // Correct dispatch call
-  //           dispatch(setTmxData([newData]));
-  
-  //         } else {
-  //           console.error("Network result was not ok for index:", i);
-  //         }
-  //       }
-  //     }
-  //     setSplitData(newSplitData);
-  //   } catch (error) {
-  //     console.error("There was a problem with the fetch operation:", error);
-  //     throw error;
-  //   }
-  // };
+ 
   const searchIndexApi = async () => {
     try {
       const newSplitData = [];
@@ -320,70 +262,6 @@ const Navbar = () => {
   const handleCloseProfile = () => {
     setAnchorEl(null);
   };
-  useEffect(() => {
-    setTimeout(() => {
-      if (csvData.length != 0) {
-        searchIndexApi();
-      }
-    }, 1000);
-  }, [csvData]);
-
-  const searchIndexApi = async () => {
-    try {
-      const newSplitData = [];
-      for (let i = 0; i < csvData?.length; i++) {
-        if (csvData[i][0]) {
-          const payload = {
-            index,
-            query: csvData[i][0],
-          };
-          console.log("payload==", payload);
- 
-          const requestBody = JSON.stringify(payload);
-          console.log("request==", requestBody);
-          const result = await fetch("http://localhost:8000/api/searchIndex", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json;charset=utf-8",
-            },
-            body: requestBody,
-          });
-          console.log("this is result==?", result);
-          if (result.ok) {
-            const data = await result.json();
-            const source = data.results.results[0]?.source || "";
-            const decodedText = new TextDecoder("iso-8859-1").decode(
-              new Uint8Array([...source].map((char) => char.charCodeAt(0)))
-            );
-            const originalFieldValueEncoded = cvData[i][0];
-            const byteValues = [];
-            for (let j = 0; j < originalFieldValueEncoded.length; j++) {
-              byteValues.push(originalFieldValueEncoded.charCodeAt(j));
-            }
-            const originalFieldValueDecoded = new TextDecoder(
-              "iso-8859-1"
-            ).decode(new Uint8Array(byteValues));
- 
-            const newData = {
-              0: originalFieldValueDecoded,
-              "TM text": decodedText,
-              "Match Percentage":
-                data.results.results[0]?.matchPercentage || "0%",
-            };
-            newSplitData.push(newData);
-            console.log("data", data?.results);
-          } else {
-            console.error("Network result was not ok for index:", i);
-          }
-        }
-      }
-      setSplitData(newSplitData);
-    } catch (error) {
-      console.error("There was a problem with the fetch operation:", error);
-      throw error;
-    }
-  };
-
   // Define handleLogout function
   const handleLogout = () => {
     localStorage.clear();
