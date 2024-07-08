@@ -27,6 +27,9 @@ import { format } from "date-fns";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { MdDelete, MdOutlinePeople } from "react-icons/md";
 import { GoPlus } from "react-icons/go";
+import { FaArrowRight } from "react-icons/fa6";
+import { FaArrowLeft } from "react-icons/fa6";
+import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import axios from "axios";
 import CloseIcon from "@mui/icons-material/Close";
 import "./CSS/Component.css";
@@ -40,10 +43,12 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import AddIcon from "@mui/icons-material/Add";
+import { Domain } from "@material-ui/icons";
+// import { useFunctionContext } from "./Context/Function";
+
 const Project = () => {
-  const [projectName, setProjectName] = useState([]);
+  // const [projectName, setProjectName] = useState([]) ;
   const [projects, setProjects] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [language, setLanguage] = useState([]);
@@ -68,10 +73,10 @@ const Project = () => {
   const [fileUpload, setFileUpload] = useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
   const [index, setIndex] = useState(null);
-  const [domain, setDomain] = useState([]);
   const [value, setValue] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState("");
   const [fileSoureName, setFileSoureName] = useState("");
+  const [domain, setDomain] = useState([]);
   let name = localStorage.getItem("name");
 
   const handleClickOpen = (index, project) => {

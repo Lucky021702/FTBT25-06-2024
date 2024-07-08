@@ -8,9 +8,9 @@ import mammoth from "mammoth";
 // import mammoth from "../../../../backend/uploads";
 import { useSelector } from "react-redux";
 import axios from "axios";
-
+ 
 export const FunctionContext = createContext();
-
+ 
 export const FunctionProvider = ({ children }) => {
   const [isQCSelected, setIsQCSelected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,10 +26,9 @@ export const FunctionProvider = ({ children }) => {
   const [englishSource, setEnglishSource] = useState([]);
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  
 
+ 
+ 
   const navigate = useNavigate();
  
   useEffect(() => {
@@ -39,26 +38,7 @@ export const FunctionProvider = ({ children }) => {
     }
   }, [navigate]);
 
-useEffect(()=>{
-console.log("csvData",csvData);
-},[csvData])
-const handleRowsPerPageChange = (event) => {
-  setRowsPerPage(event.target.value);
-  setCurrentPage(1);
-  console.log(rowsPerPage);
-};
-const handleNextPage = () => {
-  setCurrentPage((prevPage) => prevPage + 1);
-  console.log(currentPage);
-};
-const handlePreviousPage = () => {
-  setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
-};
-const totalLines = csvData.length;
-console.log("totalLines",totalLines);
-const startIndex = (currentPage - 1) * rowsPerPage;
-const endIndex = startIndex + rowsPerPage;
-const paginatedData = csvData.slice(startIndex, endIndex);
+
 
   const handleQCClick = () => {
     setIsQCSelected(true);
@@ -98,83 +78,33 @@ const paginatedData = csvData.slice(startIndex, endIndex);
     };
     reader.readAsBinaryString(file);
   };
-  // const handleFileUpload = (event) => {
-  //   const file = event.target.files[0];
-  //   if (!file) return;
-  //   setIsLoading(true);
-  //   const fileReader = new FileReader();
-  //   fileReader.onload = (e) => {
-  //     const data = new Uint8Array(e.target.result);
-  //     const workbook = XLSX.read(data, { type: "array" });
-  //     const firstSheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[firstSheetName];
-  //     const parsedData = XLSX.utils.sheet_to_json(worksheet, {
-  //       header: 1,
-  //       range: 1,
-  //     });
-  //     setCSVData(parsedData);
-  //     setIsLoading(false);
-  //   };
-  //   fileReader.readAsArrayBuffer(file);
-  // };
-
-  // const handleFileUpload = (event) => {
-  //   const file = event.target.files[0];
-  //   if (!file) return;
-  //   setIsLoading(true);
-  //   const extension = file.name.split(".").pop().toLowerCase();
-  //   const fileReader = new FileReader();
-  //   fileReader.onload = (e) => {
-  //     const data = new Uint8Array(e.target.result);
-  //     if (extension === "csv") {
-  //       processCSV(data);
-  //     } else if (extension === "docx") {
-  //       processDOCX(data);
-  //     }
-  //   };
-  //   fileReader.readAsArrayBuffer(file);
-  // };
-  
-  // const processCSV = (data) => {
-  //   const workbook = XLSX.read(data, { type: "array" });
-  //   const firstSheetName = workbook.SheetNames[0];
-  //   const worksheet = workbook.Sheets[firstSheetName];
-  //   const parsedData = XLSX.utils.sheet_to_json(worksheet, {
-  //     header: 1,
-  //     range: 1,
-  //   });
-  //   setCSVData(parsedData);
-  //   setIsLoading(false);
-  // };
-
-  // let fileName = useSelector((state)=>state.savedData)
 
   const handleFileUpload = async (fileName) => {
     if (!fileName) {
       console.error("File name is not provided");
       return;
     }
-
+ 
     const backendUrl = 'http://localhost:8000'; // Replace with your backend server URL
     const filePath = `${backendUrl}/api/files/${fileName}`;
     const extension = fileName.split('.').pop().toLowerCase();
-
+ 
     setIsLoading(true);
-
+ 
     try {
       console.log(`Fetching file from: ${filePath}`);
       const response = await axios.get(filePath, {
         responseType: 'arraybuffer',
       });
-
+ 
       console.log(`File fetched successfully. Processing as ${extension}...`);
-
+ 
       if (extension === 'csv') {
         // Log the content before processing
         const textDecoder = new TextDecoder('utf-8');
         const csvContent = textDecoder.decode(new Uint8Array(response.data));
         console.log('CSV Content:', csvContent);
-
+ 
         // Process the CSV content
         processCSV(new Uint8Array(response.data));
       } else if (extension === 'docx') {
@@ -188,7 +118,7 @@ const paginatedData = csvData.slice(startIndex, endIndex);
       setIsLoading(false);
     }
   };
-
+ 
   const processCSV = (data) => {
     try {
       console.log("Processing CSV data...");
@@ -207,18 +137,7 @@ const paginatedData = csvData.slice(startIndex, endIndex);
       setIsLoading(false);
     }
   };
-  // const processDOCX = async (arrayBuffer) => {
-  //   try {
-  //     const { value } = await mammoth.convertToHtml({ arrayBuffer });
-  //     const lines = value.split(/(?<=[.,])/g).map((line) => line.trim());
-  //     setCSVData(lines.filter((line) => line.length > 0).map((line) => [line]));
-  //     console.log(lines);
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     console.error("Error processing DOCX file:", error);
-  //     setIsLoading(false);
-  //   }
-  // };
+  
   const processDOCX = async (arrayBuffer) => {
     try {
       const { value } = await mammoth.convertToHtml({ arrayBuffer });
@@ -247,25 +166,7 @@ const paginatedData = csvData.slice(startIndex, endIndex);
       return [];
     }
   };
-  // const processDOCX = async (arrayBuffer) => {
-  //   try {
-  //     const { value } = await mammoth.convertToHtml({ arrayBuffer });
-  //     const container = document.createElement("div");
-  //     container.innerHTML = value;
-  //     const paragraphs = container.querySelectorAll("p");
-  //     const content = Array.from(paragraphs).flatMap((p) => {
-  //       const html = p.innerHTML;
-  //       const lines = html.split(/(?<=[.,])/g).map((line) => line.trim());
-  //       return lines.filter((line) => line.length > 0);
-  //     });
-  //     setCSVData(content.map((line) => [line]));
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     console.error("Error processing DOCX file:", error);
-  //     setIsLoading(false);
-  //   }
-  // };
-
+ 
   const handleFileUploadTcx = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -431,7 +332,7 @@ const paginatedData = csvData.slice(startIndex, endIndex);
   const handleFileUploadQCSource2 = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
+ 
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = new Uint8Array(e.target.result);
@@ -482,7 +383,7 @@ const paginatedData = csvData.slice(startIndex, endIndex);
         },
         body: JSON.stringify(data),
       });
-
+ 
       if (response.ok) {
         console.log("Filename added successfully");
       } else {
@@ -492,7 +393,7 @@ const paginatedData = csvData.slice(startIndex, endIndex);
       console.error("Error:", error);
     }
   };
-
+ 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (dataTrue) {
@@ -501,7 +402,7 @@ const paginatedData = csvData.slice(startIndex, endIndex);
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [dataTrue]);
-
+ 
   useEffect(() => {
     if (ftData.length > 0) {
       const newData = [...savedData];
@@ -528,7 +429,7 @@ const paginatedData = csvData.slice(startIndex, endIndex);
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [dataTrue]);
-
+ 
   const contextValue = {
     isQCSelected,
     isLoading,
@@ -570,22 +471,13 @@ const paginatedData = csvData.slice(startIndex, endIndex);
     handleFileUploadQCSource2,
     handleCommentChange,
     handleDownloadQC,
-    handleRowsPerPageChange,
-    handleNextPage,
-    handlePreviousPage,
-    paginatedData,
-    currentPage,
-    rowsPerPage,
-    endIndex,
-    startIndex,
-    totalLines
   };
-
+ 
   return (
     <FunctionContext.Provider value={contextValue}>
       {children}
     </FunctionContext.Provider>
   );
 };
-
+ 
 export const useFunctionContext = () => useContext(FunctionContext);
