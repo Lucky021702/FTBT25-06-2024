@@ -12,6 +12,8 @@ import PDF from "./Component/Pdf";
 import Docx_IntoCells from "./Component/Docx_IntoCells";
 import AssignTaskDialog from "./Component/AssignTaskDialog";
 import Loader from "./Component/Common_Component/Loader"
+import Test from "./Component/test"
+
 function App() {
   return (
     <>
@@ -29,6 +31,7 @@ function App() {
           <Route path="/docxIntoCells" element={<Docx_IntoCells />} />
           <Route path="/assignTask" element={<AssignTaskDialog />} />
           <Route path="/loader" element={<Loader />} />
+          <Route path="/test" element={<Test />} />
         </Routes>
       </FunctionProvider>
     </>

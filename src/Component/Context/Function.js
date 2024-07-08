@@ -26,8 +26,7 @@ export const FunctionProvider = ({ children }) => {
   const [englishSource, setEnglishSource] = useState([]);
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+
  
  
   const navigate = useNavigate();
@@ -39,26 +38,7 @@ export const FunctionProvider = ({ children }) => {
     }
   }, [navigate]);
 
-useEffect(()=>{
-console.log("csvData",csvData);
-},[csvData])
-const handleRowsPerPageChange = (event) => {
-  setRowsPerPage(event.target.value);
-  setCurrentPage(1);
-  console.log(rowsPerPage);
-};
-const handleNextPage = () => {
-  setCurrentPage((prevPage) => prevPage + 1);
-  console.log(currentPage);
-};
-const handlePreviousPage = () => {
-  setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
-};
-const totalLines = csvData.length;
-console.log("totalLines",totalLines);
-const startIndex = (currentPage - 1) * rowsPerPage;
-const endIndex = startIndex + rowsPerPage;
-const paginatedData = csvData.slice(startIndex, endIndex);
+
 
   const handleQCClick = () => {
     setIsQCSelected(true);
@@ -98,56 +78,6 @@ const paginatedData = csvData.slice(startIndex, endIndex);
     };
     reader.readAsBinaryString(file);
   };
-  // const handleFileUpload = (event) => {
-  //   const file = event.target.files[0];
-  //   if (!file) return;
-  //   setIsLoading(true);
-  //   const fileReader = new FileReader();
-  //   fileReader.onload = (e) => {
-  //     const data = new Uint8Array(e.target.result);
-  //     const workbook = XLSX.read(data, { type: "array" });
-  //     const firstSheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[firstSheetName];
-  //     const parsedData = XLSX.utils.sheet_to_json(worksheet, {
-  //       header: 1,
-  //       range: 1,
-  //     });
-  //     setCSVData(parsedData);
-  //     setIsLoading(false);
-  //   };
-  //   fileReader.readAsArrayBuffer(file);
-  // };
- 
-  // const handleFileUpload = (event) => {
-  //   const file = event.target.files[0];
-  //   if (!file) return;
-  //   setIsLoading(true);
-  //   const extension = file.name.split(".").pop().toLowerCase();
-  //   const fileReader = new FileReader();
-  //   fileReader.onload = (e) => {
-  //     const data = new Uint8Array(e.target.result);
-  //     if (extension === "csv") {
-  //       processCSV(data);
-  //     } else if (extension === "docx") {
-  //       processDOCX(data);
-  //     }
-  //   };
-  //   fileReader.readAsArrayBuffer(file);
-  // };
- 
-  // const processCSV = (data) => {
-  //   const workbook = XLSX.read(data, { type: "array" });
-  //   const firstSheetName = workbook.SheetNames[0];
-  //   const worksheet = workbook.Sheets[firstSheetName];
-  //   const parsedData = XLSX.utils.sheet_to_json(worksheet, {
-  //     header: 1,
-  //     range: 1,
-  //   });
-  //   setCSVData(parsedData);
-  //   setIsLoading(false);
-  // };
-
-  // let fileName = useSelector((state)=>state.savedData)
 
   const handleFileUpload = async (fileName) => {
     if (!fileName) {
@@ -207,18 +137,7 @@ const paginatedData = csvData.slice(startIndex, endIndex);
       setIsLoading(false);
     }
   };
-  // const processDOCX = async (arrayBuffer) => {
-  //   try {
-  //     const { value } = await mammoth.convertToHtml({ arrayBuffer });
-  //     const lines = value.split(/(?<=[.,])/g).map((line) => line.trim());
-  //     setCSVData(lines.filter((line) => line.length > 0).map((line) => [line]));
-  //     console.log(lines);
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     console.error("Error processing DOCX file:", error);
-  //     setIsLoading(false);
-  //   }
-  // };
+  
   const processDOCX = async (arrayBuffer) => {
     try {
       const { value } = await mammoth.convertToHtml({ arrayBuffer });
@@ -247,24 +166,6 @@ const paginatedData = csvData.slice(startIndex, endIndex);
       return [];
     }
   };
-  // const processDOCX = async (arrayBuffer) => {
-  //   try {
-  //     const { value } = await mammoth.convertToHtml({ arrayBuffer });
-  //     const container = document.createElement("div");
-  //     container.innerHTML = value;
-  //     const paragraphs = container.querySelectorAll("p");
-  //     const content = Array.from(paragraphs).flatMap((p) => {
-  //       const html = p.innerHTML;
-  //       const lines = html.split(/(?<=[.,])/g).map((line) => line.trim());
-  //       return lines.filter((line) => line.length > 0);
-  //     });
-  //     setCSVData(content.map((line) => [line]));
-  //     setIsLoading(false);
-  //   } catch (error) {
-  //     console.error("Error processing DOCX file:", error);
-  //     setIsLoading(false);
-  //   }
-  // };
  
   const handleFileUploadTcx = (event) => {
     const file = event.target.files[0];
@@ -570,15 +471,6 @@ const paginatedData = csvData.slice(startIndex, endIndex);
     handleFileUploadQCSource2,
     handleCommentChange,
     handleDownloadQC,
-    handleRowsPerPageChange,
-    handleNextPage,
-    handlePreviousPage,
-    paginatedData,
-    currentPage,
-    rowsPerPage,
-    endIndex,
-    startIndex,
-    totalLines
   };
  
   return (

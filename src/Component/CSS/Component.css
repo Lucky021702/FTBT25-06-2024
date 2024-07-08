@@ -20,7 +20,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; 
+  z-index: 9999;
 }
 .docx-table-container {
   margin-top: 20px;
@@ -48,7 +48,7 @@
 }
 
 .icon:hover {
-  transform: scale(1.2); 
+  transform: scale(1.2);
 }
 
 .icon-container:hover::before {
@@ -63,13 +63,13 @@
   white-space: nowrap; /* Prevent tooltip from wrapping */
 }
 .icon-container:hover::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%; /* Center vertically */
   left: 100%; /* Position on the right of the icon */
   transform: translate(-50%, -50%); /* Center horizontally and vertically */
-  width: 1.5rem; 
-  height: 1.5rem; 
+  width: 1.5rem;
+  height: 1.5rem;
   background-color: rgba(0, 0, 0, 0.8); /* Background color of the circle */
   border-radius: 50%; /* Make it a circle */
   z-index: -1; /* Behind the icon */
@@ -102,18 +102,24 @@ select option {
 select option:hover {
   background-color: #f1f1f1;
 }
-.custom-editor {
-  width: 80%;
+.editor {
+  max-width: 80%; /* Set the desired max width */
+  white-space: pre-wrap; /* Ensure long text wraps correctly */
+  word-break: break-word; /* Ensure long words break correctly */
 }
 
 .highlight-text {
-  color: #3F51B5; /* Text color */
+  color: #3f51b5; /* Text color */
   padding: 10px 20px; /* Padding around the text */
   font-size: 24px; /* Increase font size for better visibility */
   font-weight: bold; /* Bold font */
   text-align: center; /* Center-align text */
-  font-family: 'Arial', sans-serif; /* Change font family */
-  background: linear-gradient(45deg, #3F51B5, #1E88E5); /* Gradient text color */
+  font-family: "Arial", sans-serif; /* Change font family */
+  background: linear-gradient(
+    45deg,
+    #3f51b5,
+    #1e88e5
+  ); /* Gradient text color */
   -webkit-background-clip: text; /* Clip background to text */
   color: transparent; /* Make text transparent to show gradient */
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Add text shadow */
@@ -124,8 +130,8 @@ select option:hover {
   transform: scale(1.05); /* Slightly increase size on hover */
   text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5); /* Enhance text shadow on hover */
 }
-.main{
-  margin: "2rem"
+.main {
+  margin: "2rem";
 }
 
 .navbar {
@@ -166,4 +172,3 @@ select option:hover {
   align-items: center;
   z-index: 1000;
 }
-

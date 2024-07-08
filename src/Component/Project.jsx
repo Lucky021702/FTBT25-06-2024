@@ -75,6 +75,7 @@ const Project = () => {
   const [value, setValue] = useState(false);
   const [selectedDomain, setSelectedDomain] = useState("");
   const [fileSoureName, setFileSoureName] = useState("");
+  const [domain, setDomain] = useState([]);
   let name = localStorage.getItem("name");
 
   const handleClickOpen = (index, project) => {
