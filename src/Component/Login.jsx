@@ -98,6 +98,7 @@ const Login = () => {
 
         // Use the email from the backend response
         localStorage.setItem("email", response.data.email);
+        localStorage.setItem("userId", JSON.stringify(response.data.userId));
         setOpenSuccessSnackbar(true);
         setTimeout(() => {
           switch (department) {
