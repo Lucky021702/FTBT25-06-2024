@@ -1,6 +1,11 @@
 .navbarCss {
   font-size: 1rem;
 }
+
+.ck.ck-editor__editable:not(.ck-editor__nested-editable) {
+  height: 10vh;
+}
+
 .nav {
   display: flex;
   justify-content: flex-end;
@@ -49,6 +54,7 @@
 
 .icon:hover {
   transform: scale(1.2);
+  background-color:"red"
 }
 
 .icon-container:hover::before {

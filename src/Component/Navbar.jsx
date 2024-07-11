@@ -17,7 +17,7 @@ import {
   Button,
 } from "@material-ui/core";
 import { format } from "date-fns";
-import { json, Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useFunctionContext } from "./Context/Function";
 import CloudUploadIcon from "@material-ui/icons/CloudUpload";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
@@ -80,10 +80,7 @@ const Navbar = () => {
     handleDownloadQC,
     setCSVData,
     csvData,
-  
   } = context;
-
-
 
   const classes = useStyles();
   const location = useLocation();
@@ -101,7 +98,9 @@ const Navbar = () => {
   const [project, setProject] = useState([]);
   const [cardData, setCardData] = useState(null);
   const [index, setIndex] = useState(null);
- const dispatch = useDispatch()
+  const dispatch = useDispatch();
+
+  
   useEffect(() => {
     setTimeout(() => {
       // if (csvData.length != 0) {
@@ -120,7 +119,7 @@ const Navbar = () => {
   //           query: csvData[i][0],
   //         };
   //         console.log("payload==", payload);
-  
+
   //         const requestBody = JSON.stringify(payload);
   //         console.log("request==", requestBody);
   //         const result = await fetch("http://localhost:8000/api/searchIndex", {
@@ -146,7 +145,7 @@ const Navbar = () => {
   //           const originalFieldValueDecoded = new TextDecoder(
   //             "iso-8859-1"
   //           ).decode(new Uint8Array(byteValues));
-  
+
   //           const newData = {
   //             0: originalFieldValueDecoded,
   //             "TM text": decodedText,
@@ -154,10 +153,10 @@ const Navbar = () => {
   //           };
   //           newSplitData.push(newData);
   //           console.log("datadatadata", data);
-  
+
   //           // Correct dispatch call
   //           dispatch(setTmxData([newData]));
-  
+
   //         } else {
   //           console.error("Network result was not ok for index:", i);
   //         }
@@ -179,7 +178,7 @@ const Navbar = () => {
             query: csvData[i][0],
           };
           console.log("payload==", payload);
-  
+
           const requestBody = JSON.stringify(payload);
           console.log("request==", requestBody);
           const result = await fetch("http://localhost:8000/api/searchIndex", {
@@ -193,7 +192,7 @@ const Navbar = () => {
           if (result.ok) {
             const data = await result.json();
             console.log("datadatadata", data);
-  
+
             if (data.length > 0) {
               const source = data[0]?.source || "";
               const target = data[0]?.target || "";
@@ -204,7 +203,7 @@ const Navbar = () => {
               const decodedText = new TextDecoder("iso-8859-1").decode(
                 new Uint8Array([...source].map((char) => char.charCodeAt(0)))
               );
-  
+
               const originalFieldValueEncoded = csvData[i][0];
               const byteValues = [];
               for (let k = 0; k < originalFieldValueEncoded.length; k++) {
@@ -213,19 +212,18 @@ const Navbar = () => {
               const originalFieldValueDecoded = new TextDecoder(
                 "iso-8859-1"
               ).decode(new Uint8Array(byteValues));
-  
+
               const newData = {
-                "csvSourceData": originalFieldValueDecoded,
-                "source": decodedText,
-                "target":decodedTarget,
+                csvSourceData: originalFieldValueDecoded,
+                source: decodedText,
+                target: decodedTarget,
                 "Match Percentage": data[0]?.matchPercentage || "0%",
               };
               newSplitData.push(newData);
-  
+
               // Correct dispatch call for each new data object
               dispatch(setTmxData([newData]));
             }
-  
           } else {
             console.error("Network result was not ok for index:", i);
           }
@@ -237,13 +235,7 @@ const Navbar = () => {
       throw error;
     }
   };
-  
-  
- 
- 
- 
- 
- 
+
   let email = localStorage.getItem("email");
   const handleClickOpen = () => {
     setDialogOpen(true);
@@ -542,18 +534,23 @@ const Navbar = () => {
                                               alignItems: "center",
                                             }}
                                           >
-                                            <DownloadIcon
-                                              className="icon"
-                                              sx={{ color: "#367af7" }}
-                                              onClick={() =>
-                                                handleDownload(
-                                                  task.assignSourceFilename.replace(
-                                                    /^[^_]*_/,
-                                                    ""
+                                            <Tooltip
+                                              title="Download source file"
+                                              arrow
+                                            >
+                                              <DownloadIcon
+                                                className="icon"
+                                                sx={{ color: "#367af7" }}
+                                                onClick={() =>
+                                                  handleDownload(
+                                                    task.assignSourceFilename.replace(
+                                                      /^[^_]*_/,
+                                                      ""
+                                                    )
                                                   )
-                                                )
-                                              }
-                                            />
+                                                }
+                                              />
+                                            </Tooltip>
                                             <Tooltip
                                               title="Reload source file"
                                               arrow
@@ -597,6 +594,7 @@ const Navbar = () => {
               <input
                 type="file"
                 accept=".csv"
+                disabled
                 onChange={handleFileUploadQC}
                 style={{ display: "none" }}
                 id="fileQC"
@@ -605,6 +603,7 @@ const Navbar = () => {
                 <Button
                   className={classes.fileUploadButton}
                   component="span"
+                  disabled
                   onClick={handleQCClick}
                   startIcon={<CloudDownloadIcon />}
                 >
@@ -942,19 +941,14 @@ const Navbar = () => {
         </Typography>
         {renderFileUpload()}
         {isLoggedIn && location.pathname !== "/login" ? (
-          // <Typography variant="h6">
-          //   <Link
-          //     to="/"
-          //     onClick={handleLogout}
-          //     style={{ textDecoration: "none", color: "inherit" }}
-          //   >
-          //     Logout
-          //   </Link>
-          // </Typography>
           <Typography position="static">
             <Toolbar>
               <Box sx={{ flexGrow: 1 }} />
-              <IconButton onClick={handleClick} color="inherit">
+              <IconButton
+                onClick={handleClick}
+                color="inherit"
+                className="icon"
+              >
                 <Avatar src="" alt="Profile" />
               </IconButton>
               <Menu

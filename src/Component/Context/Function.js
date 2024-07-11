@@ -8,9 +8,9 @@ import mammoth from "mammoth";
 // import mammoth from "../../../../backend/uploads";
 import { useSelector } from "react-redux";
 import axios from "axios";
- 
+
 export const FunctionContext = createContext();
- 
+
 export const FunctionProvider = ({ children }) => {
   const [isQCSelected, setIsQCSelected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,15 +22,13 @@ export const FunctionProvider = ({ children }) => {
   const [savedData, setSavedData] = useState([]);
   const [downloadReady, setDownloadReady] = useState(false);
   const [dataTrue, setDataTrue] = useState(false);
-  const [hideTmxColumn, sethideTmxColumn] = useState(false);
+  const [hideTmxColumn, setHideTmxColumn] = useState(false);
   const [englishSource, setEnglishSource] = useState([]);
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
 
- 
- 
   const navigate = useNavigate();
- 
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -38,7 +36,15 @@ export const FunctionProvider = ({ children }) => {
     }
   }, [navigate]);
 
-
+  useEffect(() => {
+    console.log("saveddata==", savedData);
+  }, [savedData]);
+  useEffect(() => {
+    console.log("csvData==", csvData);
+  }, [csvData]);
+  useEffect(() => {
+    console.log("editableData==", editableData);
+  }, [editableData]);
 
   const handleQCClick = () => {
     setIsQCSelected(true);
@@ -84,41 +90,36 @@ export const FunctionProvider = ({ children }) => {
       console.error("File name is not provided");
       return;
     }
- 
-    const backendUrl = 'http://localhost:8000'; // Replace with your backend server URL
+    const backendUrl = "http://localhost:8000"; // Replace with your backend server URL
     const filePath = `${backendUrl}/api/files/${fileName}`;
-    const extension = fileName.split('.').pop().toLowerCase();
- 
+    const extension = fileName.split(".").pop().toLowerCase();
     setIsLoading(true);
- 
+
     try {
       console.log(`Fetching file from: ${filePath}`);
       const response = await axios.get(filePath, {
-        responseType: 'arraybuffer',
+        responseType: "arraybuffer",
       });
- 
       console.log(`File fetched successfully. Processing as ${extension}...`);
- 
-      if (extension === 'csv') {
+      if (extension === "csv") {
         // Log the content before processing
-        const textDecoder = new TextDecoder('utf-8');
+        const textDecoder = new TextDecoder("utf-8");
         const csvContent = textDecoder.decode(new Uint8Array(response.data));
-        console.log('CSV Content:', csvContent);
- 
+        console.log("CSV Content:", csvContent);
         // Process the CSV content
         processCSV(new Uint8Array(response.data));
-      } else if (extension === 'docx') {
+      } else if (extension === "docx") {
         processDOCX(new Uint8Array(response.data));
       } else {
-        throw new Error('Unsupported file extension');
+        throw new Error("Unsupported file extension");
       }
     } catch (error) {
-      console.error('Error loading file:', error);
+      console.error("Error loading file:", error);
     } finally {
       setIsLoading(false);
     }
   };
- 
+
   const processCSV = (data) => {
     try {
       console.log("Processing CSV data...");
@@ -130,14 +131,14 @@ export const FunctionProvider = ({ children }) => {
         range: 1,
       });
       setCSVData(parsedData);
-      console.log("CSV data processed successfully");
+      console.log("CSV data processed successfully", parsedData);
     } catch (error) {
       console.error("Error processing CSV:", error);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const processDOCX = async (arrayBuffer) => {
     try {
       const { value } = await mammoth.convertToHtml({ arrayBuffer });
@@ -166,7 +167,7 @@ export const FunctionProvider = ({ children }) => {
       return [];
     }
   };
- 
+
   const handleFileUploadTcx = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -191,6 +192,7 @@ export const FunctionProvider = ({ children }) => {
     };
     reader.readAsText(file, "ISO-8859-1");
   };
+
   const handleFileUploadTcxBT = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -215,58 +217,118 @@ export const FunctionProvider = ({ children }) => {
   };
 
   const compareAndSetFT = (sourceSentence, tmxSentence) => {
-     // Convert to string and handle null or undefined cases
-     const sourceString = String(sourceSentence || "")
-       .toLowerCase()
-       .replace(/[^\w\s]/g, "")
-       .trim();
-     const tmxString = String(tmxSentence || "")
-       .toLowerCase()
-       .replace(/[^\w\s]/g, "")
-       .trim();
-     // Split sentences into words
-     const sourceWords = sourceString.split(/\s+/);
-     const tmxWords = tmxString.split(/\s+/);
-     // Count matching words
-     let matchCount = 0;
-     sourceWords.forEach((word) => {
-       if (tmxWords.includes(word)) {
-         matchCount++;
-       }
-     });
-     // Calculate match percentage
-     const matchPercentage = (matchCount / sourceWords.length) * 100;
-     // console.log("matchPercentage", matchPercentage);
-  
-     return Math.round(matchPercentage);
-   };
-  
+    // Convert to string and handle null or undefined cases
+    const sourceString = String(sourceSentence || "")
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .trim();
+    const tmxString = String(tmxSentence || "")
+      .toLowerCase()
+      .replace(/[^\w\s]/g, "")
+      .trim();
+    // Split sentences into words
+    const sourceWords = sourceString.split(/\s+/);
+    const tmxWords = tmxString.split(/\s+/);
+    // Count matching words
+    let matchCount = 0;
+    sourceWords.forEach((word) => {
+      if (tmxWords.includes(word)) {
+        matchCount++;
+      }
+    });
+    // Calculate match percentage
+    const matchPercentage = (matchCount / sourceWords.length) * 100;
+    // console.log("matchPercentage", matchPercentage);
 
-
-  const handleSave = (index) => {
-    const newSavedData = [...savedData];
-    newSavedData[index] = editableData[index];
-    setSavedData(newSavedData);
-    const newEditableData = [...editableData];
-    newEditableData[index] = "";
-    setEditableData(newEditableData);
+    return Math.round(matchPercentage);
   };
+
+  // const handleDownloadCSV = async () => {
+  //   const workbook = new ExcelJS.Workbook();
+  //   const worksheet = workbook.addWorksheet("Sheet1");
+  //   csvData.forEach((sentence) => {
+  //     const row = worksheet.addRow();
+  //     const cell = row.getCell(1);
+  //     const textSegments = [];
+  //     let currentSegment = { text: "", font: {} };
+  //     let insideTag = false;
+  //     let tempText = "";
+  //     for (let i = 0; i < sentence?.length; i++) {
+  //       if (sentence[i] === "<") {
+  //         insideTag = true;
+  //         textSegments.push(currentSegment);
+  //         currentSegment = { text: "", font: {} };
+  //       } else if (sentence[i] === ">") {
+  //         insideTag = false;
+  //         const htmlTag = tempText.toLowerCase();
+  //         if (htmlTag === "strong" || htmlTag === "b") {
+  //           currentSegment.font.bold = true;
+  //         } else if (htmlTag === "i") {
+  //           currentSegment.font.italic = true;
+  //         } else if (htmlTag === "sup") {
+  //           currentSegment.font.size = 11;
+  //           currentSegment.font.vertAlign = "superscript";
+  //         } else if (htmlTag === "sub") {
+  //           currentSegment.font.size = 11;
+  //           currentSegment.font.vertAlign = "subscript";
+  //         }
+  //         tempText = "";
+  //       } else {
+  //         if (insideTag) {
+  //           tempText += sentence[i];
+  //         } else {
+  //           currentSegment.text += sentence[i];
+  //         }
+  //       }
+  //     }
+  //     textSegments.push(currentSegment);
+  //     cell.value = { richText: textSegments };
+  //   });
+  //   const buffer = await workbook.xlsx.writeBuffer();
+  //   const blob = new Blob([buffer], {
+  //     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  //   });
+  //   const url = URL.createObjectURL(blob);
+  //   const link = document.createElement("a");
+  //   link.href = url;
+  //   link.setAttribute("download", "front_translation_data.csv");
+  //   document.body.appendChild(link);
+  //   link.click();
+  //   document.body.removeChild(link);
+  //   URL.revokeObjectURL(url);
+  // };
+
   const handleDownloadCSV = async () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
-    savedData.forEach((sentence) => {
+    worksheet.addRow(["Source", "Target"]);
+    const maxLength = Math.max(savedData.length, csvData.length);
+    const paddedSavedData = [
+      ...savedData,
+      ...Array(maxLength - savedData.length).fill(""),
+    ];
+    const paddedCsvData = [
+      ...csvData,
+      ...Array(maxLength - csvData.length).fill([""]),
+    ];
+    paddedCsvData.forEach((csvSentenceArray, index) => {
       const row = worksheet.addRow();
-      const cell = row.getCell(1);
+      const csvCell = row.getCell(1);
+      const savedCell = row.getCell(2);
+      const csvSentence = csvSentenceArray.join(" ");
+      csvCell.value = csvSentence;
+      const savedSentence = paddedSavedData[index];
       const textSegments = [];
       let currentSegment = { text: "", font: {} };
       let insideTag = false;
       let tempText = "";
-      for (let i = 0; i < sentence.length; i++) {
-        if (sentence[i] === "<") {
+
+      for (let i = 0; i < savedSentence?.length; i++) {
+        if (savedSentence[i] === "<") {
           insideTag = true;
           textSegments.push(currentSegment);
           currentSegment = { text: "", font: {} };
-        } else if (sentence[i] === ">") {
+        } else if (savedSentence[i] === ">") {
           insideTag = false;
           const htmlTag = tempText.toLowerCase();
           if (htmlTag === "strong" || htmlTag === "b") {
@@ -283,15 +345,16 @@ export const FunctionProvider = ({ children }) => {
           tempText = "";
         } else {
           if (insideTag) {
-            tempText += sentence[i];
+            tempText += savedSentence[i];
           } else {
-            currentSegment.text += sentence[i];
+            currentSegment.text += savedSentence[i];
           }
         }
       }
       textSegments.push(currentSegment);
-      cell.value = { richText: textSegments };
+      savedCell.value = { richText: textSegments };
     });
+
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -299,19 +362,27 @@ export const FunctionProvider = ({ children }) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "front_translation_data.csv");
+    link.setAttribute("download", "combined_data.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
+
+  const handleSave = (index, data) => {
+    const newSavedData = [...savedData];
+    newSavedData[index] = editableData[index];
+    setSavedData(newSavedData);
+    console.log("newsaveddata==",newSavedData);
+  };
+
   const handleEditorChange = (event, editor, index) => {
     const data = editor.getData();
-    const newData = [...savedData];
-    const cleanedData = data.replace(/<p>/g, "").replace(/<\/p>/g, "");
-    newData[index] = cleanedData;
-    setSavedData(newData);
+    const newEditableData = [...editableData];
+    newEditableData[index] = data;
+    setEditableData(newEditableData);
   };
+
   const handleFileUploadQCSource = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -332,7 +403,7 @@ export const FunctionProvider = ({ children }) => {
   const handleFileUploadQCSource2 = (event) => {
     const file = event.target.files[0];
     if (!file) return;
- 
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = new Uint8Array(e.target.result);
@@ -383,7 +454,7 @@ export const FunctionProvider = ({ children }) => {
         },
         body: JSON.stringify(data),
       });
- 
+
       if (response.ok) {
         console.log("Filename added successfully");
       } else {
@@ -393,7 +464,7 @@ export const FunctionProvider = ({ children }) => {
       console.error("Error:", error);
     }
   };
- 
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (dataTrue) {
@@ -402,7 +473,7 @@ export const FunctionProvider = ({ children }) => {
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [dataTrue]);
- 
+
   useEffect(() => {
     if (ftData.length > 0) {
       const newData = [...savedData];
@@ -412,14 +483,14 @@ export const FunctionProvider = ({ children }) => {
         } else {
           newData[index] = editableData[index];
         }
-        console.log("tcxData[index]",tcxData[index]);
+        console.log("tcxData[index]", tcxData[index]);
       });
       setSavedData(newData);
-     
     }
   }, [tcxData]);
-  const handlehide = () => {
-    sethideTmxColumn((prevState) => !prevState);
+
+  const handleHide = () => {
+    setHideTmxColumn((prevState) => !prevState);
   };
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -429,7 +500,7 @@ export const FunctionProvider = ({ children }) => {
     }, 500);
     return () => clearTimeout(timeoutId);
   }, [dataTrue]);
- 
+
   const contextValue = {
     isQCSelected,
     isLoading,
@@ -456,7 +527,7 @@ export const FunctionProvider = ({ children }) => {
     setSavedData,
     setDownloadReady,
     setDataTrue,
-    sethideTmxColumn,
+    setHideTmxColumn,
     handleQCClick,
     handleSourceClick,
     handleFileUploadQC,
@@ -466,18 +537,18 @@ export const FunctionProvider = ({ children }) => {
     handleSave,
     handleDownloadCSV,
     handleEditorChange,
-    handlehide,
+    handleHide,
     handleFileUploadQCSource,
     handleFileUploadQCSource2,
     handleCommentChange,
     handleDownloadQC,
   };
- 
+
   return (
     <FunctionContext.Provider value={contextValue}>
       {children}
     </FunctionContext.Provider>
   );
 };
- 
+
 export const useFunctionContext = () => useContext(FunctionContext);
