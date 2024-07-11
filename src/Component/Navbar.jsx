@@ -76,7 +76,6 @@ const Navbar = () => {
     downloadReady,
     handleFileUploadQCSource,
     handleFileUploadQCSource2,
-    handleCommentChange,
     handleDownloadQC,
     setCSVData,
     csvData,
@@ -610,16 +609,6 @@ const Navbar = () => {
                   QC
                 </Button>
               </label>
-              <label htmlFor="fileInput">
-                <Button
-                  className={classes.fileUploadButton}
-                  component="span"
-                  onClick={handleSourceClick}
-                  startIcon={<CloudUploadIcon />}
-                >
-                  Source
-                </Button>
-              </label>
               <input
                 type="file"
                 accept=".tmx"
@@ -632,6 +621,7 @@ const Navbar = () => {
                   className={classes.fileUploadButton}
                   component="span"
                   startIcon={<CloudUploadIcon />}
+                  
                 >
                   TMX
                 </Button>
@@ -641,6 +631,7 @@ const Navbar = () => {
                 color="secondary"
                 onClick={handleDownloadCSV}
                 startIcon={<CloudDownloadIcon />}
+                disabled={csvData.length === 0}
               >
                 FT
               </Button>

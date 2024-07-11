@@ -26,7 +26,10 @@ export const FunctionProvider = ({ children }) => {
   const [englishSource, setEnglishSource] = useState([]);
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
-
+  const [downloadFileName, setDownloadFileName] = useState("");
+ 
+ 
+ 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,15 +40,11 @@ export const FunctionProvider = ({ children }) => {
   }, [navigate]);
 
   useEffect(() => {
-    console.log("saveddata==", savedData);
-  }, [savedData]);
-  useEffect(() => {
-    console.log("csvData==", csvData);
+    console.log("csvData",csvData);
   }, [csvData]);
-  useEffect(() => {
-    console.log("editableData==", editableData);
-  }, [editableData]);
-
+ 
+ 
+ 
   const handleQCClick = () => {
     setIsQCSelected(true);
   };
@@ -84,8 +83,9 @@ export const FunctionProvider = ({ children }) => {
     };
     reader.readAsBinaryString(file);
   };
-
+ 
   const handleFileUpload = async (fileName) => {
+    setDownloadFileName(fileName)
     if (!fileName) {
       console.error("File name is not provided");
       return;
@@ -138,7 +138,7 @@ export const FunctionProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
-
+ 
   const processDOCX = async (arrayBuffer) => {
     try {
       const { value } = await mammoth.convertToHtml({ arrayBuffer });
@@ -215,172 +215,132 @@ export const FunctionProvider = ({ children }) => {
     };
     reader.readAsText(file, "ISO-8859-1");
   };
-
+ 
   const compareAndSetFT = (sourceSentence, tmxSentence) => {
-    // Convert to string and handle null or undefined cases
-    const sourceString = String(sourceSentence || "")
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .trim();
-    const tmxString = String(tmxSentence || "")
-      .toLowerCase()
-      .replace(/[^\w\s]/g, "")
-      .trim();
-    // Split sentences into words
-    const sourceWords = sourceString.split(/\s+/);
-    const tmxWords = tmxString.split(/\s+/);
-    // Count matching words
-    let matchCount = 0;
-    sourceWords.forEach((word) => {
-      if (tmxWords.includes(word)) {
-        matchCount++;
-      }
-    });
-    // Calculate match percentage
-    const matchPercentage = (matchCount / sourceWords.length) * 100;
-    // console.log("matchPercentage", matchPercentage);
-
-    return Math.round(matchPercentage);
-  };
-
-  // const handleDownloadCSV = async () => {
-  //   const workbook = new ExcelJS.Workbook();
-  //   const worksheet = workbook.addWorksheet("Sheet1");
-  //   csvData.forEach((sentence) => {
-  //     const row = worksheet.addRow();
-  //     const cell = row.getCell(1);
-  //     const textSegments = [];
-  //     let currentSegment = { text: "", font: {} };
-  //     let insideTag = false;
-  //     let tempText = "";
-  //     for (let i = 0; i < sentence?.length; i++) {
-  //       if (sentence[i] === "<") {
-  //         insideTag = true;
-  //         textSegments.push(currentSegment);
-  //         currentSegment = { text: "", font: {} };
-  //       } else if (sentence[i] === ">") {
-  //         insideTag = false;
-  //         const htmlTag = tempText.toLowerCase();
-  //         if (htmlTag === "strong" || htmlTag === "b") {
-  //           currentSegment.font.bold = true;
-  //         } else if (htmlTag === "i") {
-  //           currentSegment.font.italic = true;
-  //         } else if (htmlTag === "sup") {
-  //           currentSegment.font.size = 11;
-  //           currentSegment.font.vertAlign = "superscript";
-  //         } else if (htmlTag === "sub") {
-  //           currentSegment.font.size = 11;
-  //           currentSegment.font.vertAlign = "subscript";
-  //         }
-  //         tempText = "";
-  //       } else {
-  //         if (insideTag) {
-  //           tempText += sentence[i];
-  //         } else {
-  //           currentSegment.text += sentence[i];
-  //         }
-  //       }
-  //     }
-  //     textSegments.push(currentSegment);
-  //     cell.value = { richText: textSegments };
-  //   });
-  //   const buffer = await workbook.xlsx.writeBuffer();
-  //   const blob = new Blob([buffer], {
-  //     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  //   });
-  //   const url = URL.createObjectURL(blob);
-  //   const link = document.createElement("a");
-  //   link.href = url;
-  //   link.setAttribute("download", "front_translation_data.csv");
-  //   document.body.appendChild(link);
-  //   link.click();
-  //   document.body.removeChild(link);
-  //   URL.revokeObjectURL(url);
-  // };
-
-  const handleDownloadCSV = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
-    worksheet.addRow(["Source", "Target"]);
-    const maxLength = Math.max(savedData.length, csvData.length);
-    const paddedSavedData = [
-      ...savedData,
-      ...Array(maxLength - savedData.length).fill(""),
-    ];
-    const paddedCsvData = [
-      ...csvData,
-      ...Array(maxLength - csvData.length).fill([""]),
-    ];
-    paddedCsvData.forEach((csvSentenceArray, index) => {
-      const row = worksheet.addRow();
-      const csvCell = row.getCell(1);
-      const savedCell = row.getCell(2);
-      const csvSentence = csvSentenceArray.join(" ");
-      csvCell.value = csvSentence;
-      const savedSentence = paddedSavedData[index];
-      const textSegments = [];
-      let currentSegment = { text: "", font: {} };
-      let insideTag = false;
-      let tempText = "";
-
-      for (let i = 0; i < savedSentence?.length; i++) {
-        if (savedSentence[i] === "<") {
-          insideTag = true;
-          textSegments.push(currentSegment);
-          currentSegment = { text: "", font: {} };
-        } else if (savedSentence[i] === ">") {
-          insideTag = false;
-          const htmlTag = tempText.toLowerCase();
-          if (htmlTag === "strong" || htmlTag === "b") {
-            currentSegment.font.bold = true;
-          } else if (htmlTag === "i") {
-            currentSegment.font.italic = true;
-          } else if (htmlTag === "sup") {
-            currentSegment.font.size = 11;
-            currentSegment.font.vertAlign = "superscript";
-          } else if (htmlTag === "sub") {
-            currentSegment.font.size = 11;
-            currentSegment.font.vertAlign = "subscript";
-          }
-          tempText = "";
-        } else {
-          if (insideTag) {
-            tempText += savedSentence[i];
-          } else {
-            currentSegment.text += savedSentence[i];
-          }
-        }
-      }
-      textSegments.push(currentSegment);
-      savedCell.value = { richText: textSegments };
-    });
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", "combined_data.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleSave = (index, data) => {
+     // Convert to string and handle null or undefined cases
+     const sourceString = String(sourceSentence || "")
+       .toLowerCase()
+       .replace(/[^\w\s]/g, "")
+       .trim();
+     const tmxString = String(tmxSentence || "")
+       .toLowerCase()
+       .replace(/[^\w\s]/g, "")
+       .trim();
+     // Split sentences into words
+     const sourceWords = sourceString.split(/\s+/);
+     const tmxWords = tmxString.split(/\s+/);
+     // Count matching words
+     let matchCount = 0;
+     sourceWords.forEach((word) => {
+       if (tmxWords.includes(word)) {
+         matchCount++;
+       }
+     });
+     // Calculate match percentage
+     const matchPercentage = (matchCount / sourceWords.length) * 100;
+     // console.log("matchPercentage", matchPercentage);
+ 
+     return Math.round(matchPercentage);
+   };
+ 
+ 
+ 
+  const handleSave = (index) => {
     const newSavedData = [...savedData];
     newSavedData[index] = editableData[index];
     setSavedData(newSavedData);
-    console.log("newsaveddata==",newSavedData);
+    const newEditableData = [...editableData];
+    newEditableData[index] = "";
+    setEditableData(newEditableData);
   };
 
-  const handleEditorChange = (event, editor, index) => {
+  const handleDownloadCSV = async () => {
+     const workbook = new ExcelJS.Workbook();
+     const worksheet = workbook.addWorksheet("Sheet1");
+  
+     // Add header row
+     worksheet.addRow(["Source", "Target"]);
+  
+     // Ensure both datasets are the same length by padding the shorter one with empty strings
+     const maxLength = Math.max(savedData.length, csvData.length);
+     const paddedSavedData = [
+       ...savedData,
+       ...Array(maxLength - savedData.length).fill(""),
+     ];
+     const paddedCsvData = [
+       ...csvData,
+       ...Array(maxLength - csvData.length).fill([""]),
+     ];
+  
+     paddedCsvData.forEach((csvSentenceArray, index) => {
+       const row = worksheet.addRow();
+       const csvCell = row.getCell(1);
+       const savedCell = row.getCell(2);
+  
+       // Add csvData to the "Source" column
+       const csvSentence = csvSentenceArray.join(" ");
+       csvCell.value = csvSentence;
+  
+       // Process savedData for the "Target" column
+       const savedSentence = paddedSavedData[index];
+       const textSegments = [];
+       let currentSegment = { text: "", font: {} };
+       let insideTag = false;
+       let tempText = "";
+  
+       for (let i = 0; i < savedSentence?.length; i++) {
+         if (savedSentence[i] === "<") {
+           insideTag = true;
+           textSegments.push(currentSegment);
+           currentSegment = { text: "", font: {} };
+         } else if (savedSentence[i] === ">") {
+           insideTag = false;
+           const htmlTag = tempText.toLowerCase();
+           if (htmlTag === "strong" || htmlTag === "b") {
+             currentSegment.font.bold = true;
+           } else if (htmlTag === "i") {
+             currentSegment.font.italic = true;
+           } else if (htmlTag === "sup") {
+             currentSegment.font.size = 11;
+             currentSegment.font.vertAlign = "superscript";
+           } else if (htmlTag === "sub") {
+             currentSegment.font.size = 11;
+             currentSegment.font.vertAlign = "subscript";
+           }
+           tempText = "";
+         } else {
+           if (insideTag) {
+             tempText += savedSentence[i];
+           } else {
+             currentSegment.text += savedSentence[i];
+           }
+         }
+       }
+       textSegments.push(currentSegment);
+       savedCell.value = { richText: textSegments };
+     });
+  
+     const buffer = await workbook.xlsx.writeBuffer();
+     const blob = new Blob([buffer], {
+       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     });
+     const url = URL.createObjectURL(blob);
+     const link = document.createElement("a");
+     link.href = url;
+     link.setAttribute("download", `${downloadFileName}.xlsx`);
+     document.body.appendChild(link);
+     link.click();
+     document.body.removeChild(link);
+     URL.revokeObjectURL(url);
+   };
+  
+  
+  
+   const handleEditorChange = (event, editor, index) => {
     const data = editor.getData();
-    const newEditableData = [...editableData];
-    newEditableData[index] = data;
-    setEditableData(newEditableData);
+    const newData = [...savedData];
+    newData[index] = data;
+    setSavedData(newData);
   };
 
   const handleFileUploadQCSource = (event) => {
@@ -488,9 +448,8 @@ export const FunctionProvider = ({ children }) => {
       setSavedData(newData);
     }
   }, [tcxData]);
-
   const handleHide = () => {
-    setHideTmxColumn((prevState) => !prevState);
+    sethideTmxColumn((prevState) => !prevState);
   };
   useEffect(() => {
     const timeoutId = setTimeout(() => {

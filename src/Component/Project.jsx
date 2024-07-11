@@ -22,7 +22,8 @@ import {
   MenuItem,
   IconButton as MUIButton,
 } from "@mui/material";
-import { format } from 'date-fns';
+import Tooltip from "@mui/material/Tooltip";
+import { format } from "date-fns";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { MdDelete, MdOutlinePeople } from "react-icons/md";
 import { GoPlus } from "react-icons/go";
@@ -165,26 +166,26 @@ const Project = () => {
   const handleSourceUploadChange = async (e, index) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-  
+
     const updatedProjects = [...projects]; // Assuming projects is your state variable
     const project = updatedProjects[index]; // Get the specific project
     const targetLanguages = project.targetLanguage; // Get the target languages
-  
+
     // Iterate through each selected file
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const formData = new FormData();
-  
+
       formData.append("sourceUpload", file); // Append the original file
       formData.append("targetLanguages", JSON.stringify(targetLanguages)); // Append all target languages as a JSON string
-  
+
       try {
         const response = await axios.post(
           `http://localhost:8000/api/projects/${project._id}/upload-source`,
           formData,
           { headers: { "Content-Type": "multipart/form-data" } }
         );
-  
+
         // Assuming your API returns the file name or some identifier
         if (response.status === 200) {
           if (!project.sourceUpload) {
@@ -194,7 +195,7 @@ const Project = () => {
             fileName: response?.data?.fileName || file.name, // Use original file name if no fileName returned
             languages: targetLanguages, // Store all target languages associated with this file
           }); // Update project with uploaded file info
-  
+
           // Additional logic if needed
           setFileUpload(true);
           fetchProjects();
@@ -203,12 +204,12 @@ const Project = () => {
         console.error("Error uploading source file:", error);
       }
     }
-  
+
     // Update state with updated projects
     setProjects(updatedProjects);
     setSourceFileLength(updatedProjects); // Update file length state if needed
   };
-  
+
   // const handleSourceUploadChange = async (e, index) => {
   //   const files = e.target.files;
   //   if (!files || files.length === 0) return;
@@ -278,7 +279,7 @@ const Project = () => {
           serviceType,
           assignTo: assign,
           date: formattedDateTime,
-          assignSourceFilename :  formattedFileName
+          assignSourceFilename: formattedFileName,
         },
       ];
       const response = await axios.put(
@@ -311,7 +312,7 @@ const Project = () => {
       setFormattedDateTime(dateTimeString);
     }
   };
-  
+
   const handleServiceTypeChange = (e) => {
     setServiceType(e.target.value);
   };
@@ -337,22 +338,21 @@ const Project = () => {
       setSelectedDate(null);
       setSelectedTime(null);
       setServiceType("");
-      setFileSoureName("")
+      setFileSoureName("");
       setAssignTargetLanguage("");
     }
   }, [isDrawerOpenTasks]);
   const formatDateTask = (dateString) => {
     // Example: "2024-07-03T04:20:00.000Z"
     const date = new Date(dateString);
-    return format(date, 'yyyy-MM-dd hh:mm a');
+    return format(date, "yyyy-MM-dd hh:mm a");
   };
   const fetchProjects = async () => {
     try {
-      const email = localStorage.getItem("email");
-      const response = await axios.get("http://localhost:8000/api/Projects", {
-        params: { email },
-      });
+      // const email = localStorage.getItem("email");
+      const response = await axios.get("http://localhost:8000/api/Projects");
       setProjects(response.data);
+      console.log("responseresponseresponse",response);
     } catch (error) {
       console.error("Error fetching projects:", error);
     }
@@ -434,6 +434,9 @@ const Project = () => {
       const projectName = `${clientName}_${getRandomFourDigitString()}${formatDate(
         new Date()
       )}`;
+      let rawUserId = localStorage.getItem("userId");
+let userId = rawUserId.replace(/(^")|("$)/g, '');
+      console.log("userId",userId);
       const response = await axios.post(
         "http://localhost:8000/api/createProject",
         {
@@ -443,9 +446,9 @@ const Project = () => {
           targetLanguage,
           assignedBy: name,
           domain: selectedDomain,
-          index: `${projectName}_${sourceLanguage}_${targetLanguage.join(
-            "_"
-          )}_${selectedDomain}`,
+         index : `${projectName}_${sourceLanguage}_${targetLanguage.join("_")}_${selectedDomain}`.toLowerCase(),
+         index : `${sourceLanguage}_${targetLanguage.join("_")}_${userId}_${selectedDomain}`.toLowerCase(),
+         userId
         }
       );
 
@@ -453,6 +456,14 @@ const Project = () => {
         setIsDrawerOpen(false);
         fetchProjects();
         setOpenProjectAdd(true);
+//         await axios.post(
+//           "http://localhost:8000/api/add",{
+// index: `${projectName}_${sourceLanguage}_${targetLanguage.join("_")}_${selectedDomain}`.toLowerCase(),
+// "document": {
+//     "source": "my name is lucky",
+//     "target": "lucky is my name"
+//   }
+//           })
       }
     } catch (error) {
       setOpenProjectError(true);
@@ -464,7 +475,7 @@ const Project = () => {
     setAssign(event.target.value);
   };
   useEffect(() => {
-    console.log("projectData?.sourceUpload",projectData?.sourceUpload);
+    console.log("projectData?.sourceUpload", projectData?.sourceUpload);
   }, [projectData]);
   const handleDelete = async () => {
     try {
@@ -548,30 +559,34 @@ const Project = () => {
           }}
         >
           <TextField
-            label="Search Project.."
-            variant="outlined"
+            label='Search Project..'
+            variant='outlined'
             onChange={(e) => filterProjects(e.target.value)}
             sx={{ marginRight: "30px" }}
           />
-          <GoPlus
-            style={{ fontSize: "2.5rem", color: "black" }}
-            onClick={toggleDrawer(true)}
-            className="icon"
-          />
+          <Tooltip title='Add Project' arrow>
+            <div>
+              <GoPlus
+                style={{ fontSize: "2.5rem", color: "black" }}
+                onClick={toggleDrawer(true)}
+                className='icon'
+              />
+            </div>
+          </Tooltip>
         </Box>
       </div>
       <Drawer
-        anchor="right"
+        anchor='right'
         open={isDrawerOpen}
         onClose={toggleDrawer(false)}
         PaperProps={{ style: { width: "32%" } }}
       >
-        <AppBar position="static">
+        <AppBar position='static'>
           <Toolbar>
-            <Typography variant="h6" style={{ flexGrow: 1 }}>
+            <Typography variant='h6' style={{ flexGrow: 1 }}>
               Add New Project
             </Typography>
-            <MUIButton edge="end" color="inherit" onClick={toggleDrawer(false)}>
+            <MUIButton edge='end' color='inherit' onClick={toggleDrawer(false)}>
               <CloseIcon />
             </MUIButton>
           </Toolbar>
@@ -589,9 +604,9 @@ const Project = () => {
           </span>
           <span>
             <TextField
-              name="fullName"
-              variant="standard"
-              placeholder="Full Name"
+              name='fullName'
+              variant='standard'
+              placeholder='Full Name'
               onChange={(e) => setClientName(e.target.value)}
               sx={{ width: "315px" }}
             />
@@ -613,7 +628,7 @@ const Project = () => {
             onChange={(e) => setSelectedDomain(e.target.value)}
             style={{ width: "200px" }}
           >
-            <option value="" disabled>
+            <option value='' disabled>
               Domain
             </option>
             {domain?.domains?.map((domain) => (
@@ -640,7 +655,7 @@ const Project = () => {
               onChange={(e) => setSourceLanguage(e.target.value)}
               style={{ width: "200px" }}
             >
-              <option value="" disabled>
+              <option value='' disabled>
                 Select Language
               </option>
               {language.map((lang) => (
@@ -664,11 +679,11 @@ const Project = () => {
           </span>
           <span>
             <select
-              value=""
+              value=''
               onChange={handleLanguageChange}
               style={{ width: "200px" }}
             >
-              <option value="" disabled>
+              <option value='' disabled>
                 Select Language
               </option>
               {language.map((lang) => (
@@ -726,7 +741,7 @@ const Project = () => {
         >
           <Button
             onClick={handleCreateProject}
-            variant="contained"
+            variant='contained'
             sx={{
               margin: "10px",
               padding: "10px 20px",
@@ -744,20 +759,20 @@ const Project = () => {
         </div>
       </Drawer>
       <Drawer
-        anchor="right"
+        anchor='right'
         open={isDrawerOpenTasks}
         onClose={toggleDrawerAssignTasks(false)}
         PaperProps={{ style: { width: "44%" } }}
       >
         <div style={{ overflowX: "auto" }}>
-          <AppBar position="static">
+          <AppBar position='static'>
             <Toolbar>
-              <Typography variant="h6" style={{ flexGrow: 1 }}>
+              <Typography variant='h6' style={{ flexGrow: 1 }}>
                 Assign Tasks
               </Typography>
               <MUIButton
-                edge="end"
-                color="inherit"
+                edge='end'
+                color='inherit'
                 onClick={toggleDrawerAssignTasks(false)}
               >
                 <CloseIcon />
@@ -786,7 +801,7 @@ const Project = () => {
               },
             }}
             onClick={() => setValue(true)}
-            className="icon"
+            className='icon'
           >
             Assign Tasks
             <AddIcon />
@@ -809,7 +824,7 @@ const Project = () => {
                   backgroundColor: "#f3f4f6", // Light background color for highlighting
                 }}
               >
-                <div className="highlight-text">Assign Here</div>
+                <div className='highlight-text'>Assign Here</div>
 
                 <CardContent>
                   <div
@@ -820,15 +835,21 @@ const Project = () => {
                       justifyContent: "space-between",
                     }}
                   >
-                    <span style={{ fontSize: "15px", fontWeight: "bold",margin: "0px 12px 12px 12px" }}>
+                    <span
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: "bold",
+                        margin: "0px 12px 12px 12px",
+                      }}
+                    >
                       Source Language<span style={{ color: "red" }}>*</span>
                     </span>
                     <span>
                       <TextField
-                        name="fullName"
-                        variant="standard"
+                        name='fullName'
+                        variant='standard'
                         value={projectData?.sourceLanguage}
-                        sx={{ width: "307px",marginRight:"8px" }}
+                        sx={{ width: "307px", marginRight: "8px" }}
                       />
                     </span>
                   </div>
@@ -851,7 +872,7 @@ const Project = () => {
                         }
                         style={{ width: "255px" }}
                       >
-                        <option value="" disabled>
+                        <option value='' disabled>
                           Select Language
                         </option>
                         {projectData?.targetLanguage?.length > 0 ? (
@@ -883,15 +904,14 @@ const Project = () => {
                         onChange={handleFileSoureName}
                         style={{ width: "255px" }}
                       >
-                        <option value="" disabled>
+                        <option value='' disabled>
                           Source File Name
                         </option>
                         {projectData?.sourceUpload?.map((item) => (
-  <option key={item} value={item}>
-    {item}
-  </option>
-))}
-
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
                       </select>
                     </span>
                   </div>
@@ -912,12 +932,12 @@ const Project = () => {
                         onChange={handleServiceTypeChange}
                         style={{ width: "255px" }}
                       >
-                        <option value="" disabled>
+                        <option value='' disabled>
                           Service type
                         </option>
-                        <option value="FT">FT</option>
-                        <option value="BT">BT</option>
-                        <option value="QC">QC</option>
+                        <option value='FT'>FT</option>
+                        <option value='BT'>BT</option>
+                        <option value='QC'>QC</option>
                       </select>
                     </span>
                   </div>
@@ -939,12 +959,12 @@ const Project = () => {
                         style={{ width: "255px" }}
                       >
                         {assignTasks.length === 0 ? (
-                          <option value="" disabled>
+                          <option value='' disabled>
                             Please select service type
                           </option>
                         ) : (
                           <>
-                            <option value="" disabled>
+                            <option value='' disabled>
                               Select Name
                             </option>
                             {assignTasks.map((item, index) => (
@@ -972,7 +992,7 @@ const Project = () => {
                       <div>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                           <DatePicker
-                            label="Select Date"
+                            label='Select Date'
                             value={selectedDate}
                             onChange={handleDateChange}
                             renderInput={(params) => <TextField {...params} />}
@@ -983,7 +1003,7 @@ const Project = () => {
                       <div style={{ marginTop: "10px" }}>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                           <TimePicker
-                            label="Select Time"
+                            label='Select Time'
                             value={selectedTime}
                             onChange={handleTimeChange}
                             renderInput={(params) => <TextField {...params} />}
@@ -1003,8 +1023,8 @@ const Project = () => {
                   >
                     <Button
                       onClick={AssignTasksApi}
-                      variant="contained" // Makes the button filled
-                      color="primary" // Sets the button color
+                      variant='contained' // Makes the button filled
+                      color='primary' // Sets the button color
                       sx={{
                         margin: "10px",
                         padding: "10px 20px",
@@ -1023,44 +1043,54 @@ const Project = () => {
                 </CardContent>
               </Card>
             ) : null}
-               {projectData?.tasks !=0 ? 
-               <TableContainer component={Paper} sx={{ maxWidth: 650, margin: "20px auto" }}>
-     <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell sx={{ width: "10%" }}>No.</TableCell>
-          <TableCell sx={{ width: "20%" }}>Source Language</TableCell>
-          <TableCell sx={{ width: "15%" }}>Target Language</TableCell>
-          <TableCell sx={{ width: "15%" }}>Service Type</TableCell>
-          <TableCell sx={{ width: "20%" }}>Assign To</TableCell>
-          <TableCell sx={{ width: "20%" }}>TAT</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {projectData?.tasks &&
-          projectData.tasks.map((task, index) => (
-            <TableRow key={index}>
-              <TableCell sx={{ width: "10%" }}>{index + 1}</TableCell>
-              <TableCell sx={{ width: "20%" }}>
-                {projectData?.sourceLanguage}
-              </TableCell>
-              <TableCell sx={{ width: "15%" }}>
-                {task.assignTargetLanguage}
-              </TableCell>
-              <TableCell sx={{ width: "15%" }}>
-                {task.serviceType}
-              </TableCell>
-              <TableCell sx={{ width: "20%" }}>
-                {task.assignTo || ""}
-              </TableCell>
-              <TableCell sx={{ width: "20%" }}>
-                {formatDateTask(task.date)}
-              </TableCell>
-            </TableRow>
-          ))}
-      </TableBody>
-    </Table>
-    </TableContainer> : null}
+            {projectData?.tasks != 0 ? (
+              <TableContainer
+                component={Paper}
+                sx={{ maxWidth: 650, margin: "20px auto" }}
+              >
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ width: "10%" }}>No.</TableCell>
+                      <TableCell sx={{ width: "20%" }}>
+                        Source Language
+                      </TableCell>
+                      <TableCell sx={{ width: "15%" }}>
+                        Target Language
+                      </TableCell>
+                      <TableCell sx={{ width: "15%" }}>Service Type</TableCell>
+                      <TableCell sx={{ width: "20%" }}>Assign To</TableCell>
+                      <TableCell sx={{ width: "20%" }}>TAT</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {projectData?.tasks &&
+                      projectData.tasks.map((task, index) => (
+                        <TableRow key={index}>
+                          <TableCell sx={{ width: "10%" }}>
+                            {index + 1}
+                          </TableCell>
+                          <TableCell sx={{ width: "20%" }}>
+                            {projectData?.sourceLanguage}
+                          </TableCell>
+                          <TableCell sx={{ width: "15%" }}>
+                            {task.assignTargetLanguage}
+                          </TableCell>
+                          <TableCell sx={{ width: "15%" }}>
+                            {task.serviceType}
+                          </TableCell>
+                          <TableCell sx={{ width: "20%" }}>
+                            {task.assignTo || ""}
+                          </TableCell>
+                          <TableCell sx={{ width: "20%" }}>
+                            {formatDateTask(task.date)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : null}
           </div>
         </div>
       </Drawer>
@@ -1103,22 +1133,22 @@ const Project = () => {
                       project.status.slice(1).toLowerCase()}
                   </TableCell>
                   <TableCell onClick={() => handleProjectData(project)}>
-                    <Box display="flex" alignItems="center">
+                    <Box display='flex' alignItems='center'>
                       <input
                         multiple
                         id={`source-file-input-${index}`}
-                        type="file"
-                        accept=".csv"
+                        type='file'
+                        accept='.csv'
                         onChange={(e) => handleSourceUploadChange(e, index)}
                         style={{ display: "none" }}
                       />
                       <label htmlFor={`source-file-input-${index}`}>
-                        <IconButton component="span" className="icon">
+                        <IconButton component='span' className='icon'>
                           <CloudUploadIcon />
                         </IconButton>
                       </label>
-                      <Typography variant="body1">
-                      {project.sourceUpload
+                      <Typography variant='body1'>
+                        {project.sourceUpload
                           ? `${
                               project.sourceUpload.length <= 1
                                 ? `${project.sourceUpload.length} File`
@@ -1146,25 +1176,32 @@ const Project = () => {
                   </TableCell>
                   <TableCell>
                     <Box
-                      display="flex"
-                      alignItems="center"
-                      paddingRight="5rem"
-                      className="icon-container"
+                      display='flex'
+                      alignItems='center'
+                      paddingRight='5rem'
+                      className='icon-container'
                     >
-                      <MdOutlinePeople
-                        className="icon"
-                        onClick={() => handleIconClick(project)}
-                      />
-
-                      <MdDelete
-                        onClick={(index) => handleClickOpen(index, project)}
-                        style={{
-                          fontSize: "1.5rem",
-                          marginLeft: "15px",
-                          color: "#0485B4",
-                        }}
-                        className="icon"
-                      />
+                      <Tooltip title='Add Project' arrow>
+                        <div>
+                          <MdOutlinePeople
+                            className='icon'
+                            onClick={() => handleIconClick(project)}
+                          />
+                        </div>
+                      </Tooltip>
+                      <Tooltip title='Delete Project' arrow>
+                        <div>
+                          <MdDelete
+                            onClick={(index) => handleClickOpen(index, project)}
+                            style={{
+                              fontSize: "1.5rem",
+                              marginLeft: "15px",
+                              color: "#0485B4",
+                            }}
+                            className='icon'
+                          />
+                        </div>
+                      </Tooltip>
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -1176,8 +1213,8 @@ const Project = () => {
       <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
         <Alert
           onClose={handleClose}
-          severity="success"
-          variant="filled"
+          severity='success'
+          variant='filled'
           sx={{ width: "100%" }}
         >
           Project Assigned
@@ -1190,8 +1227,8 @@ const Project = () => {
       >
         <Alert
           onClose={handleCloseError}
-          severity="error"
-          variant="filled"
+          severity='error'
+          variant='filled'
           sx={{ width: "100%" }}
         >
           Project Assigned Failed
@@ -1204,8 +1241,8 @@ const Project = () => {
       >
         <Alert
           onClose={handleCloseProjectError}
-          severity="error"
-          variant="filled"
+          severity='error'
+          variant='filled'
           sx={{ width: "100%" }}
         >
           Something went wrong!
@@ -1218,8 +1255,8 @@ const Project = () => {
       >
         <Alert
           onClose={handleCloseDelete}
-          severity="success"
-          variant="filled"
+          severity='success'
+          variant='filled'
           sx={{ width: "100%" }}
         >
           Project deleted successfully
@@ -1232,8 +1269,8 @@ const Project = () => {
       >
         <Alert
           onClose={handleAddProjectClose}
-          severity="success"
-          variant="filled"
+          severity='success'
+          variant='filled'
           sx={{ width: "100%" }}
         >
           Project Created successfully
@@ -1246,8 +1283,8 @@ const Project = () => {
       >
         <Alert
           onClose={handleFileUplaod}
-          severity="success"
-          variant="filled"
+          severity='success'
+          variant='filled'
           sx={{ width: "100%" }}
         >
           File Upload successfully
@@ -1256,11 +1293,11 @@ const Project = () => {
       <Dialog
         open={openPopup}
         onClose={handleClickClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
       >
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+          <DialogContentText id='alert-dialog-description'>
             Are you sure want to delete!
           </DialogContentText>
         </DialogContent>
