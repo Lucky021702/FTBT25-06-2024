@@ -9,63 +9,43 @@ import {
   TableRow,
   Paper,
 } from "@material-ui/core";
-import DoneIcon from "@mui/icons-material/Done";
+import DoneIcon from '@mui/icons-material/Done';
 import { useFunctionContext } from "./Context/Function";
-import io from "socket.io-client";
-import { setQcData } from "../Redux/actions";
-import { useDispatch, useSelector } from "react-redux";
+import io from 'socket.io-client';
 
-const socket = io("http://localhost:8000");
+const socket = io('http://localhost:8000');
 
 const QC = () => {
-  const dispatch = useDispatch();
+  const [qcData, setQcData] = useState([]);
   const context = useFunctionContext();
-  const qcData = useSelector((state) => state?.qcData?.qcData?.updatedFile);
+  const { handleCommentChange, englishSource, englishBT, comments } = context;
 
-  const { handleCommentChange, comments } = context;
-
-  useEffect(() => {
-    socket.on("target-updated", (data) => {
-      console.log("data log==", data);
-      // dispatch(setQcData((prevData) => [...prevData, data]));
-      dispatch(setQcData(data));
-    });
   
+  useEffect(() => {
+    socket.on('target-updated', (data) => {
+      setQcData((prevData) => [...prevData, data]);
+    });
+
     return () => {
-      socket.off("target-updated");
+      socket.off('target-updated');
     };
   }, []);
-  useEffect(()=>{
-      console.log("dtatatsa==",qcData);
-  },[qcData])
-
 
   const handleSaveComment = (index) => {
     console.log("Comment saved:", comments[index]);
   };
-  // const hasData = qcData && qcData.Source && qcData.Source.length > 0;
+
   return (
     <div>
-      {/* {hasData ? ( */}
-      <TableContainer
-        component={Paper}
-        style={{ maxHeight: "100vh", overflow: "auto" }}
-      >
+      <TableContainer component={Paper} style={{ maxHeight: '100vh', overflow: 'auto' }}>
         <Table aria-label="simple table">
-          <TableHead
-            style={{
-              position: "sticky",
-              top: 0,
-              zIndex: 1,
-              backgroundColor: "#fff",
-            }}
-          >
+          <TableHead style={{ position: 'sticky', top: 0, zIndex: 1, backgroundColor: '#fff' }}>
             <TableRow>
               <TableCell>
                 <b>Source</b>
               </TableCell>
               <TableCell>
-                <b>Target</b>
+                <b>BT</b>
               </TableCell>
               <TableCell>
                 <b>Comment</b>
@@ -76,7 +56,7 @@ const QC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {qcData?.Source?.length != 0 && qcData?.Source?.map((sourceItem, index) => (
+            {qcData.map((row, index) => (
               <TableRow key={index}>
                 <TableCell
                   style={{
@@ -89,7 +69,7 @@ const QC = () => {
                     <div>
                       <b>({index + 1})</b>
                     </div>
-                    <div style={{ marginLeft: "0.5rem" }}>{sourceItem}</div>
+                    <div style={{ marginLeft: "0.5rem" }}>{row.source}</div>
                   </div>
                 </TableCell>
                 <TableCell
@@ -98,7 +78,7 @@ const QC = () => {
                     width: "30%",
                   }}
                 >
-                  {qcData.Target[index] || ""}
+                  {row.target}
                 </TableCell>
                 <TableCell>
                   <textarea
@@ -106,7 +86,7 @@ const QC = () => {
                     style={{ width: "90%", resize: "none", fontSize: "1rem" }}
                     multiline
                     rows={4}
-                    value={qcData.Comment[index] || ""}
+                    value={comments[index] || ""}
                     onChange={(event) => handleCommentChange(index, event)}
                   />
                 </TableCell>
@@ -118,7 +98,6 @@ const QC = () => {
                     style={{ padding: "1rem" }}
                     onClick={() => handleSaveComment(index)}
                   >
-                    Save
                   </Button>
                 </TableCell>
               </TableRow>
@@ -126,9 +105,6 @@ const QC = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      {/* ) : (
-        <div>No data available</div>
-      )} */}
     </div>
   );
 };

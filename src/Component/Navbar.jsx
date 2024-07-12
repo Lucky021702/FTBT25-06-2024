@@ -36,15 +36,13 @@ import {
   IconButton,
   Typography,
   DialogActions,
-  CardContent,
-  Grid,
-  TextField,
 } from "@mui/material";
 import Tooltip from "@mui/material/Tooltip";
 import Chat from "./Chat";
 import axios from "axios";
-import { useDispatch,useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setIndexName, setTmxData, setQcData } from "../Redux/actions";
+
 const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
@@ -62,7 +60,9 @@ const useStyles = makeStyles((theme) => ({
 
 const Navbar = () => {
   const [splitData, setSplitData] = useState([]);
-  const notificationData = useSelector((state)=>state.projectData.indexNameData)
+  const notificationData = useSelector(
+    (state) => state.projectData.indexNameData
+  );
   const userId = "123";
   const context = useFunctionContext();
   const {
@@ -98,7 +98,7 @@ const Navbar = () => {
   const [cardData, setCardData] = useState(null);
   const [index, setIndex] = useState(null);
 
- const dispatch = useDispatch()
+  const dispatch = useDispatch();
   useEffect(() => {
     setTimeout(() => {
       searchIndexApi();
@@ -173,14 +173,16 @@ const Navbar = () => {
 
   const handleNotificationData = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/qcFileData/${notificationData[0]?.index}`);
+      const response = await axios.get(
+        `http://localhost:8000/qcFileData/${notificationData[0]?.index}`
+      );
       console.log("Response Data:", response.data);
       dispatch(setQcData(response?.data));
     } catch (error) {
       console.error("Error fetching QC data", error);
     }
   };
-  
+
   let email = localStorage.getItem("email");
   const handleClickOpen = () => {
     setDialogOpen(true);
@@ -275,6 +277,8 @@ const Navbar = () => {
   const handleCloseChat = () => {
     setIsChatOpen(false);
   };
+
+
   // useEffect(() => {
   //   console.log("fileName", fileName.savedData.map((name)=>name));
   // }, [fileName]);
@@ -684,137 +688,134 @@ const Navbar = () => {
                     <CloseIcon />
                   </IconButton>
                 </DialogTitle>
-                  <DialogContent>
-                    {project.length === 0 ? (
-                      "No Notifications"
-                    ) : (
-                      <div>
-                        <TableContainer component={Paper}>
-                          <Table sx={{ minWidth: 650 }} aria-label="task table">
-                            <TableHead>
-                              <TableRow>
-                                <TableCell>Name</TableCell>
-                                <TableCell>Target Language</TableCell>
-                                <TableCell>Assign Date</TableCell>
-                                <TableCell>Source File Name</TableCell>
-                                <TableCell>Status</TableCell>
-                                <TableCell>Actions</TableCell>
-                              </TableRow>
-                            </TableHead>
-                            <TableBody>
-                              {project.map((proj) =>
-                                proj.tasks.map(
-                                  (task, index) =>
-                                    task.assignedStatus !== "Reject" && (
-                                      <TableRow key={task._id}>
-                                        <TableCell>
-                                          {proj.projectName}
-                                        </TableCell>
-                                        <TableCell>
-                                          {task.assignTargetLanguage}
-                                        </TableCell>
-                                        <TableCell>
-                                          {format(
-                                            new Date(task.date),
-                                            "yyyy-MM-dd hh:mm a"
-                                          )}
-                                        </TableCell>
-                                        <TableCell>
-                                          {task.assignSourceFilename}
-                                        </TableCell>
-                                        <TableCell>
-                                          {task.assignedStatus ? (
-                                            <div
-                                              style={{
-                                                display: "flex",
-                                                justifyContent: "space-around",
-                                                alignItems: "center",
-                                                fontSize: "1.2rem",
-                                                color: "red",
-                                              }}
-                                            >
-                                              {task.assignedStatus}
-                                            </div>
-                                          ) : (
-                                            <div
-                                              style={{
-                                                display: "flex",
-                                                justifyContent: "space-around",
-                                                alignItems: "center",
-                                              }}
-                                            >
-                                              <Button
-                                                onClick={() => {
-                                                  setAssignedStatus("Reject");
-                                                  handleCardData(task);
-                                                }}
-                                                variant="contained"
-                                                color="secondary"
-                                              >
-                                                Reject
-                                              </Button>
-
-                                              <Button
-                                                onClick={() => {
-                                                  handleCardData(task);
-                                                  handleCloseNotification(
-                                                    task.assignSourceFilename.replace(
-                                                      /^[^_]*_/,
-                                                      ""
-                                                    ),
-                                                    "Accept"
-                                                  );
-                                                }}
-                                                variant="contained"
-                                                color="primary"
-                                              >
-                                                Accept
-                                              </Button>
-                                            </div>
-                                          )}
-                                        </TableCell>
-                                        <TableCell>
+                <DialogContent>
+                  {project.length === 0 ? (
+                    "No Notifications"
+                  ) : (
+                    <div>
+                      <TableContainer component={Paper}>
+                        <Table sx={{ minWidth: 650 }} aria-label="task table">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Name</TableCell>
+                              <TableCell>Target Language</TableCell>
+                              <TableCell>Assign Date</TableCell>
+                              <TableCell>Source File Name</TableCell>
+                              <TableCell>Status</TableCell>
+                              <TableCell>Actions</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {project.map((proj) =>
+                              proj.tasks.map(
+                                (task, index) =>
+                                  task.assignedStatus !== "Reject" && (
+                                    <TableRow key={task._id}>
+                                      <TableCell>{proj.projectName}</TableCell>
+                                      <TableCell>
+                                        {task.assignTargetLanguage}
+                                      </TableCell>
+                                      <TableCell>
+                                        {format(
+                                          new Date(task.date),
+                                          "yyyy-MM-dd hh:mm a"
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        {task.assignSourceFilename}
+                                      </TableCell>
+                                      <TableCell>
+                                        {task.assignedStatus ? (
                                           <div
                                             style={{
                                               display: "flex",
-                                              justifyContent: "space-between",
+                                              justifyContent: "space-around",
+                                              alignItems: "center",
+                                              fontSize: "1.2rem",
+                                              color: "red",
+                                            }}
+                                          >
+                                            {task.assignedStatus}
+                                          </div>
+                                        ) : (
+                                          <div
+                                            style={{
+                                              display: "flex",
+                                              justifyContent: "space-around",
                                               alignItems: "center",
                                             }}
                                           >
-                                            <DownloadIcon
-                                              className="icon"
-                                              sx={{ color: "#367af7" }}
-                                              onClick={() =>
-                                                handleDownload(
+                                            <Button
+                                              onClick={() => {
+                                                setAssignedStatus("Reject");
+                                                handleCardData(task);
+                                              }}
+                                              variant="contained"
+                                              color="secondary"
+                                            >
+                                              Reject
+                                            </Button>
+
+                                            <Button
+                                              onClick={() => {
+                                                handleCardData(task);
+                                                handleCloseNotification(
                                                   task.assignSourceFilename.replace(
                                                     /^[^_]*_/,
                                                     ""
-                                                  )
-                                                )
-                                              }
-                                            />
-                                            <Tooltip
-                                              title="Reload file"
-                                              arrow
+                                                  ),
+                                                  "Accept"
+                                                );
+                                              }}
+                                              variant="contained"
+                                              color="primary"
                                             >
-                                              <CachedIcon
-                                                onClick={()=>handleNotificationData()}
-                                                className="icon"
-                                                sx={{ color: "#367AF7" }}
-                                              />
-                                            </Tooltip>
+                                              Accept
+                                            </Button>
                                           </div>
-                                        </TableCell>
-                                      </TableRow>
-                                    )
-                                )
-                              )}
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-                      </div>
-                    )}
-                  </DialogContent>
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                          }}
+                                        >
+                                          <DownloadIcon
+                                            className="icon"
+                                            sx={{ color: "#367af7" }}
+                                            onClick={() =>
+                                              handleDownload(
+                                                task.assignSourceFilename.replace(
+                                                  /^[^_]*_/,
+                                                  ""
+                                                )
+                                              )
+                                            }
+                                          />
+                                          <Tooltip title="Reload file" arrow>
+                                            <CachedIcon
+                                              onClick={() =>
+                                                handleNotificationData()
+                                              }
+                                              className="icon"
+                                              sx={{ color: "#367AF7" }}
+                                            />
+                                          </Tooltip>
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  )
+                              )
+                            )}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </div>
+                  )}
+                </DialogContent>
               </Dialog>
               <Button
                 className={classes.fileUploadButton}
