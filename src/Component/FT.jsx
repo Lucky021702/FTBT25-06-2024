@@ -59,6 +59,11 @@ function FT() {
       console.error("Error fetching user", error);
     }
   };
+  useEffect(()=>{
+    if(savedData.length != 0){
+      handleProjectData()
+    }
+  },[savedData])
   const handleProjectDataUpdate = async (index) => {
     try {
       

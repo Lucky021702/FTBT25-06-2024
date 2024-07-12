@@ -231,7 +231,7 @@ const TwoColumnChat = () => {
             }`}
           >
             <p>
-              {user.email} ({user.department})
+              {user.name} ({user.department})
             </p>
           </div>
         ))}
