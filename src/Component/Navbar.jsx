@@ -44,7 +44,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Chat from "./Chat";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setTmxData } from "../Redux/actions";
+import { setIndexName, setTmxData } from "../Redux/actions";
 const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
@@ -99,74 +99,11 @@ const Navbar = () => {
   const [index, setIndex] = useState(null);
   const dispatch = useDispatch();
 
-  
   useEffect(() => {
     setTimeout(() => {
-      // if (csvData.length != 0) {
       searchIndexApi();
-      // }
     }, 1000);
   }, [csvData]);
-
-  // const searchIndexApi = async () => {
-  //   try {
-  //     const newSplitData = [];
-  //     for (let i = 0; i < csvData?.length; i++) {
-  //       if (csvData[i][0]) {
-  //         const payload = {
-  //           index,
-  //           query: csvData[i][0],
-  //         };
-  //         console.log("payload==", payload);
-
-  //         const requestBody = JSON.stringify(payload);
-  //         console.log("request==", requestBody);
-  //         const result = await fetch("http://localhost:8000/api/searchIndex", {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/json;charset=utf-8",
-  //           },
-  //           body: requestBody,
-  //         });
-  //         console.log("this is result==?", result);
-  //         if (result.ok) {
-  //           const data = await result.json();
-  //           for (let index = 0; index < data.length; index++) {
-  //             const source = data[0]?.source || "";
-  //           }
-  //           const decodedText = new TextDecoder("iso-8859-1").decode(
-  //             new Uint8Array([...source].map((char) => char.charCodeAt(0))))
-  //           const originalFieldValueEncoded = csvData[i][0];
-  //           const byteValues = [];
-  //           for (let j = 0; j < originalFieldValueEncoded.length; j++) {
-  //             byteValues.push(originalFieldValueEncoded.charCodeAt(j));
-  //           }
-  //           const originalFieldValueDecoded = new TextDecoder(
-  //             "iso-8859-1"
-  //           ).decode(new Uint8Array(byteValues));
-
-  //           const newData = {
-  //             0: originalFieldValueDecoded,
-  //             "TM text": decodedText,
-  //             "Match Percentage": data?.matchPercentage || "0%",
-  //           };
-  //           newSplitData.push(newData);
-  //           console.log("datadatadata", data);
-
-  //           // Correct dispatch call
-  //           dispatch(setTmxData([newData]));
-
-  //         } else {
-  //           console.error("Network result was not ok for index:", i);
-  //         }
-  //       }
-  //     }
-  //     setSplitData(newSplitData);
-  //   } catch (error) {
-  //     console.error("There was a problem with the fetch operation:", error);
-  //     throw error;
-  //   }
-  // };
   const searchIndexApi = async () => {
     try {
       const newSplitData = [];
@@ -268,6 +205,7 @@ const Navbar = () => {
         serviceType: department,
       });
       setProject(response.data);
+      dispatch(setIndexName(response.data));
       console.log("response", response.data);
     } catch (error) {
       console.error("Error fetching user", error);
@@ -621,7 +559,6 @@ const Navbar = () => {
                   className={classes.fileUploadButton}
                   component="span"
                   startIcon={<CloudUploadIcon />}
-                  
                 >
                   TMX
                 </Button>
@@ -715,7 +652,7 @@ const Navbar = () => {
               <Dialog
                 open={dialogOpen}
                 onClose={handleClose}
-                maxWidth="sm"
+                maxWidth="lg"
                 fullWidth
                 PaperProps={{
                   sx: {
@@ -739,118 +676,145 @@ const Navbar = () => {
                   </IconButton>
                 </DialogTitle>
                 <DialogContent>
-                  {project.length == 0 ? (
-                    "No Notification"
+                  {project.length === 0 ? (
+                    "No Notifications"
                   ) : (
-                    <Card>
-                      <CardContent>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span>Name</span>
-                          <TextField
-                            disabled
-                            sx={{ width: "350px " }}
-                            value={name}
-                            margin="normal"
-                          />
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span>Target Langauge</span>
-                          <TextField
-                            value={project?.tasks[0]?.assignTargetLanguage}
-                            sx={{ width: "350px " }}
-                            margin="normal"
-                            disabled
-                          />
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span>Assign Date</span>
-                          <TextField
-                            value={project?.tasks[0]?.date}
-                            margin="normal"
-                            sx={{ width: "350px " }}
-                            disabled
-                          />
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span>Source File Name</span>
-                          <DownloadIcon
-                            className="icon"
-                            sx={{ color: "#367af7" }}
-                            onClick={handleDownload}
-                          />
-                          <TextField
-                            value={fileName}
-                            sx={{ width: "350px " }}
-                            margin="normal"
-                            disabled
-                          />
-                        </div>
-                        {project?.tasks[0].assignedStatus ? (
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-around",
-                              alignItems: "center",
-                              fontSize: "1.2rem",
-                              color: "red",
-                            }}
-                          >
-                            {project?.tasks[0].assignedStatus}
-                          </div>
-                        ) : (
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-around",
-                              alignItems: "center",
-                            }}
-                          >
-                            <Button
-                              onClick={() => setAssignedStatus("Reject")}
-                              variant="contained"
-                              color="secondary"
-                            >
-                              Reject
-                            </Button>
+                    <div>
+                      <TableContainer component={Paper}>
+                        <Table sx={{ minWidth: 650 }} aria-label="task table">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Name</TableCell>
+                              <TableCell>Target Language</TableCell>
+                              <TableCell>Assign Date</TableCell>
+                              <TableCell>Source File Name</TableCell>
+                              <TableCell>Status</TableCell>
+                              <TableCell>Actions</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {project.map((proj) =>
+                              proj.tasks.map(
+                                (task, index) =>
+                                  task.assignedStatus !== "Reject" && (
+                                    <TableRow key={task._id}>
+                                      <TableCell>{proj.projectName}</TableCell>
+                                      <TableCell>
+                                        {task.assignTargetLanguage}
+                                      </TableCell>
+                                      <TableCell>
+                                        {format(
+                                          new Date(task.date),
+                                          "yyyy-MM-dd hh:mm a"
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        {task.assignSourceFilename}
+                                      </TableCell>
+                                      <TableCell>
+                                        {/* {task.assignedStatus ? (
+                                            <span style={{ color: "red" }}>
+                                              {task.assignedStatus}
+                                            </span>
+                                          ) : null} */}
+                                        {task.assignedStatus ? (
+                                          <div
+                                            style={{
+                                              display: "flex",
+                                              justifyContent: "space-around",
+                                              alignItems: "center",
+                                              fontSize: "1.2rem",
+                                              color: "red",
+                                            }}
+                                          >
+                                            {task.assignedStatus}
+                                          </div>
+                                        ) : (
+                                          <div
+                                            style={{
+                                              display: "flex",
+                                              justifyContent: "space-around",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            <Button
+                                              onClick={() => {
+                                                setAssignedStatus("Reject");
+                                                handleCardData(task);
+                                              }}
+                                              variant="contained"
+                                              color="secondary"
+                                            >
+                                              Reject
+                                            </Button>
 
-                            <Button
-                              onClick={() => {
-                                setAssignedStatus("Accept");
-                                handleCloseNotification();
-                              }}
-                              variant="contained"
-                              color="primary"
-                            >
-                              Accept
-                            </Button>
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
+                                            <Button
+                                              onClick={() => {
+                                                handleCardData(task);
+                                                handleCloseNotification(
+                                                  task.assignSourceFilename.replace(
+                                                    /^[^_]*_/,
+                                                    ""
+                                                  ),
+                                                  "Accept"
+                                                );
+                                              }}
+                                              variant="contained"
+                                              color="primary"
+                                            >
+                                              Accept
+                                            </Button>
+                                          </div>
+                                        )}
+                                      </TableCell>
+                                      <TableCell>
+                                        <div
+                                          style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                          }}
+                                        >
+                                          <DownloadIcon
+                                            className="icon"
+                                            sx={{ color: "#367af7" }}
+                                            onClick={() =>
+                                              handleDownload(
+                                                task.assignSourceFilename.replace(
+                                                  /^[^_]*_/,
+                                                  ""
+                                                )
+                                              )
+                                            }
+                                          />
+                                          <Tooltip
+                                            title="Reload source file"
+                                            arrow
+                                          >
+                                            <CachedIcon
+                                              onClick={() =>
+                                                handleUpload(
+                                                  task.assignSourceFilename.replace(
+                                                    /^[^_]*_/,
+                                                    ""
+                                                  ),
+                                                  proj
+                                                )
+                                              }
+                                              className="icon"
+                                              sx={{ color: "#367AF7" }}
+                                            />
+                                          </Tooltip>
+                                        </div>
+                                      </TableCell>
+                                    </TableRow>
+                                  )
+                              )
+                            )}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </div>
                   )}
                 </DialogContent>
               </Dialog>
@@ -902,6 +866,7 @@ const Navbar = () => {
               </label>
             </>
           )}
+
           {isPM && (
             <>
               <Button

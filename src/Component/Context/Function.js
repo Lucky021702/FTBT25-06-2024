@@ -17,7 +17,7 @@ export const FunctionProvider = ({ children }) => {
   const [uploadedData, setUploadedData] = useState([]);
   const [csvData, setCSVData] = useState([]);
   const [tcxData, setTcxData] = useState([]);
-  const [editableData, setEditableData] = useState([]);
+  const [editableData,  setEditableData ] = useState([]);
   const [ftData, setFTData] = useState([]);
   const [savedData, setSavedData] = useState([]);
   const [downloadReady, setDownloadReady] = useState(false);
@@ -27,8 +27,7 @@ export const FunctionProvider = ({ children }) => {
   const [englishBT, setEnglishBT] = useState([]);
   const [comments, setComments] = useState([]);
   const [downloadFileName, setDownloadFileName] = useState("");
- 
- 
+  const [index, setIndex] = useState("");
  
   const navigate = useNavigate();
 
@@ -40,8 +39,8 @@ export const FunctionProvider = ({ children }) => {
   }, [navigate]);
 
   useEffect(() => {
-    console.log("csvData",csvData);
-  }, [csvData]);
+    console.log("savedData",savedData);
+  }, [savedData]);
  
  
  
@@ -244,15 +243,7 @@ export const FunctionProvider = ({ children }) => {
    };
  
  
- 
-  const handleSave = (index) => {
-    const newSavedData = [...savedData];
-    newSavedData[index] = editableData[index];
-    setSavedData(newSavedData);
-    const newEditableData = [...editableData];
-    newEditableData[index] = "";
-    setEditableData(newEditableData);
-  };
+
 
   const handleDownloadCSV = async () => {
      const workbook = new ExcelJS.Workbook();
@@ -334,15 +325,22 @@ export const FunctionProvider = ({ children }) => {
      URL.revokeObjectURL(url);
    };
   
-  
+
+   const handleSave = (index) => {
+    setIndex(index)
+     const newSavedData = [...savedData];
+     newSavedData[index] = editableData[index];
+     setSavedData(newSavedData);
+   };
+
   
    const handleEditorChange = (event, editor, index) => {
-    const data = editor.getData();
-    const newData = [...savedData];
-    newData[index] = data;
-    setSavedData(newData);
-  };
-
+     const data = editor.getData();
+     const newEditableData = [...editableData];
+     newEditableData[index] = data;
+     setEditableData(newEditableData);
+   };
+  
   const handleFileUploadQCSource = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -482,6 +480,7 @@ export const FunctionProvider = ({ children }) => {
     setCSVData,
     setTcxData,
     setEditableData,
+    handleSave,
     setFTData,
     setSavedData,
     setDownloadReady,
@@ -493,7 +492,6 @@ export const FunctionProvider = ({ children }) => {
     handleFileUpload,
     handleFileUploadTcx,
     compareAndSetFT,
-    handleSave,
     handleDownloadCSV,
     handleEditorChange,
     handleHide,
@@ -501,6 +499,7 @@ export const FunctionProvider = ({ children }) => {
     handleFileUploadQCSource2,
     handleCommentChange,
     handleDownloadQC,
+    index
   };
 
   return (

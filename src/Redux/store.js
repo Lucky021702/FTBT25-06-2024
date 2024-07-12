@@ -1,7 +1,7 @@
 // redux/store.js
 import { createStore, applyMiddleware } from 'redux';
 import {thunk} from 'redux-thunk';  // Importing redux-thunk middleware
-import rootReducer from '../Redux/reducer';
+import rootReducer from '../Redux/rootReducer';
 
 const store = createStore(
   rootReducer,

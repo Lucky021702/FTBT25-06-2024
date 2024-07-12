@@ -178,3 +178,8 @@ select option:hover {
   align-items: center;
   z-index: 1000;
 }
+
+.ck.ck-editor__editable:not(.ck-editor__nested-editable)
+{
+  height: 13vh;
+}
