@@ -30,6 +30,9 @@ function QC() {
     };
   }, []);
 
+  // Check if qcData has data
+  const hasData = qcData && qcData.Source && qcData.Source.length > 0;
+
   return (
     <TableContainer component={Paper}>
       <Table>

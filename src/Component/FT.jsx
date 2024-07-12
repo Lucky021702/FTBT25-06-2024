@@ -75,12 +75,11 @@ function FT() {
       console.error("Error fetching user", error);
     }
   };
-  useEffect(() => {
-    if (savedData.length != 0) {
-      handleProjectData();
+  useEffect(()=>{
+    if(savedData.length != 0){
+      handleProjectData()
     }
-  }, [savedData]);
-
+  },[savedData])
   const handleProjectDataUpdate = async (index) => {
     try {
       const payload = {

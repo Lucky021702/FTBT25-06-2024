@@ -1,4 +1,4 @@
-import { SET_INDEX_NAME } from '../actionTypes'; // Import action type
+import { SET_INDEX_NAME } from '../actionTypes'; 
 
 const initialStateIndex = {
   indexNameData: [],

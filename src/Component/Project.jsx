@@ -456,14 +456,6 @@ let userId = rawUserId.replace(/(^")|("$)/g, '');
         setIsDrawerOpen(false);
         fetchProjects();
         setOpenProjectAdd(true);
-//         await axios.post(
-//           "http://localhost:8000/api/add",{
-// index: `${projectName}_${sourceLanguage}_${targetLanguage.join("_")}_${selectedDomain}`.toLowerCase(),
-// "document": {
-//     "source": "my name is lucky",
-//     "target": "lucky is my name"
-//   }
-//           })
       }
     } catch (error) {
       setOpenProjectError(true);
