@@ -28,7 +28,8 @@ export const FunctionProvider = ({ children }) => {
   const [comments, setComments] = useState([]);
   const [downloadFileName, setDownloadFileName] = useState("");
   const [index, setIndex] = useState("");
- 
+  const [shouldDisplay, setShouldDisplay] = useState(false);
+
   const navigate = useNavigate();
  
   useEffect(() => {
@@ -379,10 +380,12 @@ export const FunctionProvider = ({ children }) => {
     reader.readAsArrayBuffer(file);
   };
   // const handleCommentChange = (index, event) => {
+  //   console.log(`Comment at index ${index} changed to: ${event.target.value}`);
   //   const newComments = [...comments];
   //   newComments[index] = event.target.value;
   //   setComments(newComments);
   // };
+  
   const handleDownloadQC = async () => {
     const fileName = prompt("Enter file name (without extension):", "data");
     if (!fileName) return;
@@ -501,7 +504,8 @@ export const FunctionProvider = ({ children }) => {
     handleHide,
     handleFileUploadQCSource,
     handleFileUploadQCSource2,
-    // handleCommentChange,
+    setShouldDisplay,
+    shouldDisplay,
     handleDownloadQC,
     index
   };

@@ -40,12 +40,29 @@ const [fileData,setFileData] = useState([])
 
   const tmx = useSelector((state) => state.tmxData.tmxData);
   const notificationData = useSelector((state)=>state.projectData.indexNameData)
+  // const handleProjectData = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `http://localhost:8000/api/qcFileData/${notificationData[0].index}`);
+  //     setFileData(response.data)
+  //     console.log("responseresponse",response);
+  //   } catch (error) {
+  //     console.error("Error fetching user", error);
+  //   }
+  // };
   const handleProjectData = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8000/api/qcFileData/${notificationData[0].index}`);
-      setFileData(response.data)
-      console.log("responseresponse",response);
+      const formattedCsvData = csvData.map((row) => `"${row.join(", ")}"`);
+      let payload = {
+        index: notificationData[0].index,
+        Source: formattedCsvData ? formattedCsvData : [],
+        Target: savedData ? savedData : [],
+      };
+      const response = await axios.post(
+        "http://localhost:8000/api/fileData",
+        payload
+      );
+      setFileData(response.data);
     } catch (error) {
       console.error("Error fetching user", error);
     }
@@ -55,7 +72,6 @@ const [fileData,setFileData] = useState([])
   }, [notificationData]);
   const handleProjectDataUpdate = async (index) => {
     try {
-      
       const payload = {
         index: notificationData[0].index,
         targetIndex: index,
@@ -67,7 +83,7 @@ const [fileData,setFileData] = useState([])
           "http://localhost:8000/updateTargetAtIndex",
           payload
         );
-        // setFileData(response.data);
+        setFileData(response.data);
       }, 1000);
     }
     } catch (error) {

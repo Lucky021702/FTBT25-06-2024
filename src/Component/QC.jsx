@@ -18,17 +18,27 @@ import { useDispatch, useSelector } from "react-redux";
 const socket = io("http://localhost:8000");
  
 const QC = () => {
-  const [comments, setComments] = useState([]);
+  
   const dispatch = useDispatch();
   const context = useFunctionContext();
   const qcData = useSelector((state) => state?.qcData?.qcData);
-  // const qcData = useSelector((state) => state?.qcData?.qcData?.updatedFile);
- 
-  // const { handleCommentChange, comments } = context;
+const [comments, setComments] = useState([]);
+const { shouldDisplay } = context;
+
+useEffect(() => {
+  if (qcData?.Comment) {
+    setComments(qcData.Comment.slice()); 
+  }
+}, [qcData]);
+
+const handleCommentChange = (index, event) => {
+  console.log(`Comment at index ${index} changed to: ${event.target.value}`);
+  const newComments = [...comments];
+  newComments[index] = event.target.value;
+  setComments(newComments); // Update state with new comments
+};
  
   useEffect(() => {
-    if (qcData?.Source?.length != 0) {
-    
     socket.on("target-updated", (data) => {
       console.log("data log==", data?.updatedFile);
       dispatch(setQcData(data?.updatedFile));
@@ -36,25 +46,16 @@ const QC = () => {
  
     return () => {
       socket.off("target-updated");
-    };
   }}, []);
-  useEffect(()=>{
-      console.log("dtatatsa==",qcData);
-  },[qcData])
  
-  const handleCommentChange = (index, event) => {
-    const newComments = [...comments];
-    newComments[index] = event.target.value;
-    setComments(newComments);
-  };
+ 
   const handleSaveComment = (index) => {
     console.log("Comment saved:", comments[index]);
   };
-  // const hasData = qcData && qcData.Source && qcData.Source.length > 0;
   return (
     <div>
-      {/* {hasData ? ( */}
-      <TableContainer
+      
+      { shouldDisplay ? <TableContainer
         component={Paper}
         style={{ maxHeight: "100vh", overflow: "auto" }}
       >
@@ -113,8 +114,8 @@ const QC = () => {
                     style={{ width: "90%", resize: "none", fontSize: "1rem" }}
                     multiline
                     rows={4}
-                    value={qcData.Comment[index] || ""}
-                    onChange={(event) => handleCommentChange(index, event)}
+                    value={comments[index] || ""}
+            onChange={(event) => handleCommentChange(index, event)}
                   />
                 </TableCell>
                 <TableCell>
@@ -132,14 +133,10 @@ const QC = () => {
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
-      {/* ) : (
-        <div>No data available</div>
-      )} */}
+      </TableContainer> : "No Data Found"}
+      
     </div>
   );
 };
  
 export default QC;
- 
- 

@@ -80,6 +80,7 @@ const Navbar = () => {
     setCSVData,
     csvData,
     savedData,
+    setShouldDisplay
   } = context;
 
 
@@ -109,8 +110,9 @@ const Navbar = () => {
   }, [csvData]);
 
   const notificationDataa = useSelector((state)=>state.projectData.indexNameData)
-  const handleProjectData = async () => {
+  const handleFileData = async () => {
     try {
+      
       const formattedCsvData = csvData.map(row => `"${row.join(", ")}"`);
       let payload = {
         index:notificationDataa[0].index,
@@ -198,6 +200,7 @@ const Navbar = () => {
       const response = await axios.get(`http://localhost:8000/api/qcFileData/${notificationData[0]?.index}`);
       console.log("Response Data:", response.data);
       dispatch(setQcData(response?.data));
+      setShouldDisplay(true)
     } catch (error) {
       console.error("Error fetching QC data", error);
     }
@@ -525,7 +528,7 @@ const Navbar = () => {
                                                       /^[^_]*_/,
                                                       ""
                                                     ),
-                                                    handleProjectData(),
+                                                    handleFileData(),
                                                     proj
                                                   )
                                                 }
