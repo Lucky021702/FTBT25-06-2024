@@ -75,7 +75,7 @@ function FT() {
       if(payload.newValue != ""){
       setTimeout(async () => {
         const response = await axios.put(
-          "http://localhost:8000/api/updateTargetAtIndex",
+          "http://localhost:8000/updateTargetAtIndex",
           payload
         );
         setFileData(response.data);
