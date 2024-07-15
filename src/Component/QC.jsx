@@ -137,10 +137,10 @@ const QC = () => {
   const { handleCommentChange, comments } = context;
  
   useEffect(() => {
+   
     socket.on("target-updated", (data) => {
       console.log("data log==", data?.updatedFile);
-      // dispatch(setQcData((prevData) => [...prevData, data]));
-      dispatch(setQcData(data));
+      dispatch(setQcData(data?.updatedFile));
     });
  
     return () => {
