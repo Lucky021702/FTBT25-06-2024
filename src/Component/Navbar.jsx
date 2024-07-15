@@ -79,7 +79,7 @@ const Navbar = () => {
     handleDownloadQC,
     setCSVData,
     csvData,
-  
+    savedData,
   } = context;
 
 
@@ -107,6 +107,24 @@ const Navbar = () => {
       searchIndexApi();
     }, 1000);
   }, [csvData]);
+
+  const notificationDataa = useSelector((state)=>state.projectData.indexNameData)
+  const handleProjectData = async () => {
+    try {
+      const formattedCsvData = csvData.map(row => `"${row.join(", ")}"`);
+      let payload = {
+        index:notificationDataa[0].index,
+        Source:formattedCsvData? formattedCsvData : [],
+        Target:savedData? savedData : [],
+      }
+      const response = await axios.post(
+        "http://localhost:8000/api/fileData",payload);
+      // setFileData(response.data)
+    } catch (error) {
+      console.error("Error fetching user", error);
+    }
+  };
+
   const searchIndexApi = async () => {
     try {
       const newSplitData = [];
@@ -507,6 +525,7 @@ const Navbar = () => {
                                                       /^[^_]*_/,
                                                       ""
                                                     ),
+                                                    handleProjectData(),
                                                     proj
                                                   )
                                                 }

@@ -22,11 +22,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 
 function FT() {
-  const [fileData,setFileData] = useState([])
-  const [savedDataLine,setSavedDataLine] = useState([])
-  useEffect(()=>{
-    console.log("savedDataLine",savedDataLine);
-  },[savedDataLine])
+const [fileData,setFileData] = useState([])
   const context = useFunctionContext();
   const {
     isQCSelected,
@@ -46,24 +42,17 @@ function FT() {
   const notificationData = useSelector((state)=>state.projectData.indexNameData)
   const handleProjectData = async () => {
     try {
-      const formattedCsvData = csvData.map(row => `"${row.join(", ")}"`);
-      let payload = {
-        index:notificationData[0].index,
-        Source:formattedCsvData? formattedCsvData : [],
-        Target:savedData? savedData : [],
-      }
-      const response = await axios.post(
-        "http://localhost:8000/api/fileData",payload);
+      const response = await axios.get(
+        `http://localhost:8000/api/qcFileData/${notificationData[0].index}`);
       setFileData(response.data)
+      console.log("responseresponse",response);
     } catch (error) {
       console.error("Error fetching user", error);
     }
   };
-  useEffect(()=>{
-    if(savedData.length != 0){
-      handleProjectData()
-    }
-  },[savedData])
+  useEffect(() => {
+    handleProjectData()
+  }, [notificationData]);
   const handleProjectDataUpdate = async (index) => {
     try {
       
@@ -78,7 +67,7 @@ function FT() {
           "http://localhost:8000/updateTargetAtIndex",
           payload
         );
-        setFileData(response.data);
+        // setFileData(response.data);
       }, 1000);
     }
     } catch (error) {
@@ -90,8 +79,9 @@ function FT() {
     if (index !== undefined && savedData[index] !== undefined) {
       handleProjectDataUpdate(index);
     }
-    console.log("savedData[index]", savedData[index]);
   }, [savedData, index]);
+
+
 
   
   return (
@@ -278,11 +268,19 @@ function FT() {
                         >
                           <CKEditor
                             editor={ClassicEditor}
+                            // data={
+                            //   matchPercent >= 50
+                            //     ?  tmx[index]?.target
+                            //     : editableData[index] || ""
+                            // }
                             data={
-                              matchPercent >= 50
-                                ? tmx[index]?.target
-                                : editableData[index] || ""
+                              fileData.Target?.[index] 
+                                ? fileData.Target[index] 
+                                : tmx[index]?.target 
+                                  ? tmx[index].target 
+                                  : editableData[index] || ""
                             }
+                            
                             onChange={(event, editor) =>
                               handleEditorChange(event, editor, index)
                             }

@@ -378,12 +378,11 @@ export const FunctionProvider = ({ children }) => {
     };
     reader.readAsArrayBuffer(file);
   };
-  const handleCommentChange = (index, event) => {
-    const newComments = [...comments];
-    newComments[index] = event.target.value;
-    setComments(newComments);
-    console.log(comments);
-  };
+  // const handleCommentChange = (index, event) => {
+  //   const newComments = [...comments];
+  //   newComments[index] = event.target.value;
+  //   setComments(newComments);
+  // };
   const handleDownloadQC = async () => {
     const fileName = prompt("Enter file name (without extension):", "data");
     if (!fileName) return;
@@ -502,7 +501,7 @@ export const FunctionProvider = ({ children }) => {
     handleHide,
     handleFileUploadQCSource,
     handleFileUploadQCSource2,
-    handleCommentChange,
+    // handleCommentChange,
     handleDownloadQC,
     index
   };
