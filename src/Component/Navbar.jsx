@@ -528,16 +528,12 @@ const Navbar = () => {
                                               title='Reload source file'
                                               arrow
                                             >
-                                              <CachedIcon
-                                                onClick={() =>
+                                             <CachedIcon
+                                                onClick={() =>{
                                                   handleUpload(
-                                                    task.assignSourceFilename.replace(
-                                                      /^[^_]*_/,
-                                                      ""
-                                                    ),
-                                                    handleNotificationData(),
-                                                    proj
-                                                  )
+                                                    task.assignSourceFilename.replace(/^[^_]*_/,""),proj
+                                                  ),
+                                                  handleNotificationData()}
                                                 }
                                                 className='icon'
                                                 sx={{ color: "#367AF7" }}
@@ -765,15 +761,15 @@ const Navbar = () => {
                                               arrow
                                             >
                                               <CachedIcon
-                                                onClick={() =>
+                                                onClick={() =>{
                                                   handleUpload(
                                                     task.assignSourceFilename.replace(
                                                       /^[^_]*_/,
                                                       ""
                                                     ),
-                                                    handleNotificationData(),
                                                     proj
-                                                  )
+                                                  ),
+                                                  handleNotificationData()}
                                                 }
                                                 className='icon'
                                                 sx={{ color: "#367AF7" }}

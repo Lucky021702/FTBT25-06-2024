@@ -465,7 +465,7 @@ const [fileData,setFileData] = useState([])
                           width: "15%",
                         }}
                       >
-                        {qcData.Target[index] === null ? "---- ----" : targetData}
+                        {qcData.Target[index] === "" ? "---- ----" : targetData}
                       </TableCell>
                       <TableCell>
       {qcData?.Target[index]?.split(" ").map((tmWord, idx) => {

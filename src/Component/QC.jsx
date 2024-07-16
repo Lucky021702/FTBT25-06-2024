@@ -110,7 +110,7 @@ const handleCommentChange = (index, event) => {
       {qcData && qcData.Target && qcData.Target[index] ? (
         <span dangerouslySetInnerHTML={{ __html: qcData.Target[index] }} />
       ) : (
-        <span>No Data Available</span>
+        <span>------------</span>
       )}
     </div>
                 </TableCell>
