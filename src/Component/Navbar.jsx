@@ -120,7 +120,7 @@ const Navbar = () => {
         let payload = {
           index: notificationDataa[0].index,
           Source: formattedCsvData ? formattedCsvData : [],
-          Target: savedData ? savedData : [],
+          // Target: savedData ? savedData : [],
         };
         const response = await axios.post(
           "http://localhost:8000/api/fileData",
@@ -535,9 +535,7 @@ const Navbar = () => {
                                                       /^[^_]*_/,
                                                       ""
                                                     ),
-                                                    // setTimeout(()=>{
-                                                    //   handleFileData()
-                                                    // },1000),
+                                                    handleNotificationData(),
                                                     proj
                                                   )
                                                 }

@@ -40,29 +40,10 @@ const [fileData,setFileData] = useState([])
 
   const tmx = useSelector((state) => state.tmxData.tmxData);
   const notificationData = useSelector((state)=>state.projectData.indexNameData)
-  // const handleProjectData = async () => {
-  //   try {
-  //     if(csvData.length > 0){
-  //     const formattedCsvData = csvData.map((row) => `"${row.join(", ")}"`);
-  //     console.log("formattedCsvData",formattedCsvData);
-  //     let payload = {
-  //       index: notificationData[0].index,
-  //       Source: formattedCsvData ? formattedCsvData : [],
-  //       Target: savedData ? savedData : [],
-  //     };
-  //     const response = await axios.post(
-  //       "http://localhost:8000/api/fileData",
-  //       payload
-  //     );
-  //     setFileData(response.data);
-  //   }
-  //   } catch (error) {
-  //     console.error("Error fetching user", error);
-  //   }
-  // };
-  // useEffect(() => {
-  //       handleProjectData()
-  // }, [notificationData]);
+  const qcData = useSelector((state) => state?.qcData?.qcData);
+  useEffect(()=>{
+    console.log("QCDATAINFT",qcData);
+  },[qcData])
   const handleProjectDataUpdate = async (index) => {
     try {
       const payload = {
@@ -283,8 +264,8 @@ const [fileData,setFileData] = useState([])
                             //     : editableData[index] || ""
                             // }
                             data={
-                              fileData.Target?.[index] 
-                                ? fileData.Target[index] 
+                              qcData.Target?.[index] 
+                                ? qcData.Target[index] 
                                 : tmx[index]?.target 
                                   ? tmx[index].target 
                                   : editableData[index] || ""
