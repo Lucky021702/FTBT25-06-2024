@@ -611,6 +611,188 @@ const Navbar = () => {
           )}
           {isBT && (
             <>
+            <div>
+                <IconButton
+                  onClick={handleClickOpen}
+                  color='inherit'
+                  className='icon'
+                >
+                  <CircleNotificationsIcon />
+                </IconButton>
+                <Dialog
+                  open={dialogOpen}
+                  onClose={handleClose}
+                  maxWidth='lg'
+                  fullWidth
+                  PaperProps={{
+                    sx: {
+                      height: "66vh",
+                    },
+                  }}
+                >
+                  <DialogTitle
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>Notifications</span>
+                    <IconButton
+                      aria-label='close'
+                      onClick={handleClose}
+                      sx={{
+                        position: "absolute",
+                        right: 8,
+                        top: 8,
+                        color: "black",
+                      }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </DialogTitle>
+                  <DialogContent>
+                    {project.length === 0 ? (
+                      "No Notifications"
+                    ) : (
+                      <div>
+                        <TableContainer component={Paper}>
+                          <Table sx={{ minWidth: 650 }} aria-label='task table'>
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>Name</TableCell>
+                                <TableCell>Target Language</TableCell>
+                                <TableCell>Assign Date</TableCell>
+                                <TableCell>Source File Name</TableCell>
+                                <TableCell>Status</TableCell>
+                                <TableCell>Actions</TableCell>
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {project.map((proj) =>
+                                proj.tasks.map(
+                                  (task, index) =>
+                                    task.assignedStatus !== "Reject" && (
+                                      <TableRow key={task._id}>
+                                        <TableCell>
+                                          {proj.projectName}
+                                        </TableCell>
+                                        <TableCell>
+                                          {task.assignTargetLanguage}
+                                        </TableCell>
+                                        <TableCell>
+                                          {format(
+                                            new Date(task.date),
+                                            "yyyy-MM-dd hh:mm a"
+                                          )}
+                                        </TableCell>
+                                        <TableCell>
+                                          {task.assignSourceFilename}
+                                        </TableCell>
+                                        <TableCell>
+                                          {task.assignedStatus ? (
+                                            <div
+                                              style={{
+                                                display: "flex",
+                                                justifyContent: "space-around",
+                                                alignItems: "center",
+                                                fontSize: "1.2rem",
+                                                color: "red",
+                                              }}
+                                            >
+                                              {task.assignedStatus}
+                                            </div>
+                                          ) : (
+                                            <div
+                                              style={{
+                                                display: "flex",
+                                                justifyContent: "space-around",
+                                                alignItems: "center",
+                                              }}
+                                            >
+                                              <Button
+                                                onClick={() => {
+                                                  setAssignedStatus("Reject");
+                                                  handleCardData(task);
+                                                }}
+                                                variant='contained'
+                                                color='secondary'
+                                              >
+                                                Reject
+                                              </Button>
+
+                                              <Button
+                                                onClick={() => {
+                                                  handleCardData(task);
+                                                  handleCloseNotification(
+                                                    task.assignSourceFilename.replace(
+                                                      /^[^_]*_/,
+                                                      ""
+                                                    ),
+                                                    "Accept"
+                                                  );
+                                                }}
+                                                variant='contained'
+                                                color='primary'
+                                              >
+                                                Accept
+                                              </Button>
+                                            </div>
+                                          )}
+                                        </TableCell>
+                                        <TableCell>
+                                          <div
+                                            style={{
+                                              display: "flex",
+                                              justifyContent: "space-between",
+                                              alignItems: "center",
+                                            }}
+                                          >
+                                            <DownloadIcon
+                                              className='icon'
+                                              sx={{ color: "#367af7" }}
+                                              onClick={() =>
+                                                handleDownload(
+                                                  task.assignSourceFilename.replace(
+                                                    /^[^_]*_/,
+                                                    ""
+                                                  )
+                                                )
+                                              }
+                                            />
+                                            <Tooltip
+                                              title='Reload source file'
+                                              arrow
+                                            >
+                                              <CachedIcon
+                                                onClick={() =>
+                                                  handleUpload(
+                                                    task.assignSourceFilename.replace(
+                                                      /^[^_]*_/,
+                                                      ""
+                                                    ),
+                                                    handleNotificationData(),
+                                                    proj
+                                                  )
+                                                }
+                                                className='icon'
+                                                sx={{ color: "#367AF7" }}
+                                              />
+                                            </Tooltip>
+                                          </div>
+                                        </TableCell>
+                                      </TableRow>
+                                    )
+                                )
+                              )}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
+              </div>
               <Button
                 className={classes.fileUploadButton}
                 onClick={handleOpenChat}
