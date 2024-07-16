@@ -106,7 +106,13 @@ const handleCommentChange = (index, event) => {
                     width: "30%",
                   }}
                 >
-                  {qcData.Target[index] || ""}
+ <div>
+      {qcData && qcData.Target && qcData.Target[index] ? (
+        <span dangerouslySetInnerHTML={{ __html: qcData.Target[index] }} />
+      ) : (
+        <span>No Data Available</span>
+      )}
+    </div>
                 </TableCell>
                 <TableCell>
                   <textarea

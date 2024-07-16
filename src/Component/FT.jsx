@@ -42,34 +42,27 @@ const [fileData,setFileData] = useState([])
   const notificationData = useSelector((state)=>state.projectData.indexNameData)
   // const handleProjectData = async () => {
   //   try {
-  //     const response = await axios.get(
-  //       `http://localhost:8000/api/qcFileData/${notificationData[0].index}`);
-  //     setFileData(response.data)
-  //     console.log("responseresponse",response);
+  //     if(csvData.length > 0){
+  //     const formattedCsvData = csvData.map((row) => `"${row.join(", ")}"`);
+  //     console.log("formattedCsvData",formattedCsvData);
+  //     let payload = {
+  //       index: notificationData[0].index,
+  //       Source: formattedCsvData ? formattedCsvData : [],
+  //       Target: savedData ? savedData : [],
+  //     };
+  //     const response = await axios.post(
+  //       "http://localhost:8000/api/fileData",
+  //       payload
+  //     );
+  //     setFileData(response.data);
+  //   }
   //   } catch (error) {
   //     console.error("Error fetching user", error);
   //   }
   // };
-  const handleProjectData = async () => {
-    try {
-      const formattedCsvData = csvData.map((row) => `"${row.join(", ")}"`);
-      let payload = {
-        index: notificationData[0].index,
-        Source: formattedCsvData ? formattedCsvData : [],
-        Target: savedData ? savedData : [],
-      };
-      const response = await axios.post(
-        "http://localhost:8000/api/fileData",
-        payload
-      );
-      setFileData(response.data);
-    } catch (error) {
-      console.error("Error fetching user", error);
-    }
-  };
-  useEffect(() => {
-    handleProjectData()
-  }, [notificationData]);
+  // useEffect(() => {
+  //       handleProjectData()
+  // }, [notificationData]);
   const handleProjectDataUpdate = async (index) => {
     try {
       const payload = {
