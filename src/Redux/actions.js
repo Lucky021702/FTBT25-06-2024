@@ -14,3 +14,9 @@ export const setQcData = (qcData) => ({
   type: SET_QC_DATA,
   payload: qcData,
 });
+
+export const setNoti = (qcData) => ({
+  type: "SET_NOTI_DATA",
+  payload: qcData,
+});
+ 

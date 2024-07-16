@@ -41,13 +41,16 @@ const [fileData,setFileData] = useState([])
   const tmx = useSelector((state) => state.tmxData.tmxData);
   const notificationData = useSelector((state)=>state.projectData.indexNameData)
   const qcData = useSelector((state) => state?.qcData?.qcData);
+  const notiData = useSelector(
+    (state) => state.notiData?.notiData
+  );
   useEffect(()=>{
     console.log("QCDATAINFT",qcData);
   },[qcData])
   const handleProjectDataUpdate = async (index) => {
     try {
       const payload = {
-        index: notificationData[0].index,
+        index: notiData,
         targetIndex: index,
         newValue: savedData[index] ? savedData[index] : "",
       };
@@ -258,11 +261,6 @@ const [fileData,setFileData] = useState([])
                         >
                           <CKEditor
                             editor={ClassicEditor}
-                            // data={
-                            //   matchPercent >= 50
-                            //     ?  tmx[index]?.target
-                            //     : editableData[index] || ""
-                            // }
                             data={
                               qcData.Target?.[index] 
                                 ? qcData.Target[index] 

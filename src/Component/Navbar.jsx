@@ -44,7 +44,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Chat from "./Chat";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { setIndexName, setTmxData, setQcData } from "../Redux/actions";
+import { setIndexName, setTmxData, setQcData, setNoti } from "../Redux/actions";
 const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
@@ -113,6 +113,9 @@ const Navbar = () => {
   const notificationDataa = useSelector(
     (state) => state.projectData.indexNameData
   );
+  const notiData = useSelector(
+    (state) => state.notiData?.notiData
+  );
   const handleFileData = async () => {
     try {
       if (csvData.length > 0) {
@@ -139,7 +142,7 @@ const Navbar = () => {
       for (let i = 0; i < csvData?.length; i++) {
         if (csvData[i][0]) {
           const payload = {
-            index,
+            index:notiData,
             query: csvData[i][0],
           };
           console.log("payload==", payload);
@@ -160,9 +163,9 @@ const Navbar = () => {
             if (data.length > 0) {
               const source = data[0]?.source || "";
               const target = data[0]?.target || "";
-              const decodedTarget = new TextDecoder("iso-8859-1").decode(
-                new Uint8Array([...target].map((char) => char.charCodeAt(0)))
-              );
+              // const decodedTarget = new TextDecoder("iso-8859-1").decode(
+              //   new Uint8Array([...target].map((char) => char.charCodeAt(0)))
+              // );
 
               const decodedText = new TextDecoder("iso-8859-1").decode(
                 new Uint8Array([...source].map((char) => char.charCodeAt(0)))
@@ -180,7 +183,7 @@ const Navbar = () => {
               const newData = {
                 csvSourceData: originalFieldValueDecoded,
                 source: decodedText,
-                target: decodedTarget,
+                target: target,
                 "Match Percentage": data[0]?.matchPercentage || "0%",
               };
               newSplitData.push(newData);
@@ -203,7 +206,7 @@ const Navbar = () => {
   const handleNotificationData = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/qcFileData/${notificationData[0]?.index}`
+        `http://localhost:8000/api/qcFileData/${notiData}`
       );
       console.log("Response Data:", response.data);
       dispatch(setQcData(response?.data));
@@ -234,7 +237,7 @@ const Navbar = () => {
   };
   const handleUpload = (fileName, task) => {
     handleFileUpload(fileName);
-    setIndex(task?.index);
+    dispatch(setNoti(task?.index))
     handleClose();
   };
   const UserName = localStorage.getItem("name");
@@ -966,6 +969,7 @@ const Navbar = () => {
                                                   ),
                                                   "Accept"
                                                 );
+                                                handleNotificationData()
                                               }}
                                               variant='contained'
                                               color='primary'
@@ -997,8 +1001,10 @@ const Navbar = () => {
                                           />
                                           <Tooltip title='Reload file' arrow>
                                             <CachedIcon
-                                              onClick={() =>
+                                              onClick={() =>{
                                                 handleNotificationData()
+                                                setDialogOpen(false)}
+                                                
                                               }
                                               className='icon'
                                               sx={{ color: "#367AF7" }}

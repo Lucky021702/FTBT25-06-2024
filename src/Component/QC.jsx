@@ -14,7 +14,7 @@ import { useFunctionContext } from "./Context/Function";
 import io from "socket.io-client";
 import { setQcData } from "../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
- 
+import Loader from "../Component/Common_Component/Loader";
 const socket = io("http://localhost:8000");
  
 const QC = () => {
@@ -23,7 +23,7 @@ const QC = () => {
   const context = useFunctionContext();
   const qcData = useSelector((state) => state?.qcData?.qcData);
 const [comments, setComments] = useState([]);
-const { shouldDisplay } = context;
+const { shouldDisplay, isLoading } = context;
 
 useEffect(() => {
   if (qcData?.Comment) {
@@ -54,7 +54,11 @@ const handleCommentChange = (index, event) => {
   };
   return (
     <div>
-      
+      {isLoading && (
+        <div className='loader-container'>
+          <Loader />
+        </div>
+      )}
       { shouldDisplay ? <TableContainer
         component={Paper}
         style={{ maxHeight: "100vh", overflow: "auto" }}

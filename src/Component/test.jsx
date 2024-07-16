@@ -46,7 +46,7 @@ const ExcelCSVUploader = () => {
   const uploadDocuments = async (documentArray) => {
     try {
       await axios.post("http://localhost:8000/api/add", {
-        index: "spanish_english_vpkw1234_pharmacovigilance",
+        index: "hindi_english_vpkw789_pharmacovigilance",
         document: documentArray,
       });
       alert("Documents uploaded successfully");
