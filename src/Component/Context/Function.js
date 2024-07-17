@@ -18,8 +18,10 @@ export const FunctionProvider = ({ children }) => {
   const [csvData, setCSVData] = useState([]);
   const [tcxData, setTcxData] = useState([]);
   const [editableData,  setEditableData ] = useState([]);
+  const [editableDataBt,  setEditableDataBt ] = useState([]);
   const [ftData, setFTData] = useState([]);
   const [savedData, setSavedData] = useState([]);
+  const [savedDataBt, setSavedDataBt] = useState([]);
   const [downloadReady, setDownloadReady] = useState(false);
   const [dataTrue, setDataTrue] = useState(false);
   const [hideTmxColumn, sethideTmxColumn] = useState(false);
@@ -38,12 +40,6 @@ export const FunctionProvider = ({ children }) => {
       navigate("/login");
     }
   }, [navigate]);
-
-  useEffect(() => {
-    console.log("savedData",savedData);
-  }, [savedData]);
- 
- 
  
   const handleQCClick = () => {
     setIsQCSelected(true);
@@ -338,12 +334,27 @@ export const FunctionProvider = ({ children }) => {
      setSavedData(newSavedData);
    };
 
+   const handleSaveBt = (index) => {
+    setIndex(index)
+     const newSavedData = [...savedDataBt];
+     newSavedData[index] = editableDataBt[index];
+     setSavedDataBt(newSavedData);
+     console.log("newSavedData",newSavedData);
+   };
+
   
    const handleEditorChange = (event, editor, index) => {
      const data = editor.getData();
      const newEditableData = [...editableData];
      newEditableData[index] = data;
      setEditableData(newEditableData);
+   };
+
+   const handleEditorChangeBt = (event, editor, index) => {
+     const data = editor.getData();
+     const newEditableData = [...editableDataBt];
+     newEditableData[index] = data;
+     setEditableDataBt(newEditableData);
    };
   
   const handleFileUploadQCSource = (event) => {
@@ -507,6 +518,9 @@ export const FunctionProvider = ({ children }) => {
     setShouldDisplay,
     shouldDisplay,
     handleDownloadQC,
+    handleEditorChangeBt,
+    handleSaveBt,
+    setEditableData,
     index
   };
  

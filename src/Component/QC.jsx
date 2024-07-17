@@ -18,7 +18,6 @@ import Loader from "../Component/Common_Component/Loader";
 const socket = io("http://localhost:8000");
  
 const QC = () => {
-  
   const dispatch = useDispatch();
   const context = useFunctionContext();
   const qcData = useSelector((state) => state?.qcData?.qcData);

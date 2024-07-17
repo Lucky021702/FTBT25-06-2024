@@ -101,7 +101,7 @@ const Navbar = () => {
   const [project, setProject] = useState([]);
   const [cardData, setCardData] = useState(null);
   const [index, setIndex] = useState(null);
-
+  const qcData = useSelector((state) => state?.qcData?.qcData);
   const dispatch = useDispatch();
   useEffect(() => {
     setTimeout(() => {
@@ -110,23 +110,48 @@ const Navbar = () => {
     }, 1000);
   }, [csvData]);
 
-  const notificationDataa = useSelector(
-    (state) => state.projectData.indexNameData
-  );
+  // useEffect(() => {
+  //   if(qcData?.Target?.length != 0){
+  //   setTimeout(() => {
+  //     handleFileDataBT()
+  //   }, 1000);
+  // }
+  // }, [qcData]);
+
   const notiData = useSelector(
     (state) => state.notiData?.notiData
   );
+useEffect(()=>{
+  console.log("notiData==>",notiData);
+},[notiData])
   const handleFileData = async () => {
     try {
       if (csvData.length > 0) {
         const formattedCsvData = csvData.map((row) => `"${row.join(", ")}"`);
         let payload = {
-          index: notificationDataa[0].index,
+          index: notiData,
           Source: formattedCsvData ? formattedCsvData : [],
           // Target: savedData ? savedData : [],
         };
         const response = await axios.post(
           "http://localhost:8000/api/fileData",
+          payload
+        );
+        console.log("response.data", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching user", error);
+    }
+  };
+  const handleFileDataBT = async () => {
+    try {
+      if(qcData?.Target?.length != 0){
+        let payload = {
+          index: notiData,
+          Source: qcData?.Target ? qcData?.Target : [],
+        };
+        const response = await axios.post(
+          "http://localhost:8000/api/btFileData",
           payload
         );
         console.log("response.data", response.data);
@@ -202,20 +227,24 @@ const Navbar = () => {
       throw error;
     }
   };
-
+useEffect(()=>{
+  handleNotificationData()
+},[notiData])
   const handleNotificationData = async () => {
     try {
+      if(notiData){
       const response = await axios.get(
         `http://localhost:8000/api/qcFileData/${notiData}`
       );
       console.log("Response Data:", response.data);
       dispatch(setQcData(response?.data));
       setShouldDisplay(true);
+    }
     } catch (error) {
       console.error("Error fetching QC data", error);
     }
   };
-
+  
   let email = localStorage.getItem("email");
   const handleClickOpen = () => {
     setDialogOpen(true);
@@ -310,9 +339,6 @@ const Navbar = () => {
   const handleCloseChat = () => {
     setIsChatOpen(false);
   };
-  // useEffect(() => {
-  //   console.log("fileName", fileName.savedData.map((name)=>name));
-  // }, [fileName]);
 
   // UseEffect to set isLoggedIn, isFT, and isBT based on token and department
   useEffect(() => {
@@ -535,8 +561,9 @@ const Navbar = () => {
                                                 onClick={() =>{
                                                   handleUpload(
                                                     task.assignSourceFilename.replace(/^[^_]*_/,""),proj
-                                                  ),
-                                                  handleNotificationData()}
+                                                  )
+                                                    // handleNotificationData()
+                                                  }
                                                 }
                                                 className='icon'
                                                 sx={{ color: "#367AF7" }}
@@ -772,7 +799,8 @@ const Navbar = () => {
                                                     ),
                                                     proj
                                                   ),
-                                                  handleNotificationData()}
+                                                  handleNotificationData()
+                                                  handleFileDataBT()}
                                                 }
                                                 className='icon'
                                                 sx={{ color: "#367AF7" }}
