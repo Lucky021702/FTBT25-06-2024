@@ -333,14 +333,14 @@ export const FunctionProvider = ({ children }) => {
      newSavedData[index] = editableData[index];
      setSavedData(newSavedData);
    };
-
    const handleSaveBt = (index) => {
     setIndex(index)
-     const newSavedData = [...savedDataBt];
-     newSavedData[index] = editableDataBt[index];
-     setSavedDataBt(newSavedData);
-     console.log("newSavedData",newSavedData);
-   };
+    const newSavedData = [...savedDataBt];
+    newSavedData[index] = editableDataBt[index];
+    setSavedDataBt(newSavedData);
+    console.log("newSavedData", newSavedData);
+  };
+  
 
   
    const handleEditorChange = (event, editor, index) => {
@@ -350,12 +350,20 @@ export const FunctionProvider = ({ children }) => {
      setEditableData(newEditableData);
    };
 
-   const handleEditorChangeBt = (event, editor, index) => {
-     const data = editor.getData();
-     const newEditableData = [...editableDataBt];
-     newEditableData[index] = data;
-     setEditableDataBt(newEditableData);
-   };
+  //  const handleEditorChangeBt = (event, editor, index) => {
+  //    const data = editor.getData();
+  //    const newEditableData = [...editableDataBt];
+  //    newEditableData[index] = data;
+  //    setEditableDataBt(newEditableData);
+  //  };
+  const handleEditorChangeBt = (event, editor, index) => {
+    const data = editor.getData();
+    console.log("Editor Data:", data);
+    const newEditableData = [...editableDataBt];
+    newEditableData[index] = data;
+    console.log("New Editable Data:", newEditableData);
+    setEditableDataBt(newEditableData);
+  };
   
   const handleFileUploadQCSource = (event) => {
     const file = event.target.files[0];
@@ -521,7 +529,9 @@ export const FunctionProvider = ({ children }) => {
     handleEditorChangeBt,
     handleSaveBt,
     setEditableData,
-    index
+    index,
+    savedDataBt,
+    setEditableDataBt
   };
  
   return (

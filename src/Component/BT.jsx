@@ -35,19 +35,26 @@ function BT() {
     editableDataBt,
     handleSaveBt,
     index,
+    setEditableDataBt,
   } = context;
 
   const tmx = useSelector((state) => state.tmxData.tmxData);
-  const notiData = useSelector(
-    (state) => state.notiData?.notiData
-  );
+  const notiData = useSelector((state) => state.notiData?.notiData);
   const qcData = useSelector((state) => state?.qcData?.qcData);
   useEffect(() => {
-    console.log("QCDATAINBT", qcData);
-  }, [qcData]);
-  
+    console.log("savedDataBt==>", savedDataBt);
+  }, [savedDataBt]);
+  useEffect(() => {
+    if (tmx && Array.isArray(tmx) && tmx.some((item) => item?.source)) {
+      // Extract and update editableDataBt with data from tmx sources
+      const newEditableData = tmx.map((item) => item.source);
+      setEditableDataBt(newEditableData);
+    }
+  }, [tmx]);
+
   const handleProjectDataUpdateBT = async (index) => {
     try {
+      console.log("indexindexindex", index);
       const payload = {
         index: notiData,
         targetIndex: index,
@@ -67,7 +74,6 @@ function BT() {
     }
   };
 
-
   useEffect(() => {
     if (typeof index !== "undefined" && savedDataBt?.[index] !== undefined) {
       handleProjectDataUpdateBT(index);
@@ -75,7 +81,7 @@ function BT() {
       console.warn("index or savedDataBt is undefined", { index, savedDataBt });
     }
   }, [savedDataBt, index]);
-  
+
   const stripHtmlTags = (html) => {
     const doc = new DOMParser().parseFromString(html, "text/html");
     return doc.body.textContent || "";
@@ -293,8 +299,10 @@ function BT() {
                         >
                           <CKEditor
                             editor={ClassicEditor}
-                            data={ qcData.Target[index] === "" ? "" :
-                              tmx[index]?.source
+                            data={
+                              qcData?.Target[index] == ""
+                                ? ""
+                                : tmx[index]?.source
                                 ? tmx[index]?.source
                                 : editableDataBt[index] || ""
                             }

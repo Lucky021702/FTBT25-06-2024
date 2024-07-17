@@ -110,13 +110,13 @@ const Navbar = () => {
     }, 1000);
   }, [csvData]);
 
-  // useEffect(() => {
-  //   if(qcData?.Target?.length != 0){
-  //   setTimeout(() => {
-  //     handleFileDataBT()
-  //   }, 1000);
-  // }
-  // }, [qcData]);
+  useEffect(() => {
+    if(qcData?.Target?.length != 0){
+    setTimeout(() => {
+      handleFileDataBT()
+    }, 1000);
+  }
+  }, [qcData]);
 
   const notiData = useSelector(
     (state) => state.notiData?.notiData
@@ -228,7 +228,10 @@ useEffect(()=>{
     }
   };
 useEffect(()=>{
+  let department = localStorage.getItem("department")
+  if(department != "BT"){
   handleNotificationData()
+  }
 },[notiData])
   const handleNotificationData = async () => {
     try {
@@ -800,7 +803,8 @@ useEffect(()=>{
                                                     proj
                                                   ),
                                                   handleNotificationData()
-                                                  handleFileDataBT()}
+                                                  // handleFileDataBT()
+                                                }
                                                 }
                                                 className='icon'
                                                 sx={{ color: "#367AF7" }}
@@ -1031,7 +1035,9 @@ useEffect(()=>{
                                             <CachedIcon
                                               onClick={() =>{
                                                 handleNotificationData()
-                                                setDialogOpen(false)}
+                                                setDialogOpen(false)
+                                                dispatch(setNoti(proj?.index))
+                                              }
                                                 
                                               }
                                               className='icon'
