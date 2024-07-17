@@ -11,6 +11,7 @@ import {
   Tooltip,
   Paper,
 } from "@material-ui/core";
+import { Snackbar, Alert } from "@mui/material";
 import { TiTick } from "react-icons/ti";
 import { useFunctionContext } from "./Context/Function";
 import ClassicEditor from "ckeditor5-build-classic-extended";
@@ -22,11 +23,9 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 
 function FT() {
-  const [fileData,setFileData] = useState([])
-  const [savedDataLine,setSavedDataLine] = useState([])
-  useEffect(()=>{
-    console.log("savedDataLine",savedDataLine);
-  },[savedDataLine])
+const [fileData,setFileData] = useState([])
+const [open, setOpen] = useState(false);
+  const [openError, setOpenError] = useState(false);
   const context = useFunctionContext();
   const {
     isQCSelected,
@@ -39,42 +38,62 @@ function FT() {
     handleEditorChange,
     editableData,
     handleSave,
-    index
+    index,
+    setEditableData
   } = context;
 
   const tmx = useSelector((state) => state.tmxData.tmxData);
-  const notificationData = useSelector((state)=>state.projectData.indexNameData)
-  const handleProjectData = async () => {
-    try {
-      const formattedCsvData = csvData.map(row => `"${row.join(", ")}"`);
-      let payload = {
-        index:notificationData[0].index,
-        Source:formattedCsvData? formattedCsvData : [],
-        Target:savedData? savedData : [],
-      }
-      const response = await axios.post(
-        "http://localhost:8000/api/fileData",payload);
-      setFileData(response.data)
-    } catch (error) {
-      console.error("Error fetching user", error);
+  const qcData = useSelector((state) => state?.qcData?.qcData);
+  const notiData = useSelector(
+    (state) => state.notiData?.notiData
+  );
+  useEffect(()=>{
+    console.log("editableData====>",editableData);
+  },[editableData])
+  const handleClose = (event, reason) => {
+    if (reason === "clickAway") {
+      return;
     }
+    setOpen(false);
+  };
+  useEffect(() => {
+    if (qcData && qcData.Target) {
+      // Update editableData with data from qcData.Target
+      const newEditableData = qcData.Target.map((item, idx) => 
+        idx < editableData.length ? editableData[idx] = item : item
+      );
+      setEditableData(newEditableData);
+    }
+  }, [qcData]);
+  
+  
+  const handleCloseError = (event, reason) => {
+    if (reason === "clickAway") {
+      return;
+    }
+    setOpenError(false);
   };
   const handleProjectDataUpdate = async (index) => {
     try {
-      
       const payload = {
-        index: notificationData[0].index,
+        index: notiData,
         targetIndex: index,
         newValue: savedData[index] ? savedData[index] : "",
       };
       if(payload.newValue != ""){
       setTimeout(async () => {
         const response = await axios.put(
-          "http://localhost:8000/api/updateTargetAtIndex",
+          "http://localhost:8000/updateTargetAtIndex",
           payload
         );
         setFileData(response.data);
+        if (response.status == 200) {
+          setOpen(true);
+        } else if (response.status != 200) {
+          setOpen(false);
+        }
       }, 1000);
+      
     }
     } catch (error) {
       console.error("Error updating target at index", error);
@@ -85,9 +104,7 @@ function FT() {
     if (index !== undefined && savedData[index] !== undefined) {
       handleProjectDataUpdate(index);
     }
-    console.log("savedData[index]", savedData[index]);
   }, [savedData, index]);
-
   
   return (
     <div>
@@ -274,10 +291,13 @@ function FT() {
                           <CKEditor
                             editor={ClassicEditor}
                             data={
-                              matchPercent >= 50
-                                ? tmx[index]?.target
-                                : editableData[index] || ""
+                              qcData.Target?.[index] 
+                                ? qcData.Target[index] 
+                                : tmx[index]?.target 
+                                  ? tmx[index].target 
+                                  : editableData[index] || ""
                             }
+                            
                             onChange={(event, editor) =>
                               handleEditorChange(event, editor, index)
                             }
@@ -297,7 +317,7 @@ function FT() {
                           width: "5px",
                         }}
                       >
-                        <Tooltip title='Save line' arrow>
+                        {/* <Tooltip title='Save line' arrow>
                           <div
                           
                             style={{
@@ -314,6 +334,48 @@ function FT() {
                             }}
                           >
                             <TiTick className="icon" style={{margin:"2px"}}/>
+                          </div>
+                        </Tooltip> */}
+                         <Tooltip title="Save line" arrow>
+                          <div
+                            style={{
+                              fontSize: "30px",
+                              marginLeft: "5px",
+                              height: "32px",
+                              borderRadius: "3px",
+                              backgroundColor:
+                                editableData[index] === "" ||
+                                editableData[index] === undefined
+                                  ? "gray"
+                                  : "green",
+                              color: "white",
+                              cursor:
+                                editableData[index] === "" ||
+                                editableData[index] === undefined
+                                  ? "not-allowed"
+                                  : "pointer",
+                            }}
+                            onClick={() => {
+                              if (
+                                editableData[index] !== "" &&
+                                editableData[index] !== undefined
+                              ) {
+                                handleSave(index);
+                                handleProjectDataUpdate(index);
+                              }
+                            }}
+                          >
+                            <TiTick
+                              className="icon"
+                              style={{
+                                margin: "2px",
+                                cursor:
+                                  editableData[index] === "" ||
+                                  editableData[index] === undefined
+                                    ? "not-allowed"
+                                    : "pointer",
+                              }}
+                            />
                           </div>
                         </Tooltip>
                       </TableCell>
@@ -348,6 +410,30 @@ function FT() {
           </div>
         </div>
       )}
+      <Snackbar open={open} autoHideDuration={2000} onClose={handleClose}>
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            Saved Successfully...
+          </Alert>
+        </Snackbar>
+        <Snackbar
+          open={openError}
+          autoHideDuration={2000}
+          onClose={handleCloseError}
+        >
+          <Alert
+            onClose={handleCloseError}
+            severity="error"
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            Something went wrong..
+          </Alert>
+        </Snackbar>
     </div>
   );
 }

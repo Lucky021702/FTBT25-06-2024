@@ -18,8 +18,10 @@ export const FunctionProvider = ({ children }) => {
   const [csvData, setCSVData] = useState([]);
   const [tcxData, setTcxData] = useState([]);
   const [editableData,  setEditableData ] = useState([]);
+  const [editableDataBt,  setEditableDataBt ] = useState([]);
   const [ftData, setFTData] = useState([]);
   const [savedData, setSavedData] = useState([]);
+  const [savedDataBt, setSavedDataBt] = useState([]);
   const [downloadReady, setDownloadReady] = useState(false);
   const [dataTrue, setDataTrue] = useState(false);
   const [hideTmxColumn, sethideTmxColumn] = useState(false);
@@ -28,7 +30,8 @@ export const FunctionProvider = ({ children }) => {
   const [comments, setComments] = useState([]);
   const [downloadFileName, setDownloadFileName] = useState("");
   const [index, setIndex] = useState("");
- 
+  const [shouldDisplay, setShouldDisplay] = useState(false);
+
   const navigate = useNavigate();
  
   useEffect(() => {
@@ -37,12 +40,6 @@ export const FunctionProvider = ({ children }) => {
       navigate("/login");
     }
   }, [navigate]);
-
-  useEffect(() => {
-    console.log("savedData",savedData);
-  }, [savedData]);
- 
- 
  
   const handleQCClick = () => {
     setIsQCSelected(true);
@@ -337,12 +334,27 @@ export const FunctionProvider = ({ children }) => {
      setSavedData(newSavedData);
    };
 
+   const handleSaveBt = (index) => {
+    setIndex(index)
+     const newSavedData = [...savedDataBt];
+     newSavedData[index] = editableDataBt[index];
+     setSavedDataBt(newSavedData);
+     console.log("newSavedData",newSavedData);
+   };
+
   
    const handleEditorChange = (event, editor, index) => {
      const data = editor.getData();
      const newEditableData = [...editableData];
      newEditableData[index] = data;
      setEditableData(newEditableData);
+   };
+
+   const handleEditorChangeBt = (event, editor, index) => {
+     const data = editor.getData();
+     const newEditableData = [...editableDataBt];
+     newEditableData[index] = data;
+     setEditableDataBt(newEditableData);
    };
   
   const handleFileUploadQCSource = (event) => {
@@ -378,12 +390,13 @@ export const FunctionProvider = ({ children }) => {
     };
     reader.readAsArrayBuffer(file);
   };
-  const handleCommentChange = (index, event) => {
-    const newComments = [...comments];
-    newComments[index] = event.target.value;
-    setComments(newComments);
-    console.log(comments);
-  };
+  // const handleCommentChange = (index, event) => {
+  //   console.log(`Comment at index ${index} changed to: ${event.target.value}`);
+  //   const newComments = [...comments];
+  //   newComments[index] = event.target.value;
+  //   setComments(newComments);
+  // };
+  
   const handleDownloadQC = async () => {
     const fileName = prompt("Enter file name (without extension):", "data");
     if (!fileName) return;
@@ -502,8 +515,12 @@ export const FunctionProvider = ({ children }) => {
     handleHide,
     handleFileUploadQCSource,
     handleFileUploadQCSource2,
-    handleCommentChange,
+    setShouldDisplay,
+    shouldDisplay,
     handleDownloadQC,
+    handleEditorChangeBt,
+    handleSaveBt,
+    setEditableData,
     index
   };
  

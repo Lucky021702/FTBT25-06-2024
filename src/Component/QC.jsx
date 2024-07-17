@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   Table,
@@ -9,29 +9,74 @@ import {
   TableRow,
   Paper,
 } from "@material-ui/core";
-import DoneIcon from '@mui/icons-material/Done';
+import DoneIcon from "@mui/icons-material/Done";
 import { useFunctionContext } from "./Context/Function";
+import io from "socket.io-client";
+import { setQcData } from "../Redux/actions";
+import { useDispatch, useSelector } from "react-redux";
 import Loader from "../Component/Common_Component/Loader";
-
-
-const QC = ({ loggedInData }) => {
+const socket = io("http://localhost:8000");
+ 
+const QC = () => {
+  const dispatch = useDispatch();
   const context = useFunctionContext();
-  const { handleCommentChange, englishSource, englishBT, comments } = context;
+  const qcData = useSelector((state) => state?.qcData?.qcData);
+const [comments, setComments] = useState([]);
+const { shouldDisplay, isLoading } = context;
+
+useEffect(() => {
+  if (qcData?.Comment) {
+    setComments(qcData.Comment.slice()); 
+  }
+}, [qcData]);
+
+const handleCommentChange = (index, event) => {
+  console.log(`Comment at index ${index} changed to: ${event.target.value}`);
+  const newComments = [...comments];
+  newComments[index] = event.target.value;
+  setComments(newComments); // Update state with new comments
+};
+ 
+  useEffect(() => {
+    socket.on("target-updated", (data) => {
+      console.log("data log==", data?.updatedFile);
+      dispatch(setQcData(data?.updatedFile));
+    });
+ 
+    return () => {
+      socket.off("target-updated");
+  }}, []);
+ 
+ 
   const handleSaveComment = (index) => {
     console.log("Comment saved:", comments[index]);
   };
-
   return (
     <div>
-       <TableContainer component={Paper} style={{ maxHeight: '100vh', overflow: 'auto'}}>
+      {isLoading && (
+        <div className='loader-container'>
+          <Loader />
+        </div>
+      )}
+      { shouldDisplay ? <TableContainer
+        component={Paper}
+        style={{ maxHeight: "100vh", overflow: "auto" }}
+      >
         <Table aria-label="simple table">
-          <TableHead style={{ position: 'sticky', top: 0, zIndex: 1, backgroundColor: '#fff' }}>
+          <TableHead
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 1,
+              backgroundColor: "#fff",
+            }}
+          >
             <TableRow>
               <TableCell>
                 <b>Source</b>
               </TableCell>
               <TableCell>
-                <b>BT</b>
+                <b>Target</b>
               </TableCell>
               <TableCell>
                 <b>Comment</b>
@@ -42,7 +87,7 @@ const QC = ({ loggedInData }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {englishSource.map((csvRow, index) => (
+            {qcData?.Source?.length != 0 && qcData?.Source?.map((sourceItem, index) => (
               <TableRow key={index}>
                 <TableCell
                   style={{
@@ -55,7 +100,7 @@ const QC = ({ loggedInData }) => {
                     <div>
                       <b>({index + 1})</b>
                     </div>
-                    <div style={{ marginLeft: "0.5rem" }}>{csvRow}</div>
+                    <div style={{ marginLeft: "0.5rem" }}>{sourceItem}</div>
                   </div>
                 </TableCell>
                 <TableCell
@@ -64,7 +109,13 @@ const QC = ({ loggedInData }) => {
                     width: "30%",
                   }}
                 >
-                  {englishBT[index]}
+ <div>
+      {qcData && qcData.Target && qcData.Target[index] ? (
+        <span dangerouslySetInnerHTML={{ __html: qcData.Target[index] }} />
+      ) : (
+        <span>------------</span>
+      )}
+    </div>
                 </TableCell>
                 <TableCell>
                   <textarea
@@ -73,7 +124,7 @@ const QC = ({ loggedInData }) => {
                     multiline
                     rows={4}
                     value={comments[index] || ""}
-                    onChange={(event) => handleCommentChange(index, event)}
+            onChange={(event) => handleCommentChange(index, event)}
                   />
                 </TableCell>
                 <TableCell>
@@ -84,15 +135,17 @@ const QC = ({ loggedInData }) => {
                     style={{ padding: "1rem" }}
                     onClick={() => handleSaveComment(index)}
                   >
+                    Save
                   </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+      </TableContainer> : "No Data Found"}
+      
     </div>
   );
 };
-
+ 
 export default QC;
