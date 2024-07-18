@@ -465,6 +465,7 @@ let userId = rawUserId.replace(/(^")|("$)/g, '');
 
   const handleAssignChange = (event) => {
     setAssign(event.target.value);
+    console.log("event.target.value",event.target.value);
   };
   useEffect(() => {
     console.log("projectData?.sourceUpload", projectData?.sourceUpload);
@@ -513,6 +514,7 @@ let userId = rawUserId.replace(/(^")|("$)/g, '');
 
   useEffect(() => {
     handleUserName();
+    setAssign("")
   }, [serviceType]);
   const toggleDrawer = (isOpen) => () => {
     setIsDrawerOpen(isOpen);
@@ -916,7 +918,7 @@ let userId = rawUserId.replace(/(^")|("$)/g, '');
                     }}
                   >
                     <span style={{ fontSize: "15px", fontWeight: "bold" }}>
-                      Assign File<span style={{ color: "red" }}>*</span>
+                      Assign File to<span style={{ color: "red" }}>*</span>
                     </span>
                     <span>
                       <select
@@ -951,12 +953,12 @@ let userId = rawUserId.replace(/(^")|("$)/g, '');
                         style={{ width: "255px" }}
                       >
                         {assignTasks.length === 0 ? (
-                          <option value='' disabled>
+                          <option value=''>
                             Please select service type
                           </option>
                         ) : (
                           <>
-                            <option value='' disabled>
+                            <option value=''>
                               Select Name
                             </option>
                             {assignTasks.map((item, index) => (
