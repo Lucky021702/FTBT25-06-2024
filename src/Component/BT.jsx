@@ -18,11 +18,17 @@ import { CKEditor } from "@ckeditor/ckeditor5-react";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import Loader from "../Component/Common_Component/Loader";
-import { useSelector } from "react-redux";
+import {useDispatch, useSelector } from "react-redux";
 import axios from "axios";
+import { setQcData,setSourceData } from "../Redux/actions";
+ 
+import io from "socket.io-client";
+const socket = io("http://localhost:8000");
 
 function BT() {
+  const dispatch = useDispatch()
   const [fileData, setFileData] = useState([]);
+  const [targetDataCk, setTargetDataCk] = useState([]);
   const context = useFunctionContext();
   const {
     isQCSelected,
@@ -36,14 +42,14 @@ function BT() {
     handleSaveBt,
     index,
     setEditableDataBt,
+    shouldDisplay,
   } = context;
 
   const tmx = useSelector((state) => state.tmxData.tmxData);
   const notiData = useSelector((state) => state.notiData?.notiData);
   const qcData = useSelector((state) => state?.qcData?.qcData);
-  useEffect(() => {
-    console.log("savedDataBt==>", savedDataBt);
-  }, [savedDataBt]);
+  const sourceData = useSelector((state) => state?.sourceData?.sourceData)
+
   useEffect(() => {
     if (tmx && Array.isArray(tmx) && tmx.some((item) => item?.source)) {
       // Extract and update editableDataBt with data from tmx sources
@@ -51,7 +57,16 @@ function BT() {
       setEditableDataBt(newEditableData);
     }
   }, [tmx]);
+  useEffect(() => {
+    socket.on("target-updated", (data) => {
+      console.log("data log==", data?.updatedFile);
+      dispatch(setSourceData(data?.updatedFile));
+    });
 
+    return () => {
+      socket.off("target-updated");
+    };
+  }, []);
   const handleProjectDataUpdateBT = async (index) => {
     try {
       console.log("indexindexindex", index);
@@ -73,7 +88,26 @@ function BT() {
       console.error("Error updating target at index", error);
     }
   };
+  const handleBtdata = async () => {
+    try {
+      if(notiData.length != 0){
+      const response = await axios.get(
+        `http://localhost:8000/api/btFileData/${notiData}`
+      );
+      setTargetDataCk(response?.data?.Target)
+    }
+    } catch (error) {
+      console.error("Error fetching QC data", error);
+    }
+  };
 
+  useEffect(() => {
+    handleBtdata();
+  }, [notiData]);
+
+  useEffect(() => {
+    console.log("targetData updated:", targetDataCk);
+  }, [targetDataCk]);
   useEffect(() => {
     if (typeof index !== "undefined" && savedDataBt?.[index] !== undefined) {
       handleProjectDataUpdateBT(index);
@@ -151,7 +185,7 @@ function BT() {
         </div>
       ) : qcData?.Target?.length != 0 ? (
         <div style={{ overflowX: "auto" }}>
-          <TableContainer component={Paper}>
+          {shouldDisplay ?<TableContainer component={Paper}>
             <Table sx={{ minWidth: 650 }} aria-label='simple table'>
               <TableHead
                 style={{
@@ -186,7 +220,6 @@ function BT() {
                 {qcData?.Target?.map((csvRow, index) => {
                   const targetData = tmx[index]?.target || "No data available";
                   const Data = qcData.Target[index] || "No data available";
-                  console.log("DataDataDataDataDataData", Data);
                   const matchPercentageValue =
                     tmx[index]?.["Match Percentage"] || "";
 
@@ -214,12 +247,12 @@ function BT() {
                           <b>({index + 1})</b>
                           <span style={{ marginLeft: "0.5rem" }}>
                             <div>
-                              {qcData &&
-                              qcData.Target &&
-                              qcData.Target[index] ? (
+                              {sourceData &&
+                              sourceData.Target &&
+                              sourceData.Target[index] ? (
                                 <span
                                   dangerouslySetInnerHTML={{
-                                    __html: qcData.Target[index],
+                                    __html: sourceData.Target[index],
                                   }}
                                 />
                               ) : (
@@ -240,7 +273,7 @@ function BT() {
                         {qcData.Target[index] === "" ? "---- ----" : targetData}
                       </TableCell>
                       <TableCell>
-                        {qcData?.Target[index]
+                        {sourceData.Target[index]
                           ?.split(" ")
                           .map((tmWord, idx) => {
                             const cleanedTmWord = stripHtmlTags(tmWord);
@@ -297,15 +330,18 @@ function BT() {
                             overflow: "auto",
                           }}
                         >
+                          {console.log("index",index)}
                           <CKEditor
                             editor={ClassicEditor}
                             data={
-                              qcData?.Target[index] == ""
-                                ? ""
-                                : tmx[index]?.source
-                                ? tmx[index]?.source
-                                : editableDataBt[index] || ""
-                            }
+                              qcData?.Target?.[index] == ""
+                                ? "":
+                                targetDataCk?.[index] ?
+                                targetDataCk[index]
+                                : tmx?.[index]?.source
+                                ? tmx?.[index]?.source
+                                : editableDataBt?.[index] || ""
+                            }                
                             onChange={(event, editor) =>
                               handleEditorChangeBt(event, editor, index)
                             }
@@ -352,7 +388,7 @@ function BT() {
                 })}
               </TableBody>
             </Table>
-          </TableContainer>
+          </TableContainer> : null}
         </div>
       ) : (
         !isLoading && (

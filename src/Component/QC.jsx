@@ -12,7 +12,7 @@ import {
 import DoneIcon from "@mui/icons-material/Done";
 import { useFunctionContext } from "./Context/Function";
 import io from "socket.io-client";
-import { setQcData } from "../Redux/actions";
+import { setBtData } from "../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
 import Loader from "../Component/Common_Component/Loader";
 const socket = io("http://localhost:8000");
@@ -21,6 +21,11 @@ const QC = () => {
   const dispatch = useDispatch();
   const context = useFunctionContext();
   const qcData = useSelector((state) => state?.qcData?.qcData);
+  const btData = useSelector((state) => state?.btData?.btData);
+  const sourceData = useSelector((state) => state?.sourceData?.sourceData)
+  useEffect(()=>{
+    console.log("sourceData",sourceData);
+   },[sourceData])
 const [comments, setComments] = useState([]);
 const { shouldDisplay, isLoading } = context;
 
@@ -38,10 +43,15 @@ const handleCommentChange = (index, event) => {
 };
  
   useEffect(() => {
-    socket.on("target-updated", (data) => {
+    socket.on("target-updated-Bt", (data) => {
       console.log("data log==", data?.updatedFile);
-      dispatch(setQcData(data?.updatedFile));
+      dispatch(setBtData(data?.updatedFile));
     });
+  // useEffect(() => {
+  //   socket.on("target-updated", (data) => {
+  //     console.log("data log==", data?.updatedFile);
+  //     dispatch(setBtData(data?.updatedFile));
+  //   });
  
     return () => {
       socket.off("target-updated");
@@ -87,7 +97,7 @@ const handleCommentChange = (index, event) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {qcData?.Source?.length != 0 && qcData?.Source?.map((sourceItem, index) => (
+            {sourceData?.Source?.length != 0 && sourceData?.Source?.map((sourceItem, index) => (
               <TableRow key={index}>
                 <TableCell
                   style={{
@@ -101,6 +111,7 @@ const handleCommentChange = (index, event) => {
                       <b>({index + 1})</b>
                     </div>
                     <div style={{ marginLeft: "0.5rem" }}>{sourceItem}</div>
+                    {/* <div style={{ marginLeft: "0.5rem" }}>{btData?.Target[index] ? <span dangerouslySetInnerHTML={{ __html: btData?.Target[index] }} />:  sourceItem}</div> */}
                   </div>
                 </TableCell>
                 <TableCell
@@ -110,7 +121,7 @@ const handleCommentChange = (index, event) => {
                   }}
                 >
  <div>
-      {qcData && qcData.Target && qcData.Target[index] ? (
+      {btData?.Target[index] ? <span dangerouslySetInnerHTML={{ __html: btData?.Target[index] }} />: qcData && qcData.Target && qcData.Target[index] ? (
         <span dangerouslySetInnerHTML={{ __html: qcData.Target[index] }} />
       ) : (
         <span>------------</span>

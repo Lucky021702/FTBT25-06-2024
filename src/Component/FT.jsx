@@ -47,9 +47,6 @@ const [open, setOpen] = useState(false);
   const notiData = useSelector(
     (state) => state.notiData?.notiData
   );
-  useEffect(()=>{
-    console.log("editableData====>",editableData);
-  },[editableData])
   const handleClose = (event, reason) => {
     if (reason === "clickAway") {
       return;

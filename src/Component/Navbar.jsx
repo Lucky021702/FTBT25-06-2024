@@ -44,7 +44,8 @@ import Tooltip from "@mui/material/Tooltip";
 import Chat from "./Chat";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { setIndexName, setTmxData, setQcData, setNoti } from "../Redux/actions";
+import { setIndexName, setTmxData, setQcData, setNoti, setBtData,setSourceData } from "../Redux/actions";
+
 const useStyles = makeStyles((theme) => ({
   title: {
     flexGrow: 1,
@@ -121,9 +122,7 @@ const Navbar = () => {
   const notiData = useSelector(
     (state) => state.notiData?.notiData
   );
-useEffect(()=>{
-  console.log("notiData==>",notiData);
-},[notiData])
+
   const handleFileData = async () => {
     try {
       if (csvData.length > 0) {
@@ -228,19 +227,18 @@ useEffect(()=>{
     }
   };
 useEffect(()=>{
-  let department = localStorage.getItem("department")
-  if(department != "BT"){
   handleNotificationData()
-  }
+  handleBtData()
 },[notiData])
   const handleNotificationData = async () => {
     try {
-      if(notiData){
+      if(notiData.length != 0){
       const response = await axios.get(
         `http://localhost:8000/api/qcFileData/${notiData}`
       );
       console.log("Response Data:", response.data);
       dispatch(setQcData(response?.data));
+      dispatch(setSourceData(response?.data));
       setShouldDisplay(true);
     }
     } catch (error) {
@@ -248,6 +246,21 @@ useEffect(()=>{
     }
   };
   
+
+  const handleBtData = async () => {
+    try {
+      if(notiData.length != 0){
+      const response = await axios.get(
+        `http://localhost:8000/api/btFileData/${notiData}`
+      );
+      dispatch(setBtData(response?.data));
+      setShouldDisplay(true);
+    }
+    } catch (error) {
+      console.error("Error fetching QC data", error);
+    }
+  };
+
   let email = localStorage.getItem("email");
   const handleClickOpen = () => {
     setDialogOpen(true);
@@ -334,6 +347,7 @@ useEffect(()=>{
     setIsFT(false);
     setIsBT(false);
     setCSVData([]);
+    setShouldDisplay(false);
   };
 
   const handleOpenChat = () => {
@@ -565,7 +579,7 @@ useEffect(()=>{
                                                   handleUpload(
                                                     task.assignSourceFilename.replace(/^[^_]*_/,""),proj
                                                   )
-                                                    // handleNotificationData()
+                                                  setShouldDisplay(true)
                                                   }
                                                 }
                                                 className='icon'
@@ -801,9 +815,8 @@ useEffect(()=>{
                                                       ""
                                                     ),
                                                     proj
-                                                  ),
-                                                  handleNotificationData()
-                                                  // handleFileDataBT()
+                                                  )
+                                                  setShouldDisplay(true);
                                                 }
                                                 }
                                                 className='icon'
@@ -1037,6 +1050,7 @@ useEffect(()=>{
                                                 handleNotificationData()
                                                 setDialogOpen(false)
                                                 dispatch(setNoti(proj?.index))
+                                                setShouldDisplay(true);
                                               }
                                                 
                                               }

@@ -358,10 +358,8 @@ export const FunctionProvider = ({ children }) => {
   //  };
   const handleEditorChangeBt = (event, editor, index) => {
     const data = editor.getData();
-    console.log("Editor Data:", data);
     const newEditableData = [...editableDataBt];
     newEditableData[index] = data;
-    console.log("New Editable Data:", newEditableData);
     setEditableDataBt(newEditableData);
   };
   
