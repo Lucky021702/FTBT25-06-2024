@@ -348,6 +348,7 @@ export const FunctionProvider = ({ children }) => {
      const newEditableData = [...editableData];
      newEditableData[index] = data;
      setEditableData(newEditableData);
+     console.log("index====?",index);
    };
 
   //  const handleEditorChangeBt = (event, editor, index) => {

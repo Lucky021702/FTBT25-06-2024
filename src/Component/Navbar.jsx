@@ -29,6 +29,7 @@ import CircleNotificationsIcon from "@mui/icons-material/CircleNotifications";
 import DownloadIcon from "@mui/icons-material/Download";
 import "./CSS/Component.css";
 import CachedIcon from "@mui/icons-material/Cached";
+import Badge from "@mui/material/Badge";
 import {
   Dialog,
   DialogTitle,
@@ -36,15 +37,20 @@ import {
   IconButton,
   Typography,
   DialogActions,
-  CardContent,
-  Grid,
-  TextField,
 } from "@mui/material";
+
 import Tooltip from "@mui/material/Tooltip";
 import Chat from "./Chat";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { setIndexName, setTmxData, setQcData, setNoti, setBtData,setSourceData } from "../Redux/actions";
+import {
+  setIndexName,
+  setTmxData,
+  setQcData,
+  setNoti,
+  setBtData,
+  setSourceData,
+} from "../Redux/actions";
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -62,10 +68,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Navbar = () => {
-  const [splitData, setSplitData] = useState([]);
-  const notificationData = useSelector(
-    (state) => state.projectData.indexNameData
-  );
+  const [notificationCount, setNotificationCount] = useState(0);
   const userId = "123";
   const context = useFunctionContext();
   const {
@@ -107,22 +110,46 @@ const Navbar = () => {
   useEffect(() => {
     setTimeout(() => {
       searchIndexApi();
-      handleFileData()
+      handleFileData();
     }, 1000);
   }, [csvData]);
 
   useEffect(() => {
-    if(qcData?.Target?.length != 0){
-    setTimeout(() => {
-      handleFileDataBT()
-    }, 1000);
-  }
+    if (qcData?.Target?.length != 0) {
+      setTimeout(() => {
+        handleFileDataBT();
+      }, 1000);
+    }
   }, [qcData]);
 
-  const notiData = useSelector(
-    (state) => state.notiData?.notiData
-  );
+  const notiData = useSelector((state) => state.notiData?.notiData);
+  function notificationsLabel(count) {
+    if (count === 0) {
+      return "no notifications";
+    }
+    if (count > 99) {
+      return "more than 99 notifications";
+    }
+    return `${count} notifications`;
+  }
 
+  useEffect(() => {
+    fetchNotificationCount();
+  }, []);
+  const fetchNotificationCount = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/notificationCount",
+        {
+          name: UserName,
+          serviceType: department,
+        }
+      );
+      setNotificationCount(response.data.totalAcceptedTaskCount);
+    } catch (error) {
+      console.error("Error fetching notification count:", error);
+    }
+  };
   const handleFileData = async () => {
     try {
       if (csvData.length > 0) {
@@ -144,7 +171,7 @@ const Navbar = () => {
   };
   const handleFileDataBT = async () => {
     try {
-      if(qcData?.Target?.length != 0){
+      if (qcData?.Target?.length != 0) {
         let payload = {
           index: notiData,
           Source: qcData?.Target ? qcData?.Target : [],
@@ -166,7 +193,7 @@ const Navbar = () => {
       for (let i = 0; i < csvData?.length; i++) {
         if (csvData[i][0]) {
           const payload = {
-            index:notiData,
+            index: notiData,
             query: csvData[i][0],
           };
           console.log("payload==", payload);
@@ -220,42 +247,40 @@ const Navbar = () => {
           }
         }
       }
-      setSplitData(newSplitData);
     } catch (error) {
       console.error("There was a problem with the fetch operation:", error);
       throw error;
     }
   };
-useEffect(()=>{
-  handleNotificationData()
-  handleBtData()
-},[notiData])
+  useEffect(() => {
+    handleNotificationData();
+    handleBtData();
+  }, [notiData]);
   const handleNotificationData = async () => {
     try {
-      if(notiData.length != 0){
-      const response = await axios.get(
-        `http://localhost:8000/api/qcFileData/${notiData}`
-      );
-      console.log("Response Data:", response.data);
-      dispatch(setQcData(response?.data));
-      dispatch(setSourceData(response?.data));
-      setShouldDisplay(true);
-    }
+      if (notiData.length != 0) {
+        const response = await axios.get(
+          `http://localhost:8000/api/qcFileData/${notiData}`
+        );
+        console.log("Response Data:", response.data);
+        dispatch(setQcData(response?.data));
+        dispatch(setSourceData(response?.data));
+        setShouldDisplay(true);
+      }
     } catch (error) {
       console.error("Error fetching QC data", error);
     }
   };
-  
 
   const handleBtData = async () => {
     try {
-      if(notiData.length != 0){
-      const response = await axios.get(
-        `http://localhost:8000/api/btFileData/${notiData}`
-      );
-      dispatch(setBtData(response?.data));
-      setShouldDisplay(true);
-    }
+      if (notiData.length != 0) {
+        const response = await axios.get(
+          `http://localhost:8000/api/btFileData/${notiData}`
+        );
+        dispatch(setBtData(response?.data));
+        setShouldDisplay(true);
+      }
     } catch (error) {
       console.error("Error fetching QC data", error);
     }
@@ -273,6 +298,9 @@ useEffect(()=>{
   const handleClose = () => {
     setDialogOpen(false);
     setAssignedStatus("");
+    setTimeout(() => {
+      fetchNotificationCount()
+    }, 500);
   };
   const handleCloseNotification = (fileName, status) => {
     setAssignedStatus(status);
@@ -282,7 +310,7 @@ useEffect(()=>{
   };
   const handleUpload = (fileName, task) => {
     handleFileUpload(fileName);
-    dispatch(setNoti(task?.index))
+    dispatch(setNoti(task?.index));
     handleClose();
   };
   const UserName = localStorage.getItem("name");
@@ -419,10 +447,13 @@ useEffect(()=>{
               <div>
                 <IconButton
                   onClick={handleClickOpen}
-                  color='inherit'
-                  className='icon'
+                  aria-label={notificationsLabel(notificationCount)}
+                  color="inherit"
+                  className="icon"
                 >
-                  <CircleNotificationsIcon />
+                  <Badge badgeContent={notificationCount} color="secondary">
+                    <CircleNotificationsIcon />
+                  </Badge>
                 </IconButton>
                 <Dialog
                   open={dialogOpen}
@@ -574,14 +605,17 @@ useEffect(()=>{
                                               title='Reload source file'
                                               arrow
                                             >
-                                             <CachedIcon
-                                                onClick={() =>{
+                                              <CachedIcon
+                                                onClick={() => {
                                                   handleUpload(
-                                                    task.assignSourceFilename.replace(/^[^_]*_/,""),proj
-                                                  )
-                                                  setShouldDisplay(true)
-                                                  }
-                                                }
+                                                    task.assignSourceFilename.replace(
+                                                      /^[^_]*_/,
+                                                      ""
+                                                    ),
+                                                    proj
+                                                  );
+                                                  setShouldDisplay(true);
+                                                }}
                                                 className='icon'
                                                 sx={{ color: "#367AF7" }}
                                               />
@@ -654,13 +688,16 @@ useEffect(()=>{
           )}
           {isBT && (
             <>
-            <div>
+              <div>
                 <IconButton
                   onClick={handleClickOpen}
+                  aria-label={notificationsLabel(notificationCount)}
                   color='inherit'
                   className='icon'
                 >
-                  <CircleNotificationsIcon />
+                  <Badge badgeContent={notificationCount} color='secondary'>
+                    <CircleNotificationsIcon />
+                  </Badge>
                 </IconButton>
                 <Dialog
                   open={dialogOpen}
@@ -808,17 +845,16 @@ useEffect(()=>{
                                               arrow
                                             >
                                               <CachedIcon
-                                                onClick={() =>{
+                                                onClick={() => {
                                                   handleUpload(
                                                     task.assignSourceFilename.replace(
                                                       /^[^_]*_/,
                                                       ""
                                                     ),
                                                     proj
-                                                  )
+                                                  );
                                                   setShouldDisplay(true);
-                                                }
-                                                }
+                                                }}
                                                 className='icon'
                                                 sx={{ color: "#367AF7" }}
                                               />
@@ -907,8 +943,15 @@ useEffect(()=>{
           )}
           {isQC && (
             <>
-              <IconButton onClick={handleClickOpen} color='inherit'>
-                <CircleNotificationsIcon />
+              <IconButton
+                onClick={handleClickOpen}
+                aria-label={notificationsLabel(notificationCount)}
+                color='inherit'
+                className='icon'
+              >
+                <Badge badgeContent={notificationCount} color='secondary'>
+                  <CircleNotificationsIcon />
+                </Badge>
               </IconButton>
               <Dialog
                 open={dialogOpen}
@@ -1014,7 +1057,7 @@ useEffect(()=>{
                                                   ),
                                                   "Accept"
                                                 );
-                                                handleNotificationData()
+                                                handleNotificationData();
                                               }}
                                               variant='contained'
                                               color='primary'
@@ -1046,14 +1089,12 @@ useEffect(()=>{
                                           />
                                           <Tooltip title='Reload file' arrow>
                                             <CachedIcon
-                                              onClick={() =>{
-                                                handleNotificationData()
-                                                setDialogOpen(false)
-                                                dispatch(setNoti(proj?.index))
+                                              onClick={() => {
+                                                handleNotificationData();
+                                                setDialogOpen(false);
+                                                dispatch(setNoti(proj?.index));
                                                 setShouldDisplay(true);
-                                              }
-                                                
-                                              }
+                                              }}
                                               className='icon'
                                               sx={{ color: "#367AF7" }}
                                             />
@@ -1179,9 +1220,7 @@ useEffect(()=>{
                     marginBottom: "1rem",
                   }}
                 >
-                  <IconButton onClick={handleClick} color='inherit'>
                     <Avatar src='' alt='Profile' />
-                  </IconButton>
                   <div style={{ marginLeft: "1rem" }}>
                     <div style={{ fontWeight: "bold" }}>{UserName}</div>
                     <div>{department}</div>
